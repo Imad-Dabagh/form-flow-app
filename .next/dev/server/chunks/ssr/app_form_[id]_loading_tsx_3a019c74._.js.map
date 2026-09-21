@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/lenovo/Desktop/form-builder-v1/frontend/app/form/%5Bid%5D/loading.tsx"],"sourcesContent":["export default function Loading() {\n  return (\n    <div className=\"min-h-screen bg-background flex items-center justify-center\">\n      <div className=\"text-muted-foreground\">Loading form...</div>\n    </div>\n  )\n}\n"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,8OAAC;QAAI,WAAU;kBACb,cAAA,8OAAC;YAAI,WAAU;sBAAwB;;;;;;;;;;;AAG7C"}}]
-}
