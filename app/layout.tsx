@@ -1,9 +1,8 @@
 import type React from "react";
 import { Analytics } from "@vercel/analytics/next";
-import { Toaster } from "@/components/ui/toaster";
-import { TopNavbar } from "@/components/top-navbar";
-import { LeftSidebar } from "@/components/left-sidebar";
-import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/modules/shared/components/ui/toaster";
+import { ThemeProvider } from "@/modules/shared/components/theme-provider";
+import { DataProvider } from "@/providers/data-provider";
 import "./globals.css";
 import { Inter } from "next/font/google";
 
@@ -21,15 +20,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className}`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <LeftSidebar />
-          <TopNavbar />
-
-          <main className="fixed left-64 top-16 right-0 bottom-0 overflow-y-auto bg-background">
+          <DataProvider>
             {children}
-          </main>
-
-          <Toaster />
-          <Analytics />
+            <Toaster />
+            <Analytics />
+          </DataProvider>
         </ThemeProvider>
       </body>
     </html>
