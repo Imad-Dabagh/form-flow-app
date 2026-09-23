@@ -9,6 +9,7 @@ import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
 import { Separator } from "@/modules/shared/components/ui/separator";
 import API from "@/router";
+import { getAuthCallbackPath } from "../redirect-path";
 
 function GoogleMark() {
   return (
@@ -36,11 +37,7 @@ function GoogleMark() {
 export function SignInScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const requestedPath = searchParams.get("next");
-  const callbackPath =
-    requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
-      ? requestedPath
-      : "/";
+  const callbackPath = getAuthCallbackPath(searchParams.get("next"));
   const getCallbackURL = () =>
     new URL(callbackPath, window.location.origin).toString();
   const [email, setEmail] = useState("");

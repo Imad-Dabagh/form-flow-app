@@ -1,4 +1,5 @@
 export { SignInScreen } from "./components/sign-in-screen";
+export { RedirectAuthenticated } from "./components/redirect-authenticated";
 export {
   RequireAuthentication,
   useAuthenticatedProfile,
