@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import { WorkspaceLayout } from "@/layouts/workspace";
+import { RequireAuthentication } from "@/modules/auth";
 
 export default function WorkspaceRouteLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
-  return <WorkspaceLayout>{children}</WorkspaceLayout>;
+  return <RequireAuthentication>{children}</RequireAuthentication>;
 }

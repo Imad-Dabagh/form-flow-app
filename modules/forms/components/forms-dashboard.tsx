@@ -25,11 +25,17 @@ import { Label } from "@/modules/shared/components/ui/label"
 import { Textarea } from "@/modules/shared/components/ui/textarea"
 import { Badge } from "@/modules/shared/components/ui/badge"
 import { useToast } from "@/modules/shared/hooks/use-toast"
+import {
+  organizationManagePath,
+  useOrganizationWorkspace,
+} from "@/modules/organizations"
 
 export function FormsDashboard() {
   const router = useRouter()
+  const organization = useOrganizationWorkspace()
   const { toast } = useToast()
-  const { forms, createForm, deleteForm, duplicateForm, getSubmissionsByFormId } = useFormsStore()
+  const { forms: allForms, createForm, deleteForm, duplicateForm, getSubmissionsByFormId } = useFormsStore()
+  const forms = allForms.filter((form) => form.organizationId === organization.id)
 
   const [searchQuery, setSearchQuery] = useState("")
   const [showNewFormDialog, setShowNewFormDialog] = useState(false)
@@ -53,6 +59,7 @@ export function FormsDashboard() {
     }
 
     const newForm = createForm({
+      organizationId: organization.id,
       title: newFormTitle,
       description: newFormDescription,
       status: "draft",
@@ -74,7 +81,7 @@ export function FormsDashboard() {
       description: "Your new form has been created successfully",
     })
 
-    router.push(`/builder/${newForm.id}`)
+    router.push(organizationManagePath(organization.slug, `/forms/${newForm.id}/builder`))
   }
 
   const handleDuplicateForm = (formId: string) => {
@@ -183,7 +190,7 @@ export function FormsDashboard() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => router.push(`/builder/${form.id}`)}>
+                          <DropdownMenuItem onClick={() => router.push(organizationManagePath(organization.slug, `/forms/${form.id}/builder`))}>
                             <Pencil className="w-4 h-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
@@ -191,7 +198,7 @@ export function FormsDashboard() {
                             <ExternalLink className="w-4 h-4 mr-2" />
                             View Form
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push(`/responses/${form.id}`)}>
+                          <DropdownMenuItem onClick={() => router.push(organizationManagePath(organization.slug, `/forms/${form.id}/responses`))}>
                             <BarChart3 className="w-4 h-4 mr-2" />
                             View Responses ({submissionCount})
                           </DropdownMenuItem>
@@ -232,7 +239,7 @@ export function FormsDashboard() {
                       variant="ghost"
                       size="sm"
                       className="w-full"
-                      onClick={() => router.push(`/builder/${form.id}`)}
+                      onClick={() => router.push(organizationManagePath(organization.slug, `/forms/${form.id}/builder`))}
                     >
                       <Pencil className="w-3 h-3 mr-2" />
                       Edit Form

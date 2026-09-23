@@ -32,6 +32,7 @@ export interface Section {
 
 export interface Form {
   id: string;
+  organizationId: string;
   title: string;
   description?: string;
   createdAt: string;

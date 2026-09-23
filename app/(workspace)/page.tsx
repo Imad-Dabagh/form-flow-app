@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation"
+import { OrganizationEntry } from "@/modules/organizations";
 
 export default function HomePage() {
-  redirect("/dashboard")
+  return <OrganizationEntry />;
 }

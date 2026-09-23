@@ -6,5 +6,5 @@ export interface OrganizationSummary {
   slug: string;
   logo: string;
   primaryColor: string;
-  role: OrganizationRole;
+  role: OrganizationRole | null;
 }
