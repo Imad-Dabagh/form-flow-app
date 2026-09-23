@@ -54,6 +54,10 @@ import {
 
 import { BuilderSection } from "./components/builder-section";
 import { FieldCard } from "./components/field-card";
+import {
+  organizationManagePath,
+  useOrganizationWorkspace,
+} from "@/modules/organizations";
 
 const dropAnimationConfig: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -64,10 +68,15 @@ const dropAnimationConfig: DropAnimation = {
 export function FormBuilder() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const organization = useOrganizationWorkspace();
   const { toast } = useToast();
 
   // FIX: Use Selector for reactivity
-  const form = useFormsStore((state) => state.forms.find((f) => f.id === id));
+  const form = useFormsStore((state) =>
+    state.forms.find((candidate) =>
+      candidate.id === id && candidate.organizationId === organization.id,
+    ),
+  );
   const updateForm = useFormsStore((state) => state.updateForm);
 
   // --- State ---
@@ -282,7 +291,7 @@ export function FormBuilder() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push(organizationManagePath(organization.slug, "/forms"))}
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>

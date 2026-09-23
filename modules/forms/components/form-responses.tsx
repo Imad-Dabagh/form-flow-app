@@ -21,13 +21,21 @@ import {
   DialogTitle,
 } from "@/modules/shared/components/ui/dialog";
 import type { Submission } from "@/modules/forms/types";
+import {
+  organizationManagePath,
+  useOrganizationWorkspace,
+} from "@/modules/organizations";
 
 export function FormResponses() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const organization = useOrganizationWorkspace();
+  const formsPath = organizationManagePath(organization.slug, "/forms");
   const { getFormById, getSubmissionsByFormId } = useFormsStore();
 
-  const form = getFormById(id);
+  const foundForm = getFormById(id);
+  const form =
+    foundForm?.organizationId === organization.id ? foundForm : undefined;
   const submissions = getSubmissionsByFormId(id);
 
   const [selectedSubmission, setSelectedSubmission] =
@@ -40,8 +48,8 @@ export function FormResponses() {
           <h2 className="text-xl font-semibold text-foreground mb-2">
             Form not found
           </h2>
-          <Button onClick={() => router.push("/dashboard")}>
-            Back to Dashboard
+          <Button onClick={() => router.push(formsPath)}>
+            Back to Forms
           </Button>
         </div>
       </div>
@@ -107,7 +115,7 @@ export function FormResponses() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push(formsPath)}
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
@@ -125,7 +133,7 @@ export function FormResponses() {
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                onClick={() => router.push(`/builder/${id}`)}
+                onClick={() => router.push(organizationManagePath(organization.slug, `/forms/${id}/builder`))}
               >
                 Edit Form
               </Button>
