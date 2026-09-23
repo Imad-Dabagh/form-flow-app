@@ -5,5 +5,5 @@ export interface CurrentProfile {
   lastName: string;
   profilePic: string;
   isEmailVerified: boolean;
-  platformRoles: string[];
+  isSuperAdmin: boolean;
 }

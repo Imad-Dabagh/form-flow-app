@@ -2,15 +2,13 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Loader2, Mail, Sparkles } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, Loader2, Mail } from "lucide-react";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
 import { Separator } from "@/modules/shared/components/ui/separator";
 import API from "@/router";
-
-const callbackURL = "/dashboard";
 
 function GoogleMark() {
   return (
@@ -37,6 +35,14 @@ function GoogleMark() {
 
 export function SignInScreen() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedPath = searchParams.get("next");
+  const callbackPath =
+    requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
+      ? requestedPath
+      : "/";
+  const getCallbackURL = () =>
+    new URL(callbackPath, window.location.origin).toString();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +56,7 @@ export function SignInScreen() {
     setError(null);
     setMagicLinkSent(false);
     setPendingAction("password");
+    const callbackURL = getCallbackURL();
 
     const { error: signInError } = await API.auth.signIn.email({
       email,
@@ -64,13 +71,14 @@ export function SignInScreen() {
       return;
     }
 
-    router.replace(callbackURL);
+    router.replace(callbackPath);
   }
 
   async function signInWithGoogle() {
     setError(null);
     setMagicLinkSent(false);
     setPendingAction("google");
+    const callbackURL = getCallbackURL();
 
     const { error: signInError } = await API.auth.signIn.social({
       provider: "google",
@@ -92,6 +100,7 @@ export function SignInScreen() {
     setError(null);
     setMagicLinkSent(false);
     setPendingAction("magic");
+    const callbackURL = getCallbackURL();
 
     const { error: magicLinkError } = await API.auth.sendMagicLink({
       email,
@@ -111,48 +120,9 @@ export function SignInScreen() {
   const isPending = pendingAction !== null;
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_32rem]">
-      <section className="relative hidden overflow-hidden bg-[#102a43] px-12 py-14 text-slate-100 lg:flex lg:flex-col">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,0.2),transparent_30%),radial-gradient(circle_at_85%_80%,rgba(45,212,191,0.16),transparent_32%)]" />
-        <div className="relative flex items-center gap-3 text-base font-semibold tracking-tight">
-          <span className="grid size-9 place-items-center rounded-xl bg-cyan-300 text-base font-black text-[#102a43]">
-            F
-          </span>
-          Form Flow
-        </div>
-
-        <div className="relative my-auto max-w-xl pb-10">
-          <p className="mb-5 flex items-center gap-2 text-sm font-medium text-cyan-200">
-            <Sparkles className="size-4" /> A calmer way to collect work
-          </p>
-          <h1 className="text-5xl font-semibold leading-[1.06] tracking-[-0.045em]">
-            Forms that move work forward.
-          </h1>
-          <p className="mt-6 max-w-md text-lg leading-8 text-slate-300">
-            Build thoughtful workflows, keep responses organized, and give your
-            team one clear place to act.
-          </p>
-        </div>
-
-        <ul className="relative space-y-3 text-sm text-slate-300">
-          {[
-            "Password, Google, or a secure email link",
-            "Your organization stays separate and protected",
-            "Start simple and shape the workflow as you grow",
-          ].map((item) => (
-            <li key={item} className="flex items-center gap-3">
-              <span className="grid size-5 place-items-center rounded-full bg-cyan-300/15 text-cyan-200">
-                <Check className="size-3" />
-              </span>
-              {item}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="flex items-center justify-center px-6 py-10 sm:px-10 lg:px-12">
-        <div className="w-full max-w-sm">
-          <div className="mb-10 lg:hidden">
+    <div className="flex min-h-screen items-center justify-center px-6 py-10 sm:px-10">
+      <section className="w-full max-w-sm">
+        <div className="mb-10">
             <div className="flex items-center gap-3 text-lg font-semibold tracking-tight">
               <span className="grid size-9 place-items-center rounded-xl bg-[#102a43] text-base font-black text-cyan-200">
                 F
@@ -270,7 +240,6 @@ export function SignInScreen() {
               </div>
             )}
           </div>
-        </div>
       </section>
     </div>
   );
