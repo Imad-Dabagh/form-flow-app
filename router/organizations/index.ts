@@ -1,6 +1,9 @@
 "use client";
 
 import useSWR, { type SWRConfiguration } from "swr";
+import useSWRMutation, {
+  type SWRMutationConfiguration,
+} from "swr/mutation";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
 import type { OrganizationSummary } from "@/modules/organizations/types";
@@ -28,12 +31,33 @@ export function useOrganizations(
   };
 }
 
-export function createOrganization(
-  input: CreateOrganizationInput,
-): Promise<OrganizationSummary> {
-  return requestData<OrganizationSummary>({
-    method: "POST",
-    url: "/orgs",
-    data: input,
-  });
+/**
+ * POST /api/orgs
+ */
+export function useCreateOrganization(
+  swrConfig?: SWRMutationConfiguration<
+    OrganizationSummary,
+    ApiError,
+    string,
+    CreateOrganizationInput,
+    OrganizationSummary[]
+  >,
+) {
+  const { data, ...rest } = useSWRMutation<
+    OrganizationSummary,
+    ApiError,
+    string,
+    CreateOrganizationInput,
+    OrganizationSummary[]
+  >(
+    "/orgs",
+    (url, { arg }) =>
+      requestData<OrganizationSummary>({ method: "POST", url, data: arg }),
+    swrConfig,
+  );
+
+  return {
+    organization: data ?? null,
+    ...rest,
+  };
 }
