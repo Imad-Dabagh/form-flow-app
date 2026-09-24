@@ -3,8 +3,8 @@
 import type { ReactNode } from "react";
 import { createContext, useContext } from "react";
 import { useParams } from "next/navigation";
+import API from "@/router";
 import type { OrganizationSummary } from "../types";
-import { useOrganizations } from "../hooks/use-organizations";
 
 const OrganizationWorkspaceContext = createContext<OrganizationSummary | null>(null);
 
@@ -20,7 +20,8 @@ export function useOrganizationWorkspace(): OrganizationSummary {
 
 export function OrganizationWorkspaceBoundary({ children }: { children: ReactNode }) {
   const { organizationSlug } = useParams<{ organizationSlug: string }>();
-  const { organizations, error, isLoading } = useOrganizations();
+  const { organizations, error, isLoading } =
+    API.organizations.useOrganizations();
   const organization = organizations.find(
     (candidate) => candidate.slug === organizationSlug,
   );

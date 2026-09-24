@@ -5,7 +5,6 @@ import { createContext, useContext, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import API from "@/router";
 import type { CurrentProfile } from "@/modules/profile/types";
-import { useCurrentProfile } from "@/modules/profile/hooks/use-current-profile";
 
 const AuthenticatedProfileContext = createContext<CurrentProfile | null>(null);
 
@@ -32,7 +31,8 @@ export function RequireAuthentication({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { data: session, isPending } = API.auth.useSession();
   const isVerified = Boolean(session?.user.emailVerified);
-  const { profile, error, isLoading } = useCurrentProfile(isVerified);
+  const { profile, error, isLoading } =
+    API.profile.useCurrentProfile(isVerified);
 
   useEffect(() => {
     if (isPending || session) {

@@ -2,12 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import API from "@/router";
 import { organizationManagePath } from "../paths";
-import { useOrganizations } from "../hooks/use-organizations";
 
 export function OrganizationEntry() {
   const router = useRouter();
-  const { organizations, error, isLoading } = useOrganizations();
+  const { organizations, error, isLoading } =
+    API.organizations.useOrganizations();
 
   useEffect(() => {
     if (organizations[0]) {

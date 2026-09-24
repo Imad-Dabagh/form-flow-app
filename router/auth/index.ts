@@ -20,7 +20,12 @@ export const authClient = createAuthClient({
   },
 });
 
-export const { signIn, signOut, signUp, useSession } = authClient;
+export const { signIn, signOut, signUp } = authClient;
+
+/**
+ * GET /api/auth/get-session
+ */
+export const useSession = authClient.useSession;
 
 export function getInitialIdentityName(email: string): string {
   return email.trim().split("@", 1)[0] || "Form Flow user";
