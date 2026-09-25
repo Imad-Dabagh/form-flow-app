@@ -1,6 +1,6 @@
 "use client";
 
-import useSWR, { type SWRConfiguration } from "swr";
+import useSWR, { useSWRConfig, type SWRConfiguration } from "swr";
 import useSWRMutation, {
   type SWRMutationConfiguration,
 } from "swr/mutation";
@@ -43,6 +43,8 @@ export function useCreateOrganization(
     OrganizationSummary[]
   >,
 ) {
+  const { mutate } = useSWRConfig();
+  const configuredOnSuccess = swrConfig?.onSuccess;
   const { data, ...rest } = useSWRMutation<
     OrganizationSummary,
     ApiError,
@@ -53,7 +55,29 @@ export function useCreateOrganization(
     "/orgs",
     (url, { arg }) =>
       requestData<OrganizationSummary>({ method: "POST", url, data: arg }),
-    swrConfig,
+    {
+      populateCache: (createdOrganization, currentOrganizations = []) => {
+        const firstLowerRoleIndex = currentOrganizations.findIndex(
+          (organization) => organization.role !== "ADMIN",
+        );
+
+        if (firstLowerRoleIndex === -1) {
+          return [...currentOrganizations, createdOrganization];
+        }
+
+        return [
+          ...currentOrganizations.slice(0, firstLowerRoleIndex),
+          createdOrganization,
+          ...currentOrganizations.slice(firstLowerRoleIndex),
+        ];
+      },
+      revalidate: false,
+      ...swrConfig,
+      onSuccess: (createdOrganization, key, config) => {
+        void mutate("/me");
+        configuredOnSuccess?.(createdOrganization, key, config);
+      },
+    },
   );
 
   return {
