@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { useFormsStore } from "@/modules/forms/lib/forms-store"
 import { Button } from "@/modules/shared/components/ui/button"
 import { Input } from "@/modules/shared/components/ui/input"
@@ -24,7 +25,6 @@ import {
 import { Label } from "@/modules/shared/components/ui/label"
 import { Textarea } from "@/modules/shared/components/ui/textarea"
 import { Badge } from "@/modules/shared/components/ui/badge"
-import { useToast } from "@/modules/shared/hooks/use-toast"
 import {
   organizationManagePath,
   useOrganizationWorkspace,
@@ -33,7 +33,6 @@ import {
 export function FormsDashboard() {
   const router = useRouter()
   const organization = useOrganizationWorkspace()
-  const { toast } = useToast()
   const { forms: allForms, createForm, deleteForm, duplicateForm, getSubmissionsByFormId } = useFormsStore()
   const forms = allForms.filter((form) => form.organizationId === organization.id)
 
@@ -50,10 +49,8 @@ export function FormsDashboard() {
 
   const handleCreateForm = () => {
     if (!newFormTitle.trim()) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Please enter a form title",
-        variant: "destructive",
       })
       return
     }
@@ -76,8 +73,7 @@ export function FormsDashboard() {
     setNewFormTitle("")
     setNewFormDescription("")
 
-    toast({
-      title: "Form created",
+    toast.success("Form created", {
       description: "Your new form has been created successfully",
     })
 
@@ -87,8 +83,7 @@ export function FormsDashboard() {
   const handleDuplicateForm = (formId: string) => {
     const duplicated = duplicateForm(formId)
     if (duplicated) {
-      toast({
-        title: "Form duplicated",
+      toast.success("Form duplicated", {
         description: "A copy of the form has been created",
       })
     }
@@ -96,8 +91,7 @@ export function FormsDashboard() {
 
   const handleDeleteForm = (formId: string) => {
     deleteForm(formId)
-    toast({
-      title: "Form deleted",
+    toast.success("Form deleted", {
       description: "The form has been permanently deleted",
     })
   }
@@ -105,8 +99,7 @@ export function FormsDashboard() {
   const handleCopyLink = (formId: string) => {
     const url = `${window.location.origin}/form/${formId}`
     navigator.clipboard.writeText(url)
-    toast({
-      title: "Link copied",
+    toast.success("Link copied", {
       description: "Form link has been copied to clipboard",
     })
   }

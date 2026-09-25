@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useFormsStore } from "@/modules/forms/lib/forms-store";
 import {
   DndContext,
@@ -34,7 +35,6 @@ import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Textarea } from "@/modules/shared/components/ui/textarea";
 import { Label } from "@/modules/shared/components/ui/label";
-import { useToast } from "@/modules/shared/hooks/use-toast";
 import type { Section, Field, FieldType } from "@/modules/forms/types";
 import {
   Dialog,
@@ -69,7 +69,6 @@ export function FormBuilder() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const organization = useOrganizationWorkspace();
-  const { toast } = useToast();
 
   // FIX: Use Selector for reactivity
   const form = useFormsStore((state) =>
@@ -113,8 +112,7 @@ export function FormBuilder() {
       content: sections,
     });
 
-    toast({
-      title: "Saved",
+    toast.success("Saved", {
       description: "Form layout and settings saved successfully.",
     });
   };
@@ -123,8 +121,7 @@ export function FormBuilder() {
   const handleCopyShareLink = () => {
     const url = `${window.location.origin}/form/${id}`;
     navigator.clipboard.writeText(url);
-    toast({
-      title: "Link copied",
+    toast.success("Link copied", {
       description: "Form link copied to clipboard",
     });
   };

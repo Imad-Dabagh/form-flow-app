@@ -1,6 +1,6 @@
 import type React from "react";
 import { Analytics } from "@vercel/analytics/next";
-import { Toaster } from "@/modules/shared/components/ui/toaster";
+import { Toaster } from "@/modules/shared/components/ui/sonner";
 import { ThemeProvider } from "@/modules/shared/components/theme-provider";
 import { DataProvider } from "@/providers/data-provider";
 import "./globals.css";
@@ -22,7 +22,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <DataProvider>
             {children}
-            <Toaster />
+            <Toaster position="top-center" />
             <Analytics />
           </DataProvider>
         </ThemeProvider>
