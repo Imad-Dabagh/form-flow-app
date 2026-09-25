@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -24,8 +25,11 @@ function formatDate(value: string): string {
 
 export function OrganizationDashboard() {
   const organization = useOrganizationWorkspace();
-  const forms = useFormsStore((state) =>
-    state.forms.filter((form) => form.organizationId === organization.id),
+  const allForms = useFormsStore((state) => state.forms);
+  const forms = useMemo(
+    () =>
+      allForms.filter((form) => form.organizationId === organization.id),
+    [allForms, organization.id],
   );
   const submissions = useFormsStore((state) => state.submissions);
   const formsPath = organizationManagePath(organization.slug, "/forms");
