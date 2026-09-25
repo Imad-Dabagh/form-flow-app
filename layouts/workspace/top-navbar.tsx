@@ -14,7 +14,7 @@ import { Button } from "@/modules/shared/components/ui/button";
 import { useTheme } from "@/modules/shared/components/theme-provider";
 import { useAuthenticatedProfile } from "@/modules/auth";
 import {
-  organizationManagePath,
+  organizationWorkspacePath,
   useOrganizationWorkspace,
 } from "@/modules/organizations";
 import API from "@/router";
@@ -47,7 +47,7 @@ export function TopNavbar() {
     <nav className="fixed top-0 right-0 left-0 z-40 flex h-16 items-center justify-between border-b border-border bg-background px-4 md:left-64 md:px-6">
       <Link
         className="truncate text-sm font-semibold md:hidden"
-        href={organizationManagePath(organization.slug, "/dashboard")}
+        href={organizationWorkspacePath(organization.slug, "/dashboard")}
       >
         {organization.name}
       </Link>

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import API from "@/router";
-import { organizationManagePath } from "../paths";
+import { organizationWorkspacePath } from "../paths";
 
 export function OrganizationEntry() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export function OrganizationEntry() {
 
   useEffect(() => {
     if (organizations[0]) {
-      router.replace(organizationManagePath(organizations[0].slug, "/dashboard"));
+      router.replace(organizationWorkspacePath(organizations[0].slug, "/dashboard"));
     }
   }, [organizations, router]);
 

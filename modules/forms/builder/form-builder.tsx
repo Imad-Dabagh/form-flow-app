@@ -55,7 +55,7 @@ import {
 import { BuilderSection } from "./components/builder-section";
 import { FieldCard } from "./components/field-card";
 import {
-  organizationManagePath,
+  organizationWorkspacePath,
   useOrganizationWorkspace,
 } from "@/modules/organizations";
 
@@ -288,7 +288,7 @@ export function FormBuilder() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => router.push(organizationManagePath(organization.slug, "/forms"))}
+                onClick={() => router.push(organizationWorkspacePath(organization.slug, "/forms"))}
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>

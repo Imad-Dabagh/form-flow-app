@@ -4,7 +4,7 @@ export {
   OrganizationWorkspaceBoundary,
   useOrganizationWorkspace,
 } from "./components/organization-workspace-boundary";
-export { organizationManagePath } from "./paths";
+export { organizationWorkspacePath } from "./paths";
 export {
   getOrganizationThemeStyle,
   type OrganizationPrimaryColor,

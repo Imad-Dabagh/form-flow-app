@@ -12,7 +12,7 @@ import {
 import { useFormsStore } from "@/modules/forms/lib/forms-store";
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
-import { organizationManagePath } from "../paths";
+import { organizationWorkspacePath } from "../paths";
 import { useOrganizationWorkspace } from "./organization-workspace-boundary";
 
 function formatDate(value: string): string {
@@ -32,7 +32,7 @@ export function OrganizationDashboard() {
     [allForms, organization.id],
   );
   const submissions = useFormsStore((state) => state.submissions);
-  const formsPath = organizationManagePath(organization.slug, "/forms");
+  const formsPath = organizationWorkspacePath(organization.slug, "/forms");
   const canManageForms = organization.role !== "USER";
   const publishedForms = forms.filter((form) => form.status === "published");
   const responseCount = submissions.filter((submission) =>
@@ -113,7 +113,7 @@ export function OrganizationDashboard() {
             {recentForms.map((form) => (
               <Link
                 className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-muted/50"
-                href={organizationManagePath(
+                href={organizationWorkspacePath(
                   organization.slug,
                   `/forms/${form.id}/builder`,
                 )}

@@ -4,15 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FileText, LayoutDashboard } from "lucide-react";
 import {
-  organizationManagePath,
+  organizationWorkspacePath,
   useOrganizationWorkspace,
 } from "@/modules/organizations";
 
 export function LeftSidebar() {
   const pathname = usePathname();
   const organization = useOrganizationWorkspace();
-  const dashboardPath = organizationManagePath(organization.slug, "/dashboard");
-  const formsPath = organizationManagePath(organization.slug, "/forms");
+  const dashboardPath = organizationWorkspacePath(organization.slug, "/dashboard");
+  const formsPath = organizationWorkspacePath(organization.slug, "/forms");
   const isDashboardActive = pathname === dashboardPath;
   const isFormsActive = pathname.startsWith(formsPath);
 

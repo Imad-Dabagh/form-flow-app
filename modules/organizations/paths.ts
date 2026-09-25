@@ -1,6 +1,6 @@
-export function organizationManagePath(
+export function organizationWorkspacePath(
   organizationSlug: string,
   path = "",
 ): string {
-  return `/${organizationSlug}/manage${path}`;
+  return `/orgs/${organizationSlug}${path}`;
 }

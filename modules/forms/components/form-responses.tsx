@@ -22,7 +22,7 @@ import {
 } from "@/modules/shared/components/ui/dialog";
 import type { Submission } from "@/modules/forms/types";
 import {
-  organizationManagePath,
+  organizationWorkspacePath,
   useOrganizationWorkspace,
 } from "@/modules/organizations";
 
@@ -30,7 +30,7 @@ export function FormResponses() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const organization = useOrganizationWorkspace();
-  const formsPath = organizationManagePath(organization.slug, "/forms");
+  const formsPath = organizationWorkspacePath(organization.slug, "/forms");
   const { getFormById, getSubmissionsByFormId } = useFormsStore();
 
   const foundForm = getFormById(id);
@@ -133,7 +133,7 @@ export function FormResponses() {
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                onClick={() => router.push(organizationManagePath(organization.slug, `/forms/${id}/builder`))}
+                onClick={() => router.push(organizationWorkspacePath(organization.slug, `/forms/${id}/builder`))}
               >
                 Edit Form
               </Button>

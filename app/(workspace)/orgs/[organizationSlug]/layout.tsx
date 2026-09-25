@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { WorkspaceLayout } from "@/layouts/workspace";
 import { OrganizationWorkspaceBoundary } from "@/modules/organizations";
 
-export default function OrganizationManageLayout({
+export default function OrganizationWorkspaceLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (

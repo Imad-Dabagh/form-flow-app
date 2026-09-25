@@ -4,7 +4,7 @@ import type { FormEvent } from "react";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Building2, ImagePlus, Loader2 } from "lucide-react";
-import { organizationManagePath } from "@/modules/organizations";
+import { organizationWorkspacePath } from "@/modules/organizations";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
@@ -69,7 +69,7 @@ export function OrganizationSetupStep() {
     try {
       const organization = await trigger({ name: name.trim(), slug: finalSlug });
       router.replace(
-        organizationManagePath(organization.slug, "/dashboard"),
+        organizationWorkspacePath(organization.slug, "/dashboard"),
       );
     } catch {
       // The mutation exposes the API error for the form to render.
