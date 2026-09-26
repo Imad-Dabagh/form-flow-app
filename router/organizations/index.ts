@@ -6,10 +6,12 @@ import useSWRMutation, {
 } from "swr/mutation";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
+import type { OrganizationPrimaryColor } from "@/modules/organizations/lib/primary-color-theme";
 import type { OrganizationSummary } from "@/modules/organizations/types";
 
 export interface CreateOrganizationInput {
   name: string;
+  primaryColor?: OrganizationPrimaryColor;
   slug: string;
 }
 

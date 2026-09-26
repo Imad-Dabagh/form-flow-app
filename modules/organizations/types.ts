@@ -1,3 +1,5 @@
+import type { OrganizationPrimaryColor } from "./lib/primary-color-theme";
+
 export type OrganizationRole = "ADMIN" | "MANAGER" | "USER";
 
 export interface OrganizationSummary {
@@ -5,6 +7,6 @@ export interface OrganizationSummary {
   name: string;
   slug: string;
   logo: string;
-  primaryColor: string;
+  primaryColor: OrganizationPrimaryColor;
   role: OrganizationRole | null;
 }
