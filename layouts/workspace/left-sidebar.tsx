@@ -75,7 +75,7 @@ export function LeftSidebar() {
           href={dashboardPath}
           className={`flex items-center justify-center gap-3 rounded-lg px-3 py-3 transition-colors sm:justify-start sm:px-4 ${
             isDashboardActive
-              ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+              ? "bg-primary-100 font-medium text-primary-700 dark:bg-primary-950 dark:text-primary-300"
               : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           }`}
         >
@@ -86,7 +86,7 @@ export function LeftSidebar() {
           href={formsPath}
           className={`flex items-center justify-center gap-3 rounded-lg px-3 py-3 transition-colors sm:justify-start sm:px-4 ${
             isFormsActive
-              ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+              ? "bg-primary-100 font-medium text-primary-700 dark:bg-primary-950 dark:text-primary-300"
               : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           }`}
         >
