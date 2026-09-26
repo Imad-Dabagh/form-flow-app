@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { LeftSidebar } from "./left-sidebar";
 import {
-  getOrganizationThemeStyle,
+  OrganizationThemeScope,
   useOrganizationWorkspace,
 } from "@/modules/organizations";
 
@@ -11,11 +11,11 @@ export function WorkspaceLayout({ children }: { children: ReactNode }) {
   const organization = useOrganizationWorkspace();
 
   return (
-    <div style={getOrganizationThemeStyle(organization.primaryColor)}>
+    <OrganizationThemeScope primaryColor={organization.primaryColor}>
       <LeftSidebar />
       <main className="fixed inset-y-0 right-0 left-16 overflow-y-auto bg-background sm:left-64">
         {children}
       </main>
-    </div>
+    </OrganizationThemeScope>
   );
 }
