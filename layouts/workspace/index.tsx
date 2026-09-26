@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { LeftSidebar } from "./left-sidebar";
-import { TopNavbar } from "./top-navbar";
 import {
   getOrganizationThemeStyle,
   useOrganizationWorkspace,
@@ -14,8 +13,7 @@ export function WorkspaceLayout({ children }: { children: ReactNode }) {
   return (
     <div style={getOrganizationThemeStyle(organization.primaryColor)}>
       <LeftSidebar />
-      <TopNavbar />
-      <main className="fixed top-16 right-0 bottom-0 left-0 overflow-y-auto bg-background md:left-64">
+      <main className="fixed inset-y-0 right-0 left-16 overflow-y-auto bg-background sm:left-64">
         {children}
       </main>
     </div>
