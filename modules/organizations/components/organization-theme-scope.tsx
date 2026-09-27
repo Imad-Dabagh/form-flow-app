@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useMemo, type ReactNode } from "react";
+import { useTheme } from "@/modules/shared/components/theme-provider";
 import {
   getOrganizationThemeStyle,
   type OrganizationPrimaryColor,
@@ -15,9 +16,11 @@ export function OrganizationThemeScope({
   children,
   primaryColor,
 }: OrganizationThemeScopeProps) {
+  const { resolvedTheme } = useTheme();
+  const mode = resolvedTheme === "dark" ? "dark" : "light";
   const themeStyle = useMemo(
-    () => getOrganizationThemeStyle(primaryColor),
-    [primaryColor],
+    () => getOrganizationThemeStyle(primaryColor, mode),
+    [mode, primaryColor],
   );
 
   useLayoutEffect(() => {

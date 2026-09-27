@@ -195,7 +195,7 @@ export function LeftSidebar() {
                   className={cn(
                     "h-11 gap-3 rounded-lg px-3 text-sm transition-[background-color,color,box-shadow] duration-200 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0!",
                     active
-                      ? "bg-primary-500! font-semibold text-white! shadow-sm hover:bg-primary-600! hover:text-white!"
+                      ? "bg-primary-500! font-semibold text-primary-foreground! shadow-sm hover:bg-primary-600! hover:text-primary-foreground!"
                       : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                   )}
                 >
