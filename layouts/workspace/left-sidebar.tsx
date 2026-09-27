@@ -11,6 +11,7 @@ import {
   LogOut,
   Moon,
   PanelLeft,
+  Settings,
   User,
   X,
 } from "lucide-react";
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { useAuthenticatedProfile } from "@/modules/auth";
 import {
   organizationWorkspacePath,
+  useOrganizationPermissions,
   useOrganizationWorkspace,
   type OrganizationSummary,
 } from "@/modules/organizations";
@@ -92,6 +94,7 @@ export function LeftSidebar() {
   const organization = useOrganizationWorkspace();
   const { organizations } = API.organizations.useOrganizations();
   const profile = useAuthenticatedProfile();
+  const { canManageOrganization } = useOrganizationPermissions();
   const { isMobile, setOpenMobile, toggleSidebar } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();
   const dashboardPath = organizationWorkspacePath(
@@ -99,6 +102,7 @@ export function LeftSidebar() {
     "/dashboard",
   );
   const formsPath = organizationWorkspacePath(organization.slug, "/forms");
+  const settingsPath = organizationWorkspacePath(organization.slug, "/settings");
   const navItems = [
     { href: dashboardPath, label: "Overview", icon: LayoutDashboard },
     { href: formsPath, label: "Forms", icon: FileText },
@@ -313,6 +317,18 @@ export function LeftSidebar() {
                     Profile
                   </Link>
                 </DropdownMenuItem>
+                {canManageOrganization && (
+                  <DropdownMenuItem asChild>
+                    <Link
+                      aria-current={pathname === settingsPath ? "page" : undefined}
+                      href={settingsPath}
+                      onClick={closeMobileSidebar}
+                    >
+                      <Settings className="mr-2 size-4" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive"
