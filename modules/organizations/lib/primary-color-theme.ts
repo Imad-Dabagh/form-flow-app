@@ -75,6 +75,12 @@ const primaryColorThemes = {
   OrganizationPrimaryColorTheme
 >;
 
+export function getOrganizationColorSwatch(
+  color: OrganizationPrimaryColor,
+): string {
+  return primaryColorThemes[color].base;
+}
+
 export function getOrganizationThemeStyle(
   color: OrganizationPrimaryColor,
   mode: OrganizationThemeMode = "light",

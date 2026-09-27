@@ -34,7 +34,7 @@ export function useCurrentProfile(
 }
 
 /**
- * PATCH /api/me
+ * PUT /api/me
  */
 export function useUpdateCurrentProfile(
   swrConfig?: SWRMutationConfiguration<
@@ -54,7 +54,7 @@ export function useUpdateCurrentProfile(
   >(
     "/me",
     (url, { arg }) =>
-      requestData<CurrentProfile>({ method: "PATCH", url, data: arg }),
+      requestData<CurrentProfile>({ method: "PUT", url, data: arg }),
     {
       populateCache: true,
       revalidate: false,

@@ -8,5 +8,7 @@ export interface OrganizationSummary {
   slug: string;
   logo: string;
   primaryColor: OrganizationPrimaryColor;
+  slogan: string;
+  shortDescription: string;
   role: OrganizationRole | null;
 }

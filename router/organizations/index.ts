@@ -16,6 +16,16 @@ export interface CreateOrganizationInput {
   slug: string;
 }
 
+export interface UpdateOrganizationInput {
+  logo: string;
+  name: string;
+  primaryColor: OrganizationPrimaryColor;
+  slogan: string;
+  shortDescription: string;
+}
+
+type OrganizationDetails = Omit<OrganizationSummary, "role">;
+
 /**
  * GET /api/orgs
  */
@@ -87,4 +97,38 @@ export function useCreateOrganization(
     organization: data ?? null,
     ...rest,
   };
+}
+
+/**
+ * PUT /api/orgs/:organizationSlug
+ */
+export function useUpdateOrganization(organizationSlug: string) {
+  const { mutate } = useSWRConfig();
+  const { trigger: update, ...rest } = useSWRMutation<
+    OrganizationDetails,
+    ApiError,
+    string,
+    UpdateOrganizationInput
+  >(
+    `/orgs/${organizationSlug}`,
+    (url, { arg }) =>
+      requestData<OrganizationDetails>({ method: "PUT", url, data: arg }),
+  );
+
+  async function trigger(input: UpdateOrganizationInput) {
+    const updated = await update(input);
+    await mutate<OrganizationSummary[]>(
+      "/orgs",
+      (current) =>
+        current?.map((organization) =>
+          organization.id === updated.id
+            ? { ...organization, ...updated }
+            : organization,
+        ) ?? [],
+      { revalidate: false },
+    );
+    return updated;
+  }
+
+  return { trigger, ...rest };
 }

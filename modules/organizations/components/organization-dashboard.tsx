@@ -14,6 +14,7 @@ import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
 import { organizationWorkspacePath } from "../paths";
 import { useOrganizationWorkspace } from "./organization-workspace-boundary";
+import { useOrganizationPermissions } from "./use-organization-permissions";
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("en", {
@@ -25,6 +26,7 @@ function formatDate(value: string): string {
 
 export function OrganizationDashboard() {
   const organization = useOrganizationWorkspace();
+  const { canManageForms, accessLabel } = useOrganizationPermissions();
   const allForms = useFormsStore((state) => state.forms);
   const forms = useMemo(
     () =>
@@ -33,7 +35,6 @@ export function OrganizationDashboard() {
   );
   const submissions = useFormsStore((state) => state.submissions);
   const formsPath = organizationWorkspacePath(organization.slug, "/forms");
-  const canManageForms = organization.role !== "USER";
   const publishedForms = forms.filter((form) => form.status === "published");
   const responseCount = submissions.filter((submission) =>
     forms.some((form) => form.id === submission.formId),
@@ -41,7 +42,6 @@ export function OrganizationDashboard() {
   const recentForms = [...forms]
     .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
     .slice(0, 5);
-  const accessLabel = organization.role ?? "Platform administrator";
 
   const metrics = [
     { label: "Forms", value: forms.length, icon: FileText },
