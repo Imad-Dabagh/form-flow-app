@@ -50,14 +50,14 @@ export function OrganizationDashboard() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 sm:py-10 lg:px-10">
+    <div className="mx-auto w-full max-w-[69rem] px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
       <header className="flex flex-col gap-6 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
             Organization workspace
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <h1 className="truncate text-3xl font-semibold tracking-[-0.035em] text-foreground sm:text-4xl">
+            <h1 className="min-w-0 max-w-full truncate text-2xl font-semibold tracking-[-0.035em] text-foreground sm:text-3xl">
               {organization.name}
             </h1>
             <Badge className="rounded-full px-2.5 py-1 text-xs" variant="secondary">
