@@ -1,9 +1,11 @@
 import * as auth from "./auth";
+import * as files from "./files";
 import * as organizations from "./organizations";
 import * as profile from "./profile";
 
 const API = {
   auth,
+  files,
   organizations,
   profile,
 } as const;
