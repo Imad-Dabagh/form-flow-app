@@ -24,7 +24,7 @@ export function WorkspaceHeader() {
       <div className="flex min-w-0 items-center gap-3">
         <SidebarTrigger
           aria-label={sidebarLabel}
-          className="size-11 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground md:size-8 [&_svg]:size-3.5!"
+          className="size-11 rounded-md text-muted-foreground hover:text-foreground md:size-8 [&_svg]:size-3.5!"
           title={sidebarLabel}
         />
         <span className="text-sm font-medium text-muted-foreground">

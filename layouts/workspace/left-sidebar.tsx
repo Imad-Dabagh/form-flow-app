@@ -223,7 +223,7 @@ export function LeftSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   asChild
-                  className="h-12 gap-3 rounded-lg px-2 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
+                  className="group h-12 gap-3 rounded-lg px-2 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
                   tooltip={displayName}
                 >
                   <button aria-label="Open profile menu" type="button">
@@ -243,7 +243,7 @@ export function LeftSidebar() {
                         {profile.email}
                       </span>
                     </span>
-                    <ChevronDown className="size-4 shrink-0 text-sidebar-foreground/50 group-data-[collapsible=icon]:hidden" />
+                    <ChevronDown className="size-4 shrink-0 text-sidebar-foreground/50 transition-transform duration-200 group-data-[state=open]:rotate-180 group-data-[collapsible=icon]:hidden" />
                   </button>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
