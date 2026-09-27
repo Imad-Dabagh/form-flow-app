@@ -11,6 +11,7 @@ import type { CurrentProfile } from "@/modules/profile/types";
 export interface UpdateCurrentProfileInput {
   firstName: string;
   lastName: string;
+  profilePic?: string;
 }
 
 /**

@@ -10,6 +10,7 @@ import type { OrganizationPrimaryColor } from "@/modules/organizations/lib/prima
 import type { OrganizationSummary } from "@/modules/organizations/types";
 
 export interface CreateOrganizationInput {
+  logo?: string;
   name: string;
   primaryColor?: OrganizationPrimaryColor;
   slug: string;

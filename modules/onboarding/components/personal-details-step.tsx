@@ -2,13 +2,13 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { ArrowRight, Camera, Loader2 } from "lucide-react";
+import { ArrowRight, ImagePlus, Loader2, UserRound, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useAuthenticatedProfile } from "@/modules/auth";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/modules/shared/components/ui/avatar";
+  FilePicker,
+  IMAGE_FILE_ACCEPT,
+} from "@/modules/shared/components/file-upload/file-picker";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
@@ -23,6 +23,8 @@ export function PersonalDetailsStep() {
   const profile = useAuthenticatedProfile();
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
+  const [profilePic, setProfilePic] = useState(profile.profilePic);
+  const [isUploading, setIsUploading] = useState(false);
   const { trigger, error, isMutating } =
     API.profile.useUpdateCurrentProfile();
 
@@ -33,6 +35,7 @@ export function PersonalDetailsStep() {
       await trigger({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
+        profilePic,
       });
     } catch {
       // The mutation exposes the API error for the form to render.
@@ -60,25 +63,108 @@ export function PersonalDetailsStep() {
           </p>
         </div>
 
-        <div className="mt-8 flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/[0.03]">
-          <Avatar className="size-16 border-2 border-white shadow-sm dark:border-white/10">
-            {profile.profilePic && (
-              <AvatarImage alt="" src={profile.profilePic} />
-            )}
-            <AvatarFallback className="bg-[#dff7fa] text-base font-bold text-[#102a43] dark:bg-cyan-300 dark:text-slate-950">
-              {getInitials(firstName, lastName)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 flex-1">
-            <Button disabled size="sm" type="button" variant="outline">
-              <Camera className="size-4" />
-              Upload photo
-            </Button>
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              Optional · Uploads will be available soon
-            </p>
-          </div>
-        </div>
+        <FilePicker
+          accept={IMAGE_FILE_ACCEPT}
+          buttonTitle={profilePic ? "Change photo" : "Upload photo"}
+          maxFiles={1}
+          onFilesUploaded={(files) => {
+            if (files[0]) {
+              setProfilePic(files[0].url);
+            }
+          }}
+          onUploadingChange={setIsUploading}
+          render={({
+            error: uploadError,
+            getInputProps,
+            getRootProps,
+            isDragActive,
+            isDragReject,
+            isUploading: isPhotoUploading,
+            open,
+          }) => (
+            <div
+              {...getRootProps({
+                className: cn(
+                  "mt-8 flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 transition-colors dark:border-white/10 dark:bg-white/[0.03]",
+                  isDragActive &&
+                    !isDragReject &&
+                    "border-primary-500 bg-primary-50 dark:bg-primary-950/30",
+                  isDragReject &&
+                    "border-red-400 bg-red-50 dark:border-red-500 dark:bg-red-500/10",
+                ),
+              })}
+            >
+              <input {...getInputProps()} />
+              <div
+                className={cn(
+                  "group/preview relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-full border-2 bg-white text-slate-400 shadow-sm dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-500",
+                  !profilePic &&
+                    "border-dashed border-slate-300 dark:border-slate-600",
+                )}
+              >
+                {profilePic ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    alt="Profile preview"
+                    className="size-full object-cover"
+                    src={profilePic}
+                  />
+                ) : getInitials(firstName, lastName) !== "U" ? (
+                  <span className="text-base font-bold text-[#102a43] dark:text-cyan-200">
+                    {getInitials(firstName, lastName)}
+                  </span>
+                ) : (
+                  <UserRound className="size-7" />
+                )}
+                {profilePic && (
+                  <button
+                    aria-label="Remove profile photo"
+                    className="absolute right-1 top-1 grid size-5 place-items-center rounded-full border border-slate-200 bg-white/95 text-slate-600 shadow-sm transition hover:text-red-600 focus-visible:opacity-100 sm:opacity-0 sm:group-hover/preview:opacity-100 dark:border-white/15 dark:bg-slate-900/90 dark:text-slate-300"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setProfilePic("");
+                    }}
+                    type="button"
+                  >
+                    <X className="size-3" />
+                  </button>
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <Button
+                  disabled={isPhotoUploading}
+                  onClick={open}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  {isPhotoUploading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <ImagePlus className="size-4" />
+                  )}
+                  {isPhotoUploading
+                    ? "Uploading…"
+                    : profilePic
+                      ? "Change photo"
+                      : "Upload photo"}
+                </Button>
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  {isDragActive
+                    ? "Drop the image here"
+                    : "Optional · PNG, JPG, WebP, GIF, or AVIF · 15 MB max"}
+                </p>
+                {uploadError && (
+                  <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                    {uploadError}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        />
 
         <form className="mt-8" onSubmit={savePersonalDetails}>
           <div className="grid gap-5 sm:grid-cols-2">
@@ -128,8 +214,8 @@ export function PersonalDetailsStep() {
           )}
 
           <div className="mt-8 flex justify-end border-t border-slate-200 pt-6 dark:border-white/10">
-            <Button disabled={isMutating} size="lg" type="submit">
-              {isMutating ? (
+            <Button disabled={isMutating || isUploading} size="lg" type="submit">
+              {isMutating || isUploading ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
                 <ArrowRight className="size-4" />
