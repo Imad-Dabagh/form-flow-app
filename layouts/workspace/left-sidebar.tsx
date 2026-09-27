@@ -9,6 +9,8 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
+  Moon,
+  PanelLeft,
   User,
   X,
 } from "lucide-react";
@@ -25,6 +27,7 @@ import {
   AvatarImage,
 } from "@/modules/shared/components/ui/avatar";
 import { Button } from "@/modules/shared/components/ui/button";
+import { useTheme } from "@/modules/shared/components/theme-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +43,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from "@/modules/shared/components/ui/sidebar";
 import API from "@/router";
@@ -88,7 +92,8 @@ export function LeftSidebar() {
   const organization = useOrganizationWorkspace();
   const { organizations } = API.organizations.useOrganizations();
   const profile = useAuthenticatedProfile();
-  const { isMobile, setOpenMobile, state } = useSidebar();
+  const { isMobile, setOpenMobile, toggleSidebar } = useSidebar();
+  const { resolvedTheme, setTheme } = useTheme();
   const dashboardPath = organizationWorkspacePath(
     organization.slug,
     "/dashboard",
@@ -122,26 +127,26 @@ export function LeftSidebar() {
       className="border-r border-sidebar-border bg-sidebar shadow-[8px_0_30px_rgba(15,23,42,0.04)]"
     >
       <SidebarHeader className="h-14 shrink-0 justify-center px-3 py-0 group-data-[collapsible=icon]:px-1">
-        <div className="flex min-w-0 items-center gap-2 group-data-[collapsible=icon]:justify-center">
+        <div className="flex min-w-0 items-center gap-1.5 group-data-[collapsible=icon]:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 aria-label={`Switch organization, current: ${organization.name}`}
-                className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-lg border border-sidebar-border bg-card/80 px-2 text-left text-sidebar-foreground shadow-xs transition-colors hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+                className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-lg border border-sidebar-border bg-card/80 px-2 text-left text-sidebar-foreground shadow-xs transition-colors hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
                 title={organization.name}
                 type="button"
               >
                 <OrganizationLogo organization={organization} />
-                <span className="min-w-0 flex-1 truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold">
                   {organization.name}
                 </span>
-                <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+                <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
               className="max-h-72 min-w-56 overflow-y-auto"
-              side={state === "collapsed" && !isMobile ? "right" : "bottom"}
+              side="bottom"
               sideOffset={8}
             >
               {organizations.map((candidate) => (
@@ -162,6 +167,11 @@ export function LeftSidebar() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <SidebarTrigger
+            aria-label="Collapse sidebar"
+            className="hidden size-8 shrink-0 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground md:flex [&_svg]:size-4!"
+            title="Collapse sidebar"
+          />
           <Button
             aria-label="Close navigation menu"
             className="size-11 shrink-0 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground md:hidden"
@@ -173,6 +183,18 @@ export function LeftSidebar() {
             <X className="size-4" />
           </Button>
         </div>
+        <button
+          aria-label="Expand sidebar"
+          className="group/expand relative hidden size-10 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:flex"
+          onClick={toggleSidebar}
+          title="Expand sidebar"
+          type="button"
+        >
+          <span className="transition-opacity duration-150 group-hover/expand:opacity-0 group-focus-visible/expand:opacity-0">
+            <OrganizationLogo organization={organization} />
+          </span>
+          <PanelLeft className="absolute size-4 opacity-0 transition-opacity duration-150 group-hover/expand:opacity-100 group-focus-visible/expand:opacity-100" />
+        </button>
       </SidebarHeader>
 
       <SidebarContent className="px-3 py-5 group-data-[collapsible=icon]:px-1">
@@ -253,12 +275,37 @@ export function LeftSidebar() {
                 side="top"
                 sideOffset={8}
               >
-                <div className="px-2 py-1.5">
-                  <p className="truncate text-sm font-medium">{displayName}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {profile.email}
-                  </p>
-                </div>
+                <DropdownMenuItem asChild disabled={!resolvedTheme}>
+                  <button
+                    aria-label={
+                      resolvedTheme === "dark"
+                        ? "Switch to light mode"
+                        : "Switch to dark mode"
+                    }
+                    className="mb-1 flex w-full items-center gap-3 rounded-lg border border-border bg-muted/50 px-3 py-2.5 text-left hover:bg-muted focus:bg-muted"
+                    onClick={() =>
+                      setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                    }
+                    type="button"
+                  >
+                    <Moon className="size-4" />
+                    <span className="flex-1 font-medium">Dark mode</span>
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "flex h-5 w-9 items-center rounded-full p-0.5 transition-colors",
+                        resolvedTheme === "dark" ? "bg-primary-500" : "bg-border",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "size-4 rounded-full bg-white shadow-sm transition-transform",
+                          resolvedTheme === "dark" && "translate-x-4",
+                        )}
+                      />
+                    </span>
+                  </button>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/profile" onClick={closeMobileSidebar}>
