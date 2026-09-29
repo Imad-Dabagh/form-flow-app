@@ -10,6 +10,7 @@ import {
 } from "@/modules/shared/components/ui/tabs";
 import { organizationWorkspacePath } from "../paths";
 import { OrganizationGeneralSettings } from "./organization-general-settings";
+import { OrganizationInvitations } from "./organization-invitations";
 import { OrganizationTeamMembers } from "./organization-team-members";
 import { useOrganizationWorkspace } from "./organization-workspace-boundary";
 import { useOrganizationPermissions } from "./use-organization-permissions";
@@ -51,7 +52,7 @@ export function OrganizationSettings() {
           <TabsTrigger className={activeTabClass} value="team-members">
             Team Members
           </TabsTrigger>
-          <TabsTrigger className={activeTabClass} disabled value="invitations">
+          <TabsTrigger className={activeTabClass} value="invitations">
             Invitations
           </TabsTrigger>
         </TabsList>
@@ -60,6 +61,9 @@ export function OrganizationSettings() {
         </TabsContent>
         <TabsContent value="team-members">
           <OrganizationTeamMembers />
+        </TabsContent>
+        <TabsContent value="invitations">
+          <OrganizationInvitations />
         </TabsContent>
       </Tabs>
     </div>

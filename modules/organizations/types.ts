@@ -14,6 +14,15 @@ export interface OrganizationTeamMember {
   joinedAt: string;
 }
 
+export interface OrganizationInvitation {
+  id: string;
+  email: string;
+  role: OrganizationTeamRole;
+  status: "PENDING" | "EXPIRED";
+  createdAt: string;
+  expiresAt: string;
+}
+
 export type OrganizationMemberLookup =
   | { kind: "existing"; email: string; name: string; profilePic: string; currentRole: OrganizationRole | null }
   | { kind: "pending"; email: string; role: OrganizationTeamRole }
