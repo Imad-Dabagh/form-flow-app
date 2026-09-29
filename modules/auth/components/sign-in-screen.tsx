@@ -64,7 +64,7 @@ export function SignInScreen() {
     setPendingAction(null);
 
     if (signInError) {
-      setError(signInError.message);
+      setError(signInError.message ?? "Could not sign in. Please try again.");
       return;
     }
 
@@ -83,7 +83,7 @@ export function SignInScreen() {
     });
 
     if (signInError) {
-      setError(signInError.message);
+      setError(signInError.message ?? "Could not sign in with Google. Please try again.");
       setPendingAction(null);
     }
   }
@@ -107,7 +107,7 @@ export function SignInScreen() {
     setPendingAction(null);
 
     if (magicLinkError) {
-      setError(magicLinkError.message);
+      setError(magicLinkError.message ?? "Could not send the sign-in link. Please try again.");
       return;
     }
 
