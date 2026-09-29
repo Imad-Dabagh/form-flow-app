@@ -7,7 +7,7 @@ import {
   ChevronDown,
   ChevronsUpDown,
   FileText,
-  LayoutDashboard,
+  Home,
   LogOut,
   Moon,
   PanelLeft,
@@ -102,9 +102,10 @@ export function LeftSidebar() {
     "/dashboard",
   );
   const formsPath = organizationWorkspacePath(organization.slug, "/forms");
+  const profilePath = organizationWorkspacePath(organization.slug, "/profile");
   const settingsPath = organizationWorkspacePath(organization.slug, "/settings");
   const navItems = [
-    { href: dashboardPath, label: "Overview", icon: LayoutDashboard },
+    { href: dashboardPath, label: "Dashboard", icon: Home },
     { href: formsPath, label: "Forms", icon: FileText },
   ];
   const displayName =
@@ -312,7 +313,11 @@ export function LeftSidebar() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/profile" onClick={closeMobileSidebar}>
+                  <Link
+                    aria-current={pathname === profilePath ? "page" : undefined}
+                    href={profilePath}
+                    onClick={closeMobileSidebar}
+                  >
                     <User className="mr-2 size-4" />
                     Profile
                   </Link>
