@@ -12,6 +12,19 @@ export interface UpdateCurrentProfileInput {
   firstName: string;
   lastName: string;
   profilePic?: string;
+  coverPhoto?: string;
+  phone?: string;
+  shortDescription?: string;
+}
+
+function normalizeCurrentProfile(profile: CurrentProfile): CurrentProfile {
+  return {
+    ...profile,
+    profilePic: profile.profilePic ?? "",
+    coverPhoto: profile.coverPhoto ?? "",
+    phone: profile.phone ?? "",
+    shortDescription: profile.shortDescription ?? "",
+  };
 }
 
 /**
@@ -23,7 +36,10 @@ export function useCurrentProfile(
 ) {
   const { data, ...rest } = useSWR<CurrentProfile, ApiError>(
     enabled ? "/me" : null,
-    (url) => requestData<CurrentProfile>({ method: "GET", url }),
+    async (url) =>
+      normalizeCurrentProfile(
+        await requestData<CurrentProfile>({ method: "GET", url }),
+      ),
     swrConfig,
   );
 
@@ -53,8 +69,10 @@ export function useUpdateCurrentProfile(
     CurrentProfile
   >(
     "/me",
-    (url, { arg }) =>
-      requestData<CurrentProfile>({ method: "PUT", url, data: arg }),
+    async (url, { arg }) =>
+      normalizeCurrentProfile(
+        await requestData<CurrentProfile>({ method: "PUT", url, data: arg }),
+      ),
     {
       populateCache: true,
       revalidate: false,

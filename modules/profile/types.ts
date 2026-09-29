@@ -4,6 +4,9 @@ export interface CurrentProfile {
   firstName: string;
   lastName: string;
   profilePic: string;
+  coverPhoto: string;
+  phone: string;
+  shortDescription: string;
   onboardingCompletedAt: string | null;
   isEmailVerified: boolean;
   isSuperAdmin: boolean;
