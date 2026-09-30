@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ImagePlus, Loader2, UserRound, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useAuthenticatedProfile } from "@/modules/auth";
+import { useCurrentProfileContext } from "../../current-profile-context";
 import {
   FilePicker,
   IMAGE_FILE_ACCEPT,
@@ -25,8 +25,8 @@ function getInitials(firstName: string, lastName: string): string {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "U";
 }
 
-export function ProfileSettings() {
-  const profile = useAuthenticatedProfile();
+export function ProfileSettingsTemplate() {
+  const profile = useCurrentProfileContext();
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
   const [profilePic, setProfilePic] = useState(profile.profilePic);
@@ -38,7 +38,7 @@ export function ProfileSettings() {
   const [isPhotoUploading, setIsPhotoUploading] = useState(false);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
   const { trigger: updateProfile, isMutating } =
-    API.profile.useUpdateCurrentProfile();
+    API.me.useUpdateOne();
   const isUploading = isPhotoUploading || isCoverUploading;
   const isDirty =
     firstName.trim() !== profile.firstName ||
