@@ -1,11 +1,10 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowRight, Building2, ImagePlus, Loader2, X } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, ImagePlus, Loader2, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { organizationWorkspacePath } from "@/modules/organizations";
+import { useCurrentProfileContext } from "@/modules/profile/current-profile-context";
 import {
   FilePicker,
   IMAGE_FILE_ACCEPT,
@@ -16,72 +15,28 @@ import { Label } from "@/modules/shared/components/ui/label";
 import API from "@/router";
 import { OnboardingFrame } from "./onboarding-frame";
 
-const ORGANIZATION_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const ORGANIZATION_SLUG_MAX_LENGTH = 20;
-
-function normalizeSlugInput(value: string): string {
-  return value
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-{2,}/g, "-")
-    .slice(0, ORGANIZATION_SLUG_MAX_LENGTH);
+function getInitials(firstName: string, lastName: string): string {
+  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "U";
 }
 
-function finalizeSlug(value: string): string {
-  return normalizeSlugInput(value).replace(/-+$/, "");
-}
-
-export function OrganizationSetupStep() {
-  const router = useRouter();
-  const slugWasEdited = useRef(false);
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [logo, setLogo] = useState("");
+export function PersonalDetailsStep() {
+  const profile = useCurrentProfileContext();
+  const [firstName, setFirstName] = useState(profile.firstName);
+  const [lastName, setLastName] = useState(profile.lastName);
+  const [profilePic, setProfilePic] = useState(profile.profilePic);
   const [isUploading, setIsUploading] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
   const { trigger, error, isMutating } =
-    API.organizations.useCreateOrganization();
+    API.me.useUpdateOne();
 
-  function updateName(value: string) {
-    setName(value);
-    setValidationError(null);
-
-    if (!slugWasEdited.current) {
-      setSlug(finalizeSlug(value));
-    }
-  }
-
-  function updateSlug(value: string) {
-    slugWasEdited.current = true;
-    setSlug(normalizeSlugInput(value));
-    setValidationError(null);
-  }
-
-  async function createOrganization(event: FormEvent<HTMLFormElement>) {
+  async function savePersonalDetails(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const finalSlug = finalizeSlug(slug);
-    setSlug(finalSlug);
-    setValidationError(null);
-
-    if (!ORGANIZATION_SLUG_PATTERN.test(finalSlug)) {
-      setValidationError(
-        "Use lowercase letters, numbers, and single hyphens only.",
-      );
-      return;
-    }
 
     try {
-      const organization = await trigger({
-        logo,
-        name: name.trim(),
-        slug: finalSlug,
+      await trigger({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        profilePic,
       });
-      router.replace(
-        organizationWorkspacePath(organization.slug, "/dashboard"),
-      );
     } catch {
       // The mutation exposes the API error for the form to render.
     }
@@ -89,31 +44,32 @@ export function OrganizationSetupStep() {
 
   return (
     <OnboardingFrame
-      description="Create the workspace where your team will build forms. You can refine its branding later."
-      eyebrow="One last step"
-      step={2}
-      title="Set up your organization."
+      description="Start with the details your teammates will see. You can update them again later from your profile."
+      eyebrow="Welcome aboard"
+      step={1}
+      title="Let's get to know you."
     >
       <section className="rounded-[1.75rem] border border-white/80 bg-white p-6 shadow-[0_24px_80px_-38px_rgba(15,42,67,0.45)] sm:p-9 dark:border-white/10 dark:bg-[#182124] dark:shadow-black/30">
         <div>
           <p className="text-sm font-semibold text-cyan-700 dark:text-cyan-300">
-            Your workspace
+            Your profile
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
-            Create your first organization
+            Add your personal details
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-            This name and address identify your workspace throughout Form Flow.
+            Your photo is optional. Your name helps people recognize you
+            across workspaces.
           </p>
         </div>
 
         <FilePicker
           accept={IMAGE_FILE_ACCEPT}
-          buttonTitle={logo ? "Change logo" : "Upload logo"}
+          buttonTitle={profilePic ? "Change photo" : "Upload photo"}
           maxFiles={1}
           onFilesUploaded={(files) => {
             if (files[0]) {
-              setLogo(files[0].url);
+              setProfilePic(files[0].url);
             }
           }}
           onUploadingChange={setIsUploading}
@@ -123,7 +79,7 @@ export function OrganizationSetupStep() {
             getRootProps,
             isDragActive,
             isDragReject,
-            isUploading: isLogoUploading,
+            isUploading: isPhotoUploading,
             open,
           }) => (
             <div
@@ -141,29 +97,33 @@ export function OrganizationSetupStep() {
               <input {...getInputProps()} />
               <div
                 className={cn(
-                  "group/preview relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border-2 bg-white text-slate-400 shadow-sm dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-500",
-                  !logo &&
+                  "group/preview relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-full border-2 bg-white text-slate-400 shadow-sm dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-500",
+                  !profilePic &&
                     "border-dashed border-slate-300 dark:border-slate-600",
                 )}
               >
-                {logo ? (
+                {profilePic ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    alt="Organization logo preview"
+                    alt="Profile preview"
                     className="size-full object-cover"
-                    src={logo}
+                    src={profilePic}
                   />
+                ) : getInitials(firstName, lastName) !== "U" ? (
+                  <span className="text-base font-bold text-[#102a43] dark:text-cyan-200">
+                    {getInitials(firstName, lastName)}
+                  </span>
                 ) : (
-                  <Building2 className="size-7" />
+                  <UserRound className="size-7" />
                 )}
-                {logo && (
+                {profilePic && (
                   <button
-                    aria-label="Remove organization logo"
+                    aria-label="Remove profile photo"
                     className="absolute right-1 top-1 grid size-5 place-items-center rounded-full border border-slate-200 bg-white/95 text-slate-600 shadow-sm transition hover:text-red-600 focus-visible:opacity-100 sm:opacity-0 sm:group-hover/preview:opacity-100 dark:border-white/15 dark:bg-slate-900/90 dark:text-slate-300"
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
-                      setLogo("");
+                      setProfilePic("");
                     }}
                     type="button"
                   >
@@ -174,22 +134,22 @@ export function OrganizationSetupStep() {
 
               <div className="min-w-0 flex-1">
                 <Button
-                  disabled={isLogoUploading}
+                  disabled={isPhotoUploading}
                   onClick={open}
                   size="sm"
                   type="button"
                   variant="outline"
                 >
-                  {isLogoUploading ? (
+                  {isPhotoUploading ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : (
                     <ImagePlus className="size-4" />
                   )}
-                  {isLogoUploading
+                  {isPhotoUploading
                     ? "Uploading…"
-                    : logo
-                      ? "Change logo"
-                      : "Upload logo"}
+                    : profilePic
+                      ? "Change photo"
+                      : "Upload photo"}
                 </Button>
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   {isDragActive
@@ -206,55 +166,50 @@ export function OrganizationSetupStep() {
           )}
         />
 
-        <form className="mt-8" onSubmit={createOrganization}>
-          <div className="space-y-5">
+        <form className="mt-8" onSubmit={savePersonalDetails}>
+          <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="organizationName">Organization name</Label>
+              <Label htmlFor="firstName">First name</Label>
               <Input
-                autoComplete="organization"
+                autoComplete="given-name"
                 autoFocus
-                id="organizationName"
+                id="firstName"
                 maxLength={50}
-                onChange={(event) => updateName(event.target.value)}
-                placeholder="Acme Studio"
+                onChange={(event) => setFirstName(event.target.value)}
                 required
-                value={name}
+                value={firstName}
               />
             </div>
-
             <div className="space-y-2">
-              <div className="flex items-center justify-between gap-4">
-                <Label htmlFor="organizationSlug">Workspace address</Label>
-                <span className="text-xs tabular-nums text-slate-400">
-                  {slug.length}/{ORGANIZATION_SLUG_MAX_LENGTH}
-                </span>
-              </div>
+              <Label htmlFor="lastName">Last name</Label>
               <Input
-                aria-describedby="organizationSlugHelp"
-                aria-invalid={Boolean(validationError)}
-                id="organizationSlug"
-                maxLength={ORGANIZATION_SLUG_MAX_LENGTH}
-                onBlur={() => setSlug(finalizeSlug(slug))}
-                onChange={(event) => updateSlug(event.target.value)}
-                pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-                placeholder="acme-studio"
+                autoComplete="family-name"
+                id="lastName"
+                maxLength={50}
+                onChange={(event) => setLastName(event.target.value)}
                 required
-                spellCheck={false}
-                value={slug}
+                value={lastName}
               />
-              <p
-                className="text-xs leading-5 text-slate-500 dark:text-slate-400"
-                id="organizationSlugHelp"
-              >
-                formflow.app/{slug || "your-workspace"} · lowercase letters,
-                numbers, and hyphens
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="email">Email address</Label>
+              <Input
+                className="disabled:cursor-default disabled:bg-slate-100 disabled:opacity-100 dark:disabled:bg-white/[0.04]"
+                disabled
+                id="email"
+                type="email"
+                value={profile.email}
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Your email comes from your sign-in account and cannot be
+                changed here.
               </p>
             </div>
           </div>
 
-          {(validationError || error) && (
+          {error && (
             <p className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
-              {validationError ?? error?.message}
+              {error.message}
             </p>
           )}
 
@@ -265,7 +220,7 @@ export function OrganizationSetupStep() {
               ) : (
                 <ArrowRight className="size-4" />
               )}
-              Create organization
+              Save and continue
             </Button>
           </div>
         </form>

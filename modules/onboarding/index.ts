@@ -1,1 +1,1 @@
-export { OnboardingFlow } from "./components/onboarding-flow";
+export { OnboardingFlowTemplate } from "./templates/onboarding-flow";

@@ -1,5 +1,5 @@
-import { OnboardingFlow } from "@/modules/onboarding";
+import { OnboardingFlowTemplate } from "@/modules/onboarding";
 
 export default function WelcomePage() {
-  return <OnboardingFlow />;
+  return <OnboardingFlowTemplate />;
 }

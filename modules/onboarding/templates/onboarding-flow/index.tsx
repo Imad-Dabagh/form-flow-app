@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthenticatedProfile } from "@/modules/auth";
+import { useCurrentProfileContext } from "@/modules/profile/current-profile-context";
 import API from "@/router";
-import { OrganizationSetupStep } from "./organization-setup-step";
-import { PersonalDetailsStep } from "./personal-details-step";
+import { OrganizationSetupStep } from "./components/organization-setup-step";
+import { PersonalDetailsStep } from "./components/personal-details-step";
 
 function FlowState({ children }: { children: string }) {
   return (
@@ -15,11 +15,11 @@ function FlowState({ children }: { children: string }) {
   );
 }
 
-export function OnboardingFlow() {
+export function OnboardingFlowTemplate() {
   const router = useRouter();
-  const profile = useAuthenticatedProfile();
+  const profile = useCurrentProfileContext();
   const { organizations, error, isLoading } =
-    API.organizations.useOrganizations();
+    API.orgs.useFindAll();
   const hasPersonalDetails = Boolean(
     profile.firstName.trim() && profile.lastName.trim(),
   );
