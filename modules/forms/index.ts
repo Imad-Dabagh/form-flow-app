@@ -1,4 +1,2 @@
-export { FormBuilder } from "./builder/form-builder";
-export { FormResponses } from "./components/form-responses";
-export { FormsDashboard } from "./components/forms-dashboard";
-export { PublicForm } from "./components/public-form";
+export { FormsList } from "./components/forms-list";
+export { FormBuilderPlaceholder } from "./components/form-builder-placeholder";
