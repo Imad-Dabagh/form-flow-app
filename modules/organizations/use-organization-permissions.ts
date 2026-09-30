@@ -1,11 +1,11 @@
 "use client";
 
-import { useAuthenticatedProfile } from "@/modules/auth";
-import { useOrganizationWorkspace } from "./organization-workspace-boundary";
+import { useCurrentProfileContext } from "@/modules/profile/current-profile-context";
+import { useOrganizationWorkspace } from "./organization-workspace-context";
 
 export function useOrganizationPermissions() {
   const { role } = useOrganizationWorkspace();
-  const { isSuperAdmin } = useAuthenticatedProfile();
+  const { isSuperAdmin } = useCurrentProfileContext();
 
   return {
     canManageOrganization: isSuperAdmin || role === "ADMIN",

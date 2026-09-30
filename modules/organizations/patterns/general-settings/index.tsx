@@ -15,8 +15,8 @@ import API from "@/router";
 import {
   ORGANIZATION_PRIMARY_COLORS,
   getOrganizationColorSwatch,
-} from "../lib/primary-color-theme";
-import type { OrganizationSummary } from "../types";
+} from "../../lib/primary-color-theme";
+import type { OrganizationSummary } from "@/router/orgs/types";
 
 const ORGANIZATION_LOGO_ACCEPT = {
   "image/png": [".png"],
@@ -31,7 +31,9 @@ export function OrganizationGeneralSettings({ organization }: { organization: Or
   const [slogan, setSlogan] = useState(organization.slogan ?? "");
   const [shortDescription, setShortDescription] = useState(organization.shortDescription ?? "");
   const [isUploading, setIsUploading] = useState(false);
-  const { trigger, isMutating } = API.organizations.useUpdateOrganization(organization.slug);
+  const { trigger, isMutating } = API.orgs.useUpdateBySlug({
+    organizationSlug: organization.slug,
+  });
   const isDirty =
     name.trim() !== organization.name ||
     logo !== organization.logo ||

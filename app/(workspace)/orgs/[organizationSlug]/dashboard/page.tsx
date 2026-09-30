@@ -1,5 +1,5 @@
-import { OrganizationDashboard } from "@/modules/organizations";
+import { OrganizationDashboardTemplate } from "@/modules/organizations";
 
 export default function DashboardPage() {
-  return <OrganizationDashboard />;
+  return <OrganizationDashboardTemplate />;
 }

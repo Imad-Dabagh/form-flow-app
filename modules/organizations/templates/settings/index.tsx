@@ -8,17 +8,17 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/modules/shared/components/ui/tabs";
-import { organizationWorkspacePath } from "../paths";
-import { OrganizationGeneralSettings } from "./organization-general-settings";
-import { OrganizationInvitations } from "./organization-invitations";
-import { OrganizationTeamMembers } from "./organization-team-members";
-import { useOrganizationWorkspace } from "./organization-workspace-boundary";
-import { useOrganizationPermissions } from "./use-organization-permissions";
+import { organizationWorkspacePath } from "../../paths";
+import { OrganizationGeneralSettings } from "../../patterns/general-settings";
+import { OrganizationInvitations } from "../../patterns/invitations";
+import { OrganizationTeamMembers } from "../../patterns/team-members";
+import { useOrganizationWorkspace } from "../../organization-workspace-context";
+import { useOrganizationPermissions } from "../../use-organization-permissions";
 
 const activeTabClass =
   "data-[state=active]:bg-primary-500 data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-primary-500 dark:data-[state=active]:text-primary-foreground";
 
-export function OrganizationSettings() {
+export function OrganizationSettingsTemplate() {
   const organization = useOrganizationWorkspace();
   const { canManageOrganization } = useOrganizationPermissions();
 

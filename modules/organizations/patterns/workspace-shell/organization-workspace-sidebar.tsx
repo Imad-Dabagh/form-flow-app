@@ -16,13 +16,11 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuthenticatedProfile } from "@/modules/auth";
-import {
-  organizationWorkspacePath,
-  useOrganizationPermissions,
-  useOrganizationWorkspace,
-  type OrganizationSummary,
-} from "@/modules/organizations";
+import { useCurrentProfileContext } from "@/modules/profile/current-profile-context";
+import { organizationWorkspacePath } from "../../paths";
+import { useOrganizationPermissions } from "../../use-organization-permissions";
+import { useOrganizationWorkspace } from "../../organization-workspace-context";
+import type { OrganizationSummary } from "@/router/orgs/types";
 import {
   Avatar,
   AvatarFallback,
@@ -88,12 +86,12 @@ function OrganizationLogo({ organization }: { organization: OrganizationSummary 
   );
 }
 
-export function LeftSidebar() {
+export function OrganizationWorkspaceSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const organization = useOrganizationWorkspace();
-  const { organizations } = API.organizations.useOrganizations();
-  const profile = useAuthenticatedProfile();
+  const { organizations } = API.orgs.useFindAll();
+  const profile = useCurrentProfileContext();
   const { canManageOrganization } = useOrganizationPermissions();
   const { isMobile, setOpenMobile, toggleSidebar } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();

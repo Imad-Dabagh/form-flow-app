@@ -9,9 +9,9 @@ import {
 import API from "@/router";
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
-import { organizationWorkspacePath } from "../paths";
-import { useOrganizationWorkspace } from "./organization-workspace-boundary";
-import { useOrganizationPermissions } from "./use-organization-permissions";
+import { organizationWorkspacePath } from "../../paths";
+import { useOrganizationWorkspace } from "../../organization-workspace-context";
+import { useOrganizationPermissions } from "../../use-organization-permissions";
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("en", {
@@ -21,10 +21,12 @@ function formatDate(value: string): string {
   }).format(new Date(value));
 }
 
-export function OrganizationDashboard() {
+export function OrganizationDashboardTemplate() {
   const organization = useOrganizationWorkspace();
   const { canManageForms, accessLabel } = useOrganizationPermissions();
-  const { formsPage, error, isLoading } = API.forms.useOrganizationForms(organization.slug);
+  const { formsPage, error, isLoading } = API.orgs.forms.useFindAll({
+    organizationSlug: organization.slug,
+  });
   const formsPath = organizationWorkspacePath(organization.slug, "/forms");
   const recentForms = formsPage?.items.slice(0, 5) ?? [];
 

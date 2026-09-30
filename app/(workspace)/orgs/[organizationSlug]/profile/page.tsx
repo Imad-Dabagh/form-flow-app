@@ -1,5 +1,5 @@
-import { ProfileSettings } from "@/modules/profile/components/profile-settings";
+import { ProfileSettingsTemplate } from "@/modules/profile";
 
 export default function ProfilePage() {
-  return <ProfileSettings />;
+  return <ProfileSettingsTemplate />;
 }

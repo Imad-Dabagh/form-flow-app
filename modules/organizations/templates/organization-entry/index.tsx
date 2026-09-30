@@ -3,12 +3,12 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import API from "@/router";
-import { organizationWorkspacePath } from "../paths";
+import { organizationWorkspacePath } from "../../paths";
 
-export function OrganizationEntry() {
+export function OrganizationEntryTemplate() {
   const router = useRouter();
   const { organizations, error, isLoading } =
-    API.organizations.useOrganizations();
+    API.orgs.useFindAll();
 
   useEffect(() => {
     if (organizations[0]) {

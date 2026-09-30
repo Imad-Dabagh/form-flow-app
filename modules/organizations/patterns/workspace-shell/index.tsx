@@ -1,18 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { LeftSidebar } from "./left-sidebar";
-import {
-  OrganizationThemeScope,
-  useOrganizationWorkspace,
-} from "@/modules/organizations";
+import { OrganizationWorkspaceSidebar } from "./organization-workspace-sidebar";
+import { OrganizationThemeScope } from "./organization-theme-scope";
+import { useOrganizationWorkspace } from "../../organization-workspace-context";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/modules/shared/components/ui/sidebar";
 
-export function WorkspaceLayout({
+export function OrganizationWorkspaceShell({
   children,
   defaultSidebarOpen,
 }: {
@@ -24,7 +22,7 @@ export function WorkspaceLayout({
   return (
     <OrganizationThemeScope primaryColor={organization.primaryColor}>
       <SidebarProvider defaultOpen={defaultSidebarOpen}>
-        <LeftSidebar />
+        <OrganizationWorkspaceSidebar />
         <SidebarInset className="min-h-svh min-w-0 bg-background">
           <div className="px-4 pt-3 md:hidden">
             <SidebarTrigger

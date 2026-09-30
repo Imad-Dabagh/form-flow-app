@@ -4,8 +4,8 @@ import { useLayoutEffect, useMemo, type ReactNode } from "react";
 import { useTheme } from "@/modules/shared/components/theme-provider";
 import {
   getOrganizationThemeStyle,
-  type OrganizationPrimaryColor,
-} from "../lib/primary-color-theme";
+} from "../../lib/primary-color-theme";
+import type { OrganizationPrimaryColor } from "@/router/orgs/types";
 
 interface OrganizationThemeScopeProps {
   children: ReactNode;

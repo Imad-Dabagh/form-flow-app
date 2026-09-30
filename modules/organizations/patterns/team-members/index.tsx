@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { OrganizationTeamMember, OrganizationTeamRole } from "../types";
+import type { OrganizationTeamMember, OrganizationTeamRole } from "@/router/orgs/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/components/ui/avatar";
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button, buttonVariants } from "@/modules/shared/components/ui/button";
@@ -42,8 +42,8 @@ import {
   TableRow,
 } from "@/modules/shared/components/ui/table";
 import API from "@/router";
-import { OrganizationAddMemberDialog } from "./organization-add-member-dialog";
-import { useOrganizationWorkspace } from "./organization-workspace-boundary";
+import { OrganizationAddMemberDialog } from "../../components/organization-add-member-dialog";
+import { useOrganizationWorkspace } from "../../organization-workspace-context";
 
 function formatJoinedAt(value: string): string {
   return new Intl.DateTimeFormat("en", {
@@ -59,18 +59,20 @@ function memberName(member: OrganizationTeamMember): string {
 
 export function OrganizationTeamMembers() {
   const organization = useOrganizationWorkspace();
-  const { members, error, isLoading, mutate } = API.organizations.useOrganizationMembers(organization.slug);
+  const { members, error, isLoading, mutate } = API.orgs.members.useFindAll({
+    organizationSlug: organization.slug,
+  });
   const [editing, setEditing] = useState<OrganizationTeamMember | null>(null);
   const [removing, setRemoving] = useState<OrganizationTeamMember | null>(null);
   const [draftRole, setDraftRole] = useState<OrganizationTeamRole>("MANAGER");
-  const { trigger: updateRole, isMutating: isUpdating } = API.organizations.useUpdateOrganizationMember(
-    organization.slug,
-    editing?.id ?? "",
-  );
-  const { trigger: removeMember, isMutating: isRemoving } = API.organizations.useRemoveOrganizationMember(
-    organization.slug,
-    removing?.id ?? "",
-  );
+  const { trigger: updateRole, isMutating: isUpdating } = API.orgs.members.useUpdateById({
+    organizationSlug: organization.slug,
+    membershipId: editing?.id ?? "",
+  });
+  const { trigger: removeMember, isMutating: isRemoving } = API.orgs.members.useDeleteById({
+    organizationSlug: organization.slug,
+    membershipId: removing?.id ?? "",
+  });
   const adminCount = members.filter((member) => member.role === "ADMIN").length;
   const editingLastAdmin = editing?.role === "ADMIN" && adminCount === 1 && draftRole !== "ADMIN";
 
@@ -82,7 +84,7 @@ export function OrganizationTeamMembers() {
   async function saveRole() {
     if (!editing || editingLastAdmin || editing.role === draftRole) return;
     try {
-      await updateRole(draftRole);
+      await updateRole({ role: draftRole });
       toast.success("Member role updated.");
       setEditing(null);
     } catch (reason) {

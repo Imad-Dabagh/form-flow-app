@@ -25,9 +25,9 @@ import {
   TableRow,
 } from "@/modules/shared/components/ui/table";
 import API from "@/router";
-import type { OrganizationInvitation } from "../types";
-import { OrganizationAddMemberDialog } from "./organization-add-member-dialog";
-import { useOrganizationWorkspace } from "./organization-workspace-boundary";
+import type { OrganizationInvitation } from "@/router/orgs/types";
+import { OrganizationAddMemberDialog } from "../../components/organization-add-member-dialog";
+import { useOrganizationWorkspace } from "../../organization-workspace-context";
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("en", {
@@ -39,14 +39,19 @@ function formatDate(value: string): string {
 
 export function OrganizationInvitations() {
   const organization = useOrganizationWorkspace();
-  const { invitations, error, isLoading, mutate } = API.organizations.useOrganizationInvitations(organization.slug);
-  const { trigger: addMember, isMutating: isReinviting } = API.organizations.useAddOrganizationMember(organization.slug);
+  const { invitations, error, isLoading, mutate } = API.orgs.invitations.useFindAll({
+    organizationSlug: organization.slug,
+  });
+  const { trigger: addMember, isMutating: isReinviting } = API.orgs.members.useCreateOne({
+    organizationSlug: organization.slug,
+  });
   const [reinvitingId, setReinvitingId] = useState<string | null>(null);
   const [canceling, setCanceling] = useState<OrganizationInvitation | null>(null);
-  const { trigger: cancelInvitation, isMutating: isCanceling } = API.organizations.useCancelOrganizationInvitation(
-    organization.slug,
-    canceling?.id ?? "",
-  );
+  const { trigger: cancelInvitation, isMutating: isCanceling } =
+    API.orgs.invitations.useDeleteById({
+      organizationSlug: organization.slug,
+      invitationId: canceling?.id ?? "",
+    });
   const activeCount = invitations.filter((invitation) => invitation.status === "PENDING").length;
   const expiredCount = invitations.length - activeCount;
 
