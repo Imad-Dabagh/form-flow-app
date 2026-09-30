@@ -7,9 +7,12 @@ import API from "@/router";
 import { organizationWorkspacePath } from "@/modules/organizations";
 import { Button } from "@/modules/shared/components/ui/button";
 
-export function FormBuilderPlaceholder() {
+export function FormBuilderTemplate() {
   const { organizationSlug, formId } = useParams<{ organizationSlug: string; formId: string }>();
-  const { form, error, isLoading } = API.forms.useOrganizationForm(organizationSlug, formId);
+  const { form, error, isLoading } = API.orgs.forms.useFindById({
+    organizationSlug,
+    formId,
+  });
 
   return (
     <div className="mx-auto w-full max-w-[69rem] px-4 py-7 sm:px-6 sm:py-10 lg:px-8">

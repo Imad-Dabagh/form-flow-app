@@ -18,7 +18,7 @@ export function CreateFormDialog({ open, onOpenChange, organizationSlug }: {
 }) {
   const router = useRouter();
   const [name, setName] = useState("");
-  const { trigger, isMutating } = API.forms.useCreateOrganizationForm(organizationSlug);
+  const { trigger, isMutating } = API.orgs.forms.useCreateOne({ organizationSlug });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

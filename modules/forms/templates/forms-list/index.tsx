@@ -5,20 +5,26 @@ import Link from "next/link";
 import { FileText, Plus } from "lucide-react";
 import API from "@/router";
 import { Button } from "@/modules/shared/components/ui/button";
-import { organizationWorkspacePath, useOrganizationWorkspace } from "@/modules/organizations";
-import { useOrganizationPermissions } from "@/modules/organizations/components/use-organization-permissions";
+import {
+  organizationWorkspacePath,
+  useOrganizationPermissions,
+  useOrganizationWorkspace,
+} from "@/modules/organizations";
 import { CreateFormDialog } from "./create-form-dialog";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en", { day: "numeric", month: "short", year: "numeric" }).format(new Date(value));
 }
 
-export function FormsList() {
+export function FormsListTemplate() {
   const organization = useOrganizationWorkspace();
   const { canManageForms } = useOrganizationPermissions();
   const [page, setPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
-  const { formsPage, error, isLoading } = API.forms.useOrganizationForms(organization.slug, page);
+  const { formsPage, error, isLoading } = API.orgs.forms.useFindAll({
+    organizationSlug: organization.slug,
+    page,
+  });
 
   return (
     <div className="mx-auto w-full max-w-[69rem] px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
