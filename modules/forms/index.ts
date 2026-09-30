@@ -1,2 +1,2 @@
-export { FormsList } from "./components/forms-list";
-export { FormBuilderPlaceholder } from "./components/form-builder-placeholder";
+export { FormsListTemplate } from "./templates/forms-list";
+export { FormBuilderTemplate } from "./templates/form-builder";

@@ -25,8 +25,8 @@ import {
   SelectValue,
 } from "@/modules/shared/components/ui/select";
 import API from "@/router";
-import type { OrganizationTeamRole } from "../types";
-import { useOrganizationWorkspace } from "./organization-workspace-boundary";
+import type { OrganizationTeamRole } from "@/router/orgs/types";
+import { useOrganizationWorkspace } from "../organization-workspace-context";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -47,11 +47,13 @@ export function OrganizationAddMemberDialog() {
     return () => window.clearTimeout(timeout);
   }, [normalizedEmail, open]);
 
-  const { lookup, error, isLoading, mutate } = API.organizations.useOrganizationMemberLookup(
-    organization.slug,
-    lookupEmail,
-  );
-  const { trigger: addMember, isMutating } = API.organizations.useAddOrganizationMember(organization.slug);
+  const { lookup, error, isLoading, mutate } = API.orgs.members.useFindByEmail({
+    organizationSlug: organization.slug,
+    email: lookupEmail,
+  });
+  const { trigger: addMember, isMutating } = API.orgs.members.useCreateOne({
+    organizationSlug: organization.slug,
+  });
   const currentLookup = lookup?.email === normalizedEmail && lookupEmail === normalizedEmail ? lookup : null;
   const alreadyOnTeam = currentLookup?.kind === "existing" &&
     (currentLookup.currentRole === "ADMIN" || currentLookup.currentRole === "MANAGER");

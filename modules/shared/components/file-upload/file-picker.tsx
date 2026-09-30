@@ -11,9 +11,9 @@ import {
 } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import {
-  useUploadFile,
+  useCreateOne,
   type UploadedFile,
-} from "@/router/files";
+} from "@/router/upload";
 import { Button } from "../ui/button";
 
 export const MAX_FILE_UPLOAD_SIZE_MB = 15;
@@ -123,7 +123,7 @@ export function FilePicker({
 }: FilePickerProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { trigger } = useUploadFile({ organizationSlug });
+  const { trigger } = useCreateOne({ organizationSlug });
   const effectiveMaxFiles = multiple
     ? Math.min(Math.max(maxFiles ?? MAX_FILES_PER_PICK, 1), MAX_FILES_PER_PICK)
     : 1;

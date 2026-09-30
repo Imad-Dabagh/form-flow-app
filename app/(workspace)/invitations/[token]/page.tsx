@@ -1,4 +1,4 @@
-import { InvitationAcceptance } from "@/modules/invitations/components/invitation-acceptance";
+import { InvitationAcceptanceTemplate } from "@/modules/invitations";
 
 export default async function InvitationPage({
   params,
@@ -6,5 +6,5 @@ export default async function InvitationPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
-  return <InvitationAcceptance token={token} />;
+  return <InvitationAcceptanceTemplate token={token} />;
 }

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
-import { WorkspaceLayout } from "@/layouts/workspace";
-import { OrganizationWorkspaceBoundary } from "@/modules/organizations";
+import { OrganizationAccessBoundary } from "./organization-access-boundary";
+import { OrganizationWorkspaceShell } from "@/modules/organizations";
 
 export default async function OrganizationWorkspaceLayout({
   children,
@@ -10,10 +10,10 @@ export default async function OrganizationWorkspaceLayout({
   const sidebarOpen = cookieStore.get("sidebar_state")?.value !== "false";
 
   return (
-    <OrganizationWorkspaceBoundary>
-      <WorkspaceLayout defaultSidebarOpen={sidebarOpen}>
+    <OrganizationAccessBoundary>
+      <OrganizationWorkspaceShell defaultSidebarOpen={sidebarOpen}>
         {children}
-      </WorkspaceLayout>
-    </OrganizationWorkspaceBoundary>
+      </OrganizationWorkspaceShell>
+    </OrganizationAccessBoundary>
   );
 }

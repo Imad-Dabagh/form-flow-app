@@ -1,5 +1,5 @@
-import { FormBuilderPlaceholder } from "@/modules/forms";
+import { FormBuilderTemplate } from "@/modules/forms";
 
 export default function BuilderPage() {
-  return <FormBuilderPlaceholder />;
+  return <FormBuilderTemplate />;
 }

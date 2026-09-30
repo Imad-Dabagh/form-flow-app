@@ -1,5 +1,5 @@
-import { FormsList } from "@/modules/forms";
+import { FormsListTemplate } from "@/modules/forms";
 
 export default function FormsPage() {
-  return <FormsList />;
+  return <FormsListTemplate />;
 }

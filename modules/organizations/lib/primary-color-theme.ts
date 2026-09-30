@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import type { OrganizationPrimaryColor } from "@/router/orgs/types";
 
 export const ORGANIZATION_PRIMARY_COLORS = [
   "blue",
@@ -13,9 +14,6 @@ export const ORGANIZATION_PRIMARY_COLORS = [
   "teal",
   "sky",
 ] as const;
-
-export type OrganizationPrimaryColor =
-  (typeof ORGANIZATION_PRIMARY_COLORS)[number];
 
 export type OrganizationThemeMode = "light" | "dark";
 

@@ -1,17 +1,15 @@
 import * as auth from "./auth";
-import * as files from "./files";
-import * as forms from "./forms";
 import * as invitations from "./invitations";
-import * as organizations from "./organizations";
-import * as profile from "./profile";
+import * as me from "./me";
+import * as orgs from "./orgs";
+import * as upload from "./upload";
 
 const API = {
   auth,
-  files,
-  forms,
   invitations,
-  organizations,
-  profile,
+  me,
+  orgs,
+  upload,
 } as const;
 
 export default API;
