@@ -89,7 +89,7 @@ export function OrganizationSetupStep() {
 
   return (
     <OnboardingFrame
-      description="Create the workspace where your team will build forms and manage responses. You can refine its branding later."
+      description="Create the workspace where your team will build forms. You can refine its branding later."
       eyebrow="One last step"
       step={2}
       title="Set up your organization."

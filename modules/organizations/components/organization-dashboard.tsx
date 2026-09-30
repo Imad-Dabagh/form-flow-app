@@ -1,15 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
-  CheckCircle2,
   FileText,
   Plus,
-  Send,
 } from "lucide-react";
-import { useFormsStore } from "@/modules/forms/lib/forms-store";
+import API from "@/router";
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
 import { organizationWorkspacePath } from "../paths";
@@ -27,27 +24,9 @@ function formatDate(value: string): string {
 export function OrganizationDashboard() {
   const organization = useOrganizationWorkspace();
   const { canManageForms, accessLabel } = useOrganizationPermissions();
-  const allForms = useFormsStore((state) => state.forms);
-  const forms = useMemo(
-    () =>
-      allForms.filter((form) => form.organizationId === organization.id),
-    [allForms, organization.id],
-  );
-  const submissions = useFormsStore((state) => state.submissions);
+  const { formsPage, error, isLoading } = API.forms.useOrganizationForms(organization.slug);
   const formsPath = organizationWorkspacePath(organization.slug, "/forms");
-  const publishedForms = forms.filter((form) => form.status === "published");
-  const responseCount = submissions.filter((submission) =>
-    forms.some((form) => form.id === submission.formId),
-  ).length;
-  const recentForms = [...forms]
-    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
-    .slice(0, 5);
-
-  const metrics = [
-    { label: "Forms", value: forms.length, icon: FileText },
-    { label: "Published", value: publishedForms.length, icon: CheckCircle2 },
-    { label: "Responses", value: responseCount, icon: Send },
-  ];
+  const recentForms = formsPage?.items.slice(0, 5) ?? [];
 
   return (
     <div className="mx-auto w-full max-w-[69rem] px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
@@ -65,7 +44,7 @@ export function OrganizationDashboard() {
             </Badge>
           </div>
           <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-            Keep an eye on the forms and responses that belong to this organization.
+            Manage the forms that belong to this organization.
           </p>
         </div>
 
@@ -79,18 +58,14 @@ export function OrganizationDashboard() {
         )}
       </header>
 
-      <section className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-3">
-        {metrics.map(({ icon: Icon, label, value }) => (
-          <div className="bg-card px-5 py-5" key={label}>
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-sm font-medium">{label}</span>
-              <Icon className="size-4" />
-            </div>
-            <p className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-foreground">
-              {value}
-            </p>
-          </div>
-        ))}
+      <section className="rounded-2xl border border-border bg-card px-5 py-5">
+        <div className="flex items-center justify-between text-muted-foreground">
+          <span className="text-sm font-medium">Forms</span>
+          <FileText className="size-4" />
+        </div>
+        <p className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-foreground">
+          {isLoading ? "…" : error ? "—" : formsPage?.total ?? 0}
+        </p>
       </section>
 
       <section className="mt-9">
@@ -108,7 +83,11 @@ export function OrganizationDashboard() {
           </Button>
         </div>
 
-        {recentForms.length ? (
+        {isLoading ? (
+          <p className="mt-4 text-sm text-muted-foreground">Loading forms…</p>
+        ) : error ? (
+          <p className="mt-4 text-sm text-destructive">{error.message}</p>
+        ) : recentForms.length ? (
           <div className="mt-4 divide-y divide-border rounded-xl border border-border bg-card">
             {recentForms.map((form) => (
               <Link
@@ -120,14 +99,12 @@ export function OrganizationDashboard() {
                 key={form.id}
               >
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-foreground">{form.title}</p>
+                  <p className="truncate font-medium text-foreground">{form.name}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Updated {formatDate(form.updatedAt)}
                   </p>
                 </div>
-                <Badge variant={form.status === "published" ? "default" : "secondary"}>
-                  {form.status}
-                </Badge>
+                <ArrowUpRight className="size-4 text-muted-foreground" />
               </Link>
             ))}
           </div>
@@ -137,7 +114,7 @@ export function OrganizationDashboard() {
             <h3 className="mt-4 font-medium">No forms yet</h3>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
               {canManageForms
-                ? "Create your first form to start collecting responses."
+                ? "Create your first form to get started."
                 : "Forms created by your organization will appear here."}
             </p>
             {canManageForms && (
