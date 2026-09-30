@@ -1,5 +1,5 @@
-import { OrganizationEntry } from "@/modules/organizations";
+import { OrganizationEntryTemplate } from "@/modules/organizations";
 
 export default function HomePage() {
-  return <OrganizationEntry />;
+  return <OrganizationEntryTemplate />;
 }
