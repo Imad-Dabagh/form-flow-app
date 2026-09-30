@@ -6,10 +6,10 @@ import { toast } from "sonner";
 import { Button } from "@/modules/shared/components/ui/button";
 import API from "@/router";
 
-export function InvitationAcceptance({ token }: { token: string }) {
+export function InvitationAcceptanceTemplate({ token }: { token: string }) {
   const router = useRouter();
-  const { invitation, error, isLoading } = API.invitations.useInvitation(token);
-  const { trigger: accept, isMutating } = API.invitations.useAcceptInvitation(token);
+  const { invitation, error, isLoading } = API.invitations.useFindByToken({ token });
+  const { trigger: accept, isMutating } = API.invitations.useAcceptByToken({ token });
 
   async function acceptInvitation() {
     try {
