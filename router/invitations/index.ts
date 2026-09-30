@@ -4,7 +4,7 @@ import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
-import type { OrganizationTeamRole } from "@/modules/organizations/types";
+import type { OrganizationTeamRole } from "@/router/orgs/types";
 
 export interface InvitationDetails {
   organizationName: string;
@@ -16,7 +16,7 @@ export interface InvitationDetails {
 /**
  * GET /api/invitations/:token
  */
-export function useInvitation(token: string) {
+export function useFindByToken({ token }: { token: string }) {
   const { data, ...rest } = useSWR<InvitationDetails, ApiError>(
     token ? `/invitations/${token}` : null,
     (url: string) => requestData<InvitationDetails>({ method: "GET", url }),
@@ -27,7 +27,7 @@ export function useInvitation(token: string) {
 /**
  * POST /api/invitations/:token/accept
  */
-export function useAcceptInvitation(token: string) {
+export function useAcceptByToken({ token }: { token: string }) {
   const { mutate } = useSWRConfig();
   const { trigger: accept, ...rest } = useSWRMutation<
     { organizationSlug: string },

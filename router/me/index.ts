@@ -6,16 +6,7 @@ import useSWRMutation, {
 } from "swr/mutation";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
-import type { CurrentProfile } from "@/modules/profile/types";
-
-export interface UpdateCurrentProfileInput {
-  firstName: string;
-  lastName: string;
-  profilePic?: string;
-  coverPhoto?: string;
-  phone?: string;
-  shortDescription?: string;
-}
+import type { CurrentProfile, UpdateCurrentProfileInput } from "./types";
 
 function normalizeCurrentProfile(profile: CurrentProfile): CurrentProfile {
   return {
@@ -27,10 +18,8 @@ function normalizeCurrentProfile(profile: CurrentProfile): CurrentProfile {
   };
 }
 
-/**
- * GET /api/me
- */
-export function useCurrentProfile(
+/** GET /api/me */
+export function useFindOne(
   enabled: boolean,
   swrConfig?: SWRConfiguration<CurrentProfile, ApiError>,
 ) {
@@ -43,16 +32,11 @@ export function useCurrentProfile(
     swrConfig,
   );
 
-  return {
-    profile: data ?? null,
-    ...rest,
-  };
+  return { profile: data ?? null, ...rest };
 }
 
-/**
- * PUT /api/me
- */
-export function useUpdateCurrentProfile(
+/** PUT /api/me */
+export function useUpdateOne(
   swrConfig?: SWRMutationConfiguration<
     CurrentProfile,
     ApiError,
@@ -80,8 +64,5 @@ export function useUpdateCurrentProfile(
     },
   );
 
-  return {
-    profile: data ?? null,
-    ...rest,
-  };
+  return { profile: data ?? null, ...rest };
 }

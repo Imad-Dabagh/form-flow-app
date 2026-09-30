@@ -27,7 +27,10 @@ export interface OrganizationFormDetails extends OrganizationForm {
 }
 
 /** GET /api/orgs/:organizationSlug/forms */
-export function useOrganizationForms(organizationSlug: string, page = 1) {
+export function useFindAll({ organizationSlug, page = 1 }: {
+  organizationSlug: string;
+  page?: number;
+}) {
   const key = organizationSlug ? `/orgs/${organizationSlug}/forms?page=${page}` : null;
   const { data, ...rest } = useSWR<FormsPage, ApiError>(
     key,
@@ -38,8 +41,13 @@ export function useOrganizationForms(organizationSlug: string, page = 1) {
 }
 
 /** GET /api/orgs/:organizationSlug/forms/:formId */
-export function useOrganizationForm(organizationSlug: string, formId: string) {
-  const key = organizationSlug && formId ? `/orgs/${organizationSlug}/forms/${formId}` : null;
+export function useFindById({ organizationSlug, formId }: {
+  organizationSlug: string;
+  formId: string;
+}) {
+  const key = organizationSlug && formId
+    ? `/orgs/${organizationSlug}/forms/${formId}`
+    : null;
   const { data, ...rest } = useSWR<OrganizationFormDetails, ApiError>(
     key,
     (url: string) => requestData<OrganizationFormDetails>({ method: "GET", url }),
@@ -49,7 +57,7 @@ export function useOrganizationForm(organizationSlug: string, formId: string) {
 }
 
 /** POST /api/orgs/:organizationSlug/forms */
-export function useCreateOrganizationForm(organizationSlug: string) {
+export function useCreateOne({ organizationSlug }: { organizationSlug: string }) {
   const { mutate } = useSWRConfig();
   const { trigger: create, ...rest } = useSWRMutation<
     OrganizationForm,

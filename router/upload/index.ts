@@ -5,36 +5,13 @@ import useSWRMutation, {
 } from "swr/mutation";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
+import type { UploadedFile, UploadFileInput } from "./types";
 
-export interface UploadedFile {
-  id: string;
-  storageKey: string;
-  provider: string;
-  url: string;
-  name: string;
-  originalName: string;
-  extension: string;
-  mimeType: string;
-  size: number;
-  width?: number;
-  height?: number;
-  checksum?: string;
-  createdAt: string;
-}
+export type { UploadedFile, UploadFileInput } from "./types";
 
-export interface UploadFileInput {
-  file: File;
-}
-
-export interface UseUploadFileParams {
-  organizationSlug?: string;
-}
-
-/**
- * POST /api/upload
- */
-export function useUploadFile(
-  { organizationSlug }: UseUploadFileParams = {},
+/** POST /api/upload */
+export function useCreateOne(
+  { organizationSlug }: { organizationSlug?: string } = {},
   swrConfig?: SWRMutationConfiguration<
     UploadedFile,
     ApiError,
@@ -42,14 +19,13 @@ export function useUploadFile(
     UploadFileInput
   >,
 ) {
-  const key = "/upload";
   const { data, ...rest } = useSWRMutation<
     UploadedFile,
     ApiError,
     string,
     UploadFileInput
   >(
-    key,
+    "/upload",
     (url, { arg }) => {
       const formData = new FormData();
       formData.append("file", arg.file);
@@ -66,8 +42,5 @@ export function useUploadFile(
     swrConfig,
   );
 
-  return {
-    uploadedFile: data ?? null,
-    ...rest,
-  };
+  return { uploadedFile: data ?? null, ...rest };
 }
