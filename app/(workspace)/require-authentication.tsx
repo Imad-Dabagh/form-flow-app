@@ -1,22 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { createContext, useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { CurrentProfileProvider } from "@/modules/profile/current-profile-context";
 import API from "@/router";
-import type { CurrentProfile } from "@/modules/profile/types";
-
-const AuthenticatedProfileContext = createContext<CurrentProfile | null>(null);
-
-export function useAuthenticatedProfile(): CurrentProfile {
-  const profile = useContext(AuthenticatedProfileContext);
-
-  if (!profile) {
-    throw new Error("useAuthenticatedProfile must be used within RequireAuthentication.");
-  }
-
-  return profile;
-}
 
 function AccessState({ children }: { children: ReactNode }) {
   return (
@@ -31,8 +19,7 @@ export function RequireAuthentication({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { data: session, isPending } = API.auth.useSession();
   const isVerified = Boolean(session?.user.emailVerified);
-  const { profile, error, isLoading } =
-    API.profile.useCurrentProfile(isVerified);
+  const { profile, error, isLoading } = API.me.useFindOne(isVerified);
 
   useEffect(() => {
     if (isPending || session) {
@@ -72,8 +59,8 @@ export function RequireAuthentication({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthenticatedProfileContext.Provider value={profile}>
+    <CurrentProfileProvider profile={profile}>
       {children}
-    </AuthenticatedProfileContext.Provider>
+    </CurrentProfileProvider>
   );
 }

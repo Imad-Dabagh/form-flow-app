@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Suspense } from "react";
-import { RedirectAuthenticated } from "@/modules/auth";
+import { RedirectAuthenticated } from "./redirect-authenticated";
 
 export default function AuthRouteLayout({
   children,

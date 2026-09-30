@@ -2,14 +2,13 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2, Mail } from "lucide-react";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
 import { Separator } from "@/modules/shared/components/ui/separator";
 import API from "@/router";
-import { getAuthCallbackPath } from "../redirect-path";
 
 function GoogleMark() {
   return (
@@ -34,10 +33,8 @@ function GoogleMark() {
   );
 }
 
-export function SignInScreen() {
+export function SignInTemplate({ callbackPath }: { callbackPath: string }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackPath = getAuthCallbackPath(searchParams.get("next"));
   const getCallbackURL = () =>
     new URL(callbackPath, window.location.origin).toString();
   const [email, setEmail] = useState("");

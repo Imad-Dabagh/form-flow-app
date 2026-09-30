@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { RequireAuthentication } from "@/modules/auth";
+import { RequireAuthentication } from "./require-authentication";
 
 export default function WorkspaceRouteLayout({
   children,

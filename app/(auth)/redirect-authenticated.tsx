@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import API from "@/router";
-import { getAuthCallbackPath } from "../redirect-path";
+import { getAuthCallbackPath } from "./redirect-path";
 
 export function RedirectAuthenticated({ children }: { children: ReactNode }) {
   const router = useRouter();
