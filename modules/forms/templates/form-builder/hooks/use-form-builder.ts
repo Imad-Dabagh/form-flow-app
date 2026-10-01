@@ -35,6 +35,7 @@ export function useFormBuilder(initialForm: OrganizationFormDetails) {
   }
 
   function updateDescription(description: string) {
+    if (description === draft.description) return;
     changeDraft((current) => ({ ...current, description }));
   }
 

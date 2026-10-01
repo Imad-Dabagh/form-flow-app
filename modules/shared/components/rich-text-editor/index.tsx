@@ -34,7 +34,9 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const isFull = preset === "full";
   const onChangeRef = useRef(onChange);
+  const valueRef = useRef(value);
   onChangeRef.current = onChange;
+  valueRef.current = value;
   const extensions = useMemo(
     () => [
       StarterKit.configure({
@@ -66,7 +68,10 @@ export function RichTextEditor({
           ...(id ? { id } : {}),
         },
       },
-      onUpdate: ({ editor }) => onChangeRef.current(editor.isEmpty ? "" : editor.getHTML()),
+      onUpdate: ({ editor }) => {
+        const nextValue = editor.isEmpty ? "" : editor.getHTML();
+        if (nextValue !== valueRef.current) onChangeRef.current(nextValue);
+      },
     },
     [extensions, ariaLabel, id],
   );
@@ -78,7 +83,9 @@ export function RichTextEditor({
   }, [editor, value]);
 
   useEffect(() => {
-    editor?.setEditable(!disabled);
+    if (editor && editor.isEditable !== !disabled) {
+      editor.setEditable(!disabled, false);
+    }
   }, [editor, disabled]);
 
   return (
