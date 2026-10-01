@@ -201,7 +201,7 @@ function QuestionCardContent({
         ) : question.inputType === "boolean" ? (
           <span className="flex items-center gap-2 px-3 py-2 text-sm border rounded-md bg-muted/30 text-muted-foreground">
             <span
-              className={`flex size-4 shrink-0 items-center justify-center rounded-sm border ${question.defaultValue === true ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/60"}`}
+              className={`flex size-4 shrink-0 items-center justify-center rounded-none border ${question.defaultValue === true ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/60"}`}
             >
               {question.defaultValue === true && <span className="text-xs leading-none">✓</span>}
             </span>
@@ -212,7 +212,7 @@ function QuestionCardContent({
             {(question.options ?? []).map((option, index) => (
               <span key={`${option.value}-${index}`} className="flex items-center gap-2">
                 <span
-                  className={`size-4 shrink-0 border border-muted-foreground/60 ${question.inputType === "radio" ? "rounded-full" : "rounded-sm"}`}
+                  className={`size-4 shrink-0 border border-muted-foreground/60 ${question.inputType === "radio" ? "rounded-full" : "rounded-none"}`}
                 />
                 {option.label}
               </span>
