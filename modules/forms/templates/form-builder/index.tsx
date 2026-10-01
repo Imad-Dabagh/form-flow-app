@@ -15,7 +15,7 @@ import {
   type CollisionDetection,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { ArrowLeft, FileText, Plus, Save } from "lucide-react";
+import { ArrowLeft, Eye, FileText, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 import API from "@/router";
 import type { FormQuestion, OrganizationFormDetails } from "@/router/orgs/forms";
@@ -236,11 +236,26 @@ function Builder({
 
   return (
     <div className="w-full px-4 pb-10 mx-auto max-w-7xl pt-7 sm:px-6 lg:px-8">
-      <Button asChild size="sm" variant="ghost" className="gap-2 mb-6">
-        <Link href={organizationWorkspacePath(organizationSlug, "/forms")}>
-          <ArrowLeft className="size-4" /> Forms
-        </Link>
-      </Button>
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <Button asChild size="sm" variant="ghost" className="gap-2">
+          <Link href={organizationWorkspacePath(organizationSlug, "/forms")}>
+            <ArrowLeft className="size-4" /> Forms
+          </Link>
+        </Button>
+        <Button asChild size="sm" variant="outline" className="gap-2">
+          <Link
+            href={organizationWorkspacePath(organizationSlug, `/forms/${form.id}/preview`)}
+            onClick={(event) => {
+              if (editor.isDirty) {
+                event.preventDefault();
+                toast.info("Save your changes before previewing the form.");
+              }
+            }}
+          >
+            <Eye className="size-4" /> Preview
+          </Link>
+        </Button>
+      </div>
 
       <fieldset disabled={isMutating} className="min-w-0 disabled:opacity-80">
         <RichTextEditor
