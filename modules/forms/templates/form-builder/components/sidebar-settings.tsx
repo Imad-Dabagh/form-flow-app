@@ -13,14 +13,7 @@ import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
 import { Textarea } from "@/modules/shared/components/ui/textarea";
-
-const documentExtensions = ["pdf", "docx", "xlsx", "pptx"] as const;
-const imageExtensions = ["jpg", "png", "webp", "gif"] as const;
-const uploadExtensions = {
-  all: [...documentExtensions, ...imageExtensions],
-  documents: documentExtensions,
-  images: imageExtensions,
-} as const;
+import { uploadExtensions } from "@/modules/forms/upload-policy";
 
 export function SidebarSettings({
   section,
