@@ -219,7 +219,9 @@ function QuestionCardContent({
             ))}
           </span>
         ) : (
-          <span className="flex items-center gap-2 px-3 py-2 text-sm border rounded-md bg-muted/30 text-muted-foreground">
+          <span
+            className={`flex gap-2 px-3 py-2 text-sm border rounded-md bg-muted/30 text-muted-foreground ${question.inputType === "text" ? "min-h-24 items-start" : "items-center"}`}
+          >
             {question.inputType === "email" && <Mail className="size-4 shrink-0" />}
             {question.inputType === "number" && <Hash className="size-4 shrink-0" />}
             {question.inputType === "datetime" &&
