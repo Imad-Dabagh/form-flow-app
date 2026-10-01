@@ -32,8 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/modules/shared/components/ui/alert-dialog";
-import { Label } from "@/modules/shared/components/ui/label";
-import { Textarea } from "@/modules/shared/components/ui/textarea";
+import { RichTextEditor } from "@/modules/shared/components/rich-text-editor";
 import { SectionCard } from "./components/section-card";
 import { QuestionCardDragPreview } from "./components/question-card";
 import { SidebarSettings } from "./components/sidebar-settings";
@@ -244,25 +243,16 @@ function Builder({
       </Button>
 
       <fieldset disabled={isMutating} className="min-w-0 disabled:opacity-80">
-        <div className="p-6 border shadow-sm rounded-xl bg-card">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            Form presentation
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            This description appears above the form questions.
-          </p>
-          <div className="mt-5 space-y-2">
-            <Label htmlFor="form-description">Description</Label>
-            <Textarea
-              id="form-description"
-              value={editor.draft.description}
-              rows={3}
-              disabled={!canEdit}
-              placeholder="Introduce the form to people filling it out"
-              onChange={(event) => editor.updateDescription(event.target.value)}
-            />
-          </div>
-        </div>
+        <RichTextEditor
+          id="form-description"
+          ariaLabel="Form description"
+          value={editor.draft.description}
+          disabled={!canEdit || isMutating}
+          minHeight={190}
+          className="rounded-xl border-border bg-card shadow-sm [&_.rich-text-editor-content]:p-5"
+          placeholder="Add a description to introduce this form"
+          onChange={editor.updateDescription}
+        />
         <div
           className={`mt-8 grid items-start gap-6 ${selectedSection ? "lg:grid-cols-[minmax(0,1fr)_20rem]" : "grid-cols-1"}`}
         >
