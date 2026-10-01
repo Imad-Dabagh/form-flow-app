@@ -68,14 +68,9 @@ const primaryColorThemes = {
     base: "oklch(0.685 0.169 237.323)",
     lightForeground: "oklch(0.145 0 0)",
   },
-} as const satisfies Record<
-  OrganizationPrimaryColor,
-  OrganizationPrimaryColorTheme
->;
+} as const satisfies Record<OrganizationPrimaryColor, OrganizationPrimaryColorTheme>;
 
-export function getOrganizationColorSwatch(
-  color: OrganizationPrimaryColor,
-): string {
+export function getOrganizationColorSwatch(color: OrganizationPrimaryColor): string {
   return primaryColorThemes[color].base;
 }
 
@@ -84,14 +79,10 @@ export function getOrganizationThemeStyle(
   mode: OrganizationThemeMode = "light",
 ): CSSProperties {
   const theme = primaryColorThemes[color] ?? primaryColorThemes.blue;
-  const tint = (weight: number) =>
-    `color-mix(in oklch, ${theme.base} ${weight}%, white)`;
-  const shade = (weight: number) =>
-    `color-mix(in oklch, ${theme.base} ${weight}%, black)`;
+  const tint = (weight: number) => `color-mix(in oklch, ${theme.base} ${weight}%, white)`;
+  const shade = (weight: number) => `color-mix(in oklch, ${theme.base} ${weight}%, black)`;
   const isDark = mode === "dark";
-  const primaryForeground = isDark
-    ? "oklch(0.145 0 0)"
-    : theme.lightForeground;
+  const primaryForeground = isDark ? "oklch(0.145 0 0)" : theme.lightForeground;
 
   return {
     "--primary-50": tint(6),

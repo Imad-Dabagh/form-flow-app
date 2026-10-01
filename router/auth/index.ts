@@ -31,21 +31,14 @@ export function getInitialIdentityName(email: string): string {
   return email.trim().split("@", 1)[0] || "Form Flow user";
 }
 
-export function signUpWithEmail(input: {
-  email: string;
-  password: string;
-  callbackURL?: string;
-}) {
+export function signUpWithEmail(input: { email: string; password: string; callbackURL?: string }) {
   return signUp.email({
     ...input,
     name: getInitialIdentityName(input.email),
   });
 }
 
-export function sendMagicLink(input: {
-  email: string;
-  callbackURL?: string;
-}) {
+export function sendMagicLink(input: { email: string; callbackURL?: string }) {
   return signIn.magicLink({
     ...input,
     name: getInitialIdentityName(input.email),

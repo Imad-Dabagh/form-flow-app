@@ -35,13 +35,18 @@ export interface OrganizationInvitation {
 }
 
 export type OrganizationMemberLookup =
-  | { kind: "existing"; email: string; name: string; profilePic: string; currentRole: OrganizationRole | null }
+  | {
+      kind: "existing";
+      email: string;
+      name: string;
+      profilePic: string;
+      currentRole: OrganizationRole | null;
+    }
   | { kind: "pending"; email: string; role: OrganizationTeamRole }
   | { kind: "invite"; email: string };
 
 export type AddOrganizationMemberResult =
-  | { kind: "member"; id: string }
-  | { kind: "invited"; id: string };
+  { kind: "member"; id: string } | { kind: "invited"; id: string };
 
 export interface OrganizationSummary {
   id: string;

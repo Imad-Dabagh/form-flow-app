@@ -1,11 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  FileText,
-  Plus,
-} from "lucide-react";
+import { ArrowUpRight, FileText, Plus } from "lucide-react";
 import API from "@/router";
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
@@ -66,7 +62,7 @@ export function OrganizationDashboardTemplate() {
           <FileText className="size-4" />
         </div>
         <p className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-foreground">
-          {isLoading ? "…" : error ? "—" : formsPage?.total ?? 0}
+          {isLoading ? "…" : error ? "—" : (formsPage?.total ?? 0)}
         </p>
       </section>
 
@@ -94,10 +90,7 @@ export function OrganizationDashboardTemplate() {
             {recentForms.map((form) => (
               <Link
                 className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-muted/50"
-                href={organizationWorkspacePath(
-                  organization.slug,
-                  `/forms/${form.id}/builder`,
-                )}
+                href={organizationWorkspacePath(organization.slug, `/forms/${form.id}/builder`)}
                 key={form.id}
               >
                 <div className="min-w-0">

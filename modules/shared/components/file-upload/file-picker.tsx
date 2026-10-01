@@ -3,17 +3,9 @@
 import type { ReactNode } from "react";
 import { useCallback, useState } from "react";
 import { CloudUpload, Loader2 } from "lucide-react";
-import {
-  useDropzone,
-  type Accept,
-  type DropzoneState,
-  type FileRejection,
-} from "react-dropzone";
+import { useDropzone, type Accept, type DropzoneState, type FileRejection } from "react-dropzone";
 import { cn } from "@/lib/utils";
-import {
-  useCreateOne,
-  type UploadedFile,
-} from "@/router/upload";
+import { useCreateOne, type UploadedFile } from "@/router/upload";
 import { Button } from "../ui/button";
 
 export const MAX_FILE_UPLOAD_SIZE_MB = 15;
@@ -54,14 +46,9 @@ export interface FilePickerProps {
   render?: (props: FilePickerRenderProps) => ReactNode;
 }
 
-function getRejectionMessage(
-  rejections: FileRejection[],
-  maxSizeMb: number,
-): string {
+function getRejectionMessage(rejections: FileRejection[], maxSizeMb: number): string {
   const errorCodes = new Set(
-    rejections.flatMap((rejection) =>
-      rejection.errors.map((error) => error.code),
-    ),
+    rejections.flatMap((rejection) => rejection.errors.map((error) => error.code)),
   );
 
   if (errorCodes.has("file-too-large")) {
@@ -127,10 +114,7 @@ export function FilePicker({
   const effectiveMaxFiles = multiple
     ? Math.min(Math.max(maxFiles ?? MAX_FILES_PER_PICK, 1), MAX_FILES_PER_PICK)
     : 1;
-  const effectiveMaxSizeMb = Math.min(
-    Math.max(maxSizeMb, 0),
-    MAX_FILE_UPLOAD_SIZE_MB,
-  );
+  const effectiveMaxSizeMb = Math.min(Math.max(maxSizeMb, 0), MAX_FILE_UPLOAD_SIZE_MB);
 
   const uploadFiles = useCallback(
     async (files: File[]) => {
@@ -144,16 +128,11 @@ export function FilePicker({
       onUploadingChange?.(true);
 
       try {
-        const results = await uploadInBatches(
-          files,
-          (file) => trigger({ file }),
-        );
+        const results = await uploadInBatches(files, (file) => trigger({ file }));
         const uploadedFiles = results.flatMap((result) =>
           result.status === "fulfilled" ? [result.value] : [],
         );
-        const failedUpload = results.find(
-          (result) => result.status === "rejected",
-        );
+        const failedUpload = results.find((result) => result.status === "rejected");
 
         if (uploadedFiles.length) {
           onFilesUploaded(uploadedFiles);
@@ -172,13 +151,9 @@ export function FilePicker({
         setIsUploading(false);
         onUploadingChange?.(false);
       }
-    }, [
-      onFilesUploaded,
-      onUploadError,
-      onUploadStarted,
-      onUploadingChange,
-      trigger,
-    ]);
+    },
+    [onFilesUploaded, onUploadError, onUploadStarted, onUploadingChange, trigger],
+  );
 
   const rejectFiles = useCallback(
     (rejections: FileRejection[]) => {
@@ -251,9 +226,7 @@ export function FilePicker({
       >
         {buttonTitle}
       </Button>
-      {error && (
-        <p className="mt-3 text-xs text-red-600 dark:text-red-400">{error}</p>
-      )}
+      {error && <p className="mt-3 text-xs text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

@@ -41,7 +41,8 @@ export function RequireAuthentication({ children }: { children: ReactNode }) {
   if (!isVerified) {
     return (
       <AccessState>
-        Verify your email before accessing your workspace. Check your inbox for the verification link.
+        Verify your email before accessing your workspace. Check your inbox for the verification
+        link.
       </AccessState>
     );
   }
@@ -52,15 +53,9 @@ export function RequireAuthentication({ children }: { children: ReactNode }) {
 
   if (error || !profile) {
     return (
-      <AccessState>
-        We couldn&apos;t load your profile. Refresh the page and try again.
-      </AccessState>
+      <AccessState>We couldn&apos;t load your profile. Refresh the page and try again.</AccessState>
     );
   }
 
-  return (
-    <CurrentProfileProvider profile={profile}>
-      {children}
-    </CurrentProfileProvider>
-  );
+  return <CurrentProfileProvider profile={profile}>{children}</CurrentProfileProvider>;
 }

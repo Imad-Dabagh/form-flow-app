@@ -23,7 +23,11 @@ const ORGANIZATION_LOGO_ACCEPT = {
   "image/jpeg": [".jpg", ".jpeg"],
 };
 
-export function OrganizationGeneralSettings({ organization }: { organization: OrganizationSummary }) {
+export function OrganizationGeneralSettings({
+  organization,
+}: {
+  organization: OrganizationSummary;
+}) {
   const [name, setName] = useState(organization.name);
   const [logo, setLogo] = useState(organization.logo);
   const [primaryColor, setPrimaryColor] = useState(organization.primaryColor);
@@ -82,13 +86,22 @@ export function OrganizationGeneralSettings({ organization }: { organization: Or
             onUploadError={(message) => toast.error(message)}
             onUploadingChange={setIsUploading}
             organizationSlug={organization.slug}
-            render={({ getInputProps, getRootProps, isDragActive, isDragReject, isUploading: uploading, open }) => (
+            render={({
+              getInputProps,
+              getRootProps,
+              isDragActive,
+              isDragReject,
+              isUploading: uploading,
+              open,
+            }) => (
               <div
                 {...getRootProps({
                   tabIndex: -1,
                   className: cn(
                     "relative size-36 overflow-hidden rounded-xl border border-border bg-muted/30 transition-colors hover:border-primary-400",
-                    isDragActive && !isDragReject && "border-primary-500 bg-primary-50/50 dark:bg-primary-950/20",
+                    isDragActive &&
+                      !isDragReject &&
+                      "border-primary-500 bg-primary-50/50 dark:bg-primary-950/20",
                     isDragReject && "border-destructive",
                   ),
                 })}
@@ -198,7 +211,8 @@ export function OrganizationGeneralSettings({ organization }: { organization: Or
                     aria-pressed={primaryColor === color}
                     className={cn(
                       "size-9 cursor-pointer rounded-full border border-black/10 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-popover",
-                      primaryColor === color && "ring-2 ring-primary ring-offset-2 ring-offset-popover",
+                      primaryColor === color &&
+                        "ring-2 ring-primary ring-offset-2 ring-offset-popover",
                     )}
                     key={color}
                     onClick={() => {

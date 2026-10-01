@@ -54,8 +54,10 @@ export function OrganizationAddMemberDialog() {
   const { trigger: addMember, isMutating } = API.orgs.members.useCreateOne({
     organizationSlug: organization.slug,
   });
-  const currentLookup = lookup?.email === normalizedEmail && lookupEmail === normalizedEmail ? lookup : null;
-  const alreadyOnTeam = currentLookup?.kind === "existing" &&
+  const currentLookup =
+    lookup?.email === normalizedEmail && lookupEmail === normalizedEmail ? lookup : null;
+  const alreadyOnTeam =
+    currentLookup?.kind === "existing" &&
     (currentLookup.currentRole === "ADMIN" || currentLookup.currentRole === "MANAGER");
   const alreadyInvited = currentLookup?.kind === "pending";
 
@@ -131,20 +133,26 @@ export function OrganizationAddMemberDialog() {
           {lookupEmail === normalizedEmail && error && (
             <div className="flex items-center justify-between gap-3 text-sm text-destructive">
               <span>Could not check this email.</span>
-              <Button onClick={() => void mutate()} size="sm" type="button" variant="outline">Retry</Button>
+              <Button onClick={() => void mutate()} size="sm" type="button" variant="outline">
+                Retry
+              </Button>
             </div>
           )}
           {currentLookup?.kind === "existing" && (
             <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-3">
               <Avatar className="size-9">
                 {currentLookup.profilePic && <AvatarImage alt="" src={currentLookup.profilePic} />}
-                <AvatarFallback className="text-xs">{currentLookup.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="text-xs">
+                  {currentLookup.name.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{currentLookup.name}</p>
                 <p className="truncate text-xs text-muted-foreground">{currentLookup.email}</p>
               </div>
-              {alreadyOnTeam && <span className="ml-auto text-xs text-muted-foreground">Already on team</span>}
+              {alreadyOnTeam && (
+                <span className="ml-auto text-xs text-muted-foreground">Already on team</span>
+              )}
             </div>
           )}
           {currentLookup?.kind === "invite" && (
@@ -159,8 +167,13 @@ export function OrganizationAddMemberDialog() {
           )}
 
           <DialogFooter>
-            <Button onClick={() => handleOpenChange(false)} type="button" variant="outline">Cancel</Button>
-            <Button disabled={!currentLookup || alreadyOnTeam || alreadyInvited || isMutating} type="submit">
+            <Button onClick={() => handleOpenChange(false)} type="button" variant="outline">
+              Cancel
+            </Button>
+            <Button
+              disabled={!currentLookup || alreadyOnTeam || alreadyInvited || isMutating}
+              type="submit"
+            >
               {isMutating && <Loader2 className="size-4 animate-spin" />}
               {currentLookup?.kind === "invite" ? "Send invite" : "Add member"}
             </Button>

@@ -14,9 +14,7 @@ export function CurrentProfileProvider({
   profile: CurrentProfile;
 }) {
   return (
-    <CurrentProfileContext.Provider value={profile}>
-      {children}
-    </CurrentProfileContext.Provider>
+    <CurrentProfileContext.Provider value={profile}>{children}</CurrentProfileContext.Provider>
   );
 }
 
@@ -24,9 +22,7 @@ export function useCurrentProfileContext(): CurrentProfile {
   const profile = useContext(CurrentProfileContext);
 
   if (!profile) {
-    throw new Error(
-      "useCurrentProfileContext must be used within CurrentProfileProvider.",
-    );
+    throw new Error("useCurrentProfileContext must be used within CurrentProfileProvider.");
   }
 
   return profile;

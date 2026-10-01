@@ -7,7 +7,8 @@ import { requestData } from "@/lib/request";
 import type { OrganizationInvitation } from "../types";
 
 /** GET /api/orgs/:organizationSlug/invitations */
-export function useFindAll({ organizationSlug }: { organizationSlug: string },
+export function useFindAll(
+  { organizationSlug }: { organizationSlug: string },
   swrConfig?: SWRConfiguration<OrganizationInvitation[], ApiError>,
 ) {
   const { data, ...rest } = useSWR<OrganizationInvitation[], ApiError>(
@@ -20,17 +21,15 @@ export function useFindAll({ organizationSlug }: { organizationSlug: string },
 }
 
 /** DELETE /api/orgs/:organizationSlug/invitations/:invitationId */
-export function useDeleteById({ organizationSlug, invitationId }: {
+export function useDeleteById({
+  organizationSlug,
+  invitationId,
+}: {
   organizationSlug: string;
   invitationId: string;
 }) {
   const { mutate } = useSWRConfig();
-  const { trigger: cancel, ...rest } = useSWRMutation<
-    { id: string },
-    ApiError,
-    string,
-    void
-  >(
+  const { trigger: cancel, ...rest } = useSWRMutation<{ id: string }, ApiError, string, void>(
     `/orgs/${organizationSlug}/invitations/${invitationId}`,
     (url) => requestData<{ id: string }>({ method: "DELETE", url }),
   );

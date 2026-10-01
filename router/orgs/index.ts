@@ -1,9 +1,7 @@
 "use client";
 
 import useSWR, { useSWRConfig, type SWRConfiguration } from "swr";
-import useSWRMutation, {
-  type SWRMutationConfiguration,
-} from "swr/mutation";
+import useSWRMutation, { type SWRMutationConfiguration } from "swr/mutation";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
 import type {
@@ -19,9 +17,7 @@ export * as members from "./members";
 type OrganizationDetails = Omit<OrganizationSummary, "role">;
 
 /** GET /api/orgs */
-export function useFindAll(
-  swrConfig?: SWRConfiguration<OrganizationSummary[], ApiError>,
-) {
+export function useFindAll(swrConfig?: SWRConfiguration<OrganizationSummary[], ApiError>) {
   const { data, ...rest } = useSWR<OrganizationSummary[], ApiError>(
     "/orgs",
     (url) => requestData<OrganizationSummary[]>({ method: "GET", url }),
@@ -51,8 +47,7 @@ export function useCreateOne(
     OrganizationSummary[]
   >(
     "/orgs",
-    (url, { arg }) =>
-      requestData<OrganizationSummary>({ method: "POST", url, data: arg }),
+    (url, { arg }) => requestData<OrganizationSummary>({ method: "POST", url, data: arg }),
     {
       populateCache: (createdOrganization, currentOrganizations = []) => {
         const firstLowerRoleIndex = currentOrganizations.findIndex(
@@ -89,10 +84,8 @@ export function useUpdateBySlug({ organizationSlug }: { organizationSlug: string
     ApiError,
     string,
     UpdateOrganizationInput
-  >(
-    `/orgs/${organizationSlug}`,
-    (url, { arg }) =>
-      requestData<OrganizationDetails>({ method: "PUT", url, data: arg }),
+  >(`/orgs/${organizationSlug}`, (url, { arg }) =>
+    requestData<OrganizationDetails>({ method: "PUT", url, data: arg }),
   );
 
   async function trigger(input: UpdateOrganizationInput) {
@@ -101,9 +94,7 @@ export function useUpdateBySlug({ organizationSlug }: { organizationSlug: string
       "/orgs",
       (current) =>
         current?.map((organization) =>
-          organization.id === updated.id
-            ? { ...organization, ...updated }
-            : organization,
+          organization.id === updated.id ? { ...organization, ...updated } : organization,
         ) ?? [],
       { revalidate: false },
     );

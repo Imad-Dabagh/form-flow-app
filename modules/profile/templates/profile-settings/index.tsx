@@ -6,15 +6,8 @@ import { ImagePlus, Loader2, UserRound, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useCurrentProfileContext } from "../../current-profile-context";
-import {
-  FilePicker,
-  IMAGE_FILE_ACCEPT,
-} from "@/modules/shared/components/file-upload/file-picker";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/modules/shared/components/ui/avatar";
+import { FilePicker, IMAGE_FILE_ACCEPT } from "@/modules/shared/components/file-upload/file-picker";
+import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/components/ui/avatar";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
@@ -32,13 +25,10 @@ export function ProfileSettingsTemplate() {
   const [profilePic, setProfilePic] = useState(profile.profilePic);
   const [coverPhoto, setCoverPhoto] = useState(profile.coverPhoto ?? "");
   const [phone, setPhone] = useState(profile.phone ?? "");
-  const [shortDescription, setShortDescription] = useState(
-    profile.shortDescription ?? "",
-  );
+  const [shortDescription, setShortDescription] = useState(profile.shortDescription ?? "");
   const [isPhotoUploading, setIsPhotoUploading] = useState(false);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
-  const { trigger: updateProfile, isMutating } =
-    API.me.useUpdateOne();
+  const { trigger: updateProfile, isMutating } = API.me.useUpdateOne();
   const isUploading = isPhotoUploading || isCoverUploading;
   const isDirty =
     firstName.trim() !== profile.firstName ||
@@ -72,18 +62,14 @@ export function ProfileSettingsTemplate() {
       setShortDescription(updated.shortDescription ?? "");
       toast.success("Profile saved.");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Could not save your profile.",
-      );
+      toast.error(error instanceof Error ? error.message : "Could not save your profile.");
     }
   }
 
   return (
     <div className="w-full max-w-4xl px-4 py-6 mx-auto sm:px-6 sm:py-8 lg:px-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
-          Your profile
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">Your profile</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Keep the details your teammates see up to date.
         </p>
@@ -112,9 +98,7 @@ export function ProfileSettingsTemplate() {
                 {...getRootProps({
                   className: cn(
                     "relative h-44 bg-muted/70 sm:h-56",
-                    isDragActive &&
-                      !isDragReject &&
-                      "ring-2 ring-inset ring-primary",
+                    isDragActive && !isDragReject && "ring-2 ring-inset ring-primary",
                     isDragReject && "ring-2 ring-inset ring-destructive",
                   ),
                 })}
@@ -122,11 +106,7 @@ export function ProfileSettingsTemplate() {
                 <input {...getInputProps()} />
                 {coverPhoto ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    alt="Profile cover"
-                    className="object-cover size-full"
-                    src={coverPhoto}
-                  />
+                  <img alt="Profile cover" className="object-cover size-full" src={coverPhoto} />
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-2 size-full text-muted-foreground">
                     <ImagePlus className="size-7" />
@@ -195,13 +175,7 @@ export function ProfileSettingsTemplate() {
                 >
                   <input {...getInputProps()} />
                   <Avatar className="border-4 shadow-sm size-20 border-card bg-muted">
-                    {profilePic && (
-                      <AvatarImage
-                        alt=""
-                        className="object-cover"
-                        src={profilePic}
-                      />
-                    )}
+                    {profilePic && <AvatarImage alt="" className="object-cover" src={profilePic} />}
                     <AvatarFallback className="text-xl font-semibold">
                       {getInitials(firstName, lastName) === "U" ? (
                         <UserRound className="size-8" />
@@ -211,20 +185,12 @@ export function ProfileSettingsTemplate() {
                     </AvatarFallback>
                   </Avatar>
                   <Button
-                    aria-label={
-                      profilePic
-                        ? "Change profile photo"
-                        : "Upload profile photo"
-                    }
+                    aria-label={profilePic ? "Change profile photo" : "Upload profile photo"}
                     className="absolute rounded-full shadow-sm -bottom-1 -right-1"
                     disabled={isUploading || isMutating}
                     onClick={open}
                     size="icon-sm"
-                    title={
-                      profilePic
-                        ? "Change profile photo"
-                        : "Upload profile photo"
-                    }
+                    title={profilePic ? "Change profile photo" : "Upload profile photo"}
                     type="button"
                     variant="secondary"
                   >
@@ -239,12 +205,9 @@ export function ProfileSettingsTemplate() {
             />
             <div className="flex-1 min-w-0 pb-1">
               <p className="font-semibold truncate">
-                {[firstName, lastName].filter(Boolean).join(" ") ||
-                  profile.email}
+                {[firstName, lastName].filter(Boolean).join(" ") || profile.email}
               </p>
-              <p className="text-sm truncate text-muted-foreground">
-                {profile.email}
-              </p>
+              <p className="text-sm truncate text-muted-foreground">{profile.email}</p>
             </div>
             {profilePic && (
               <Button
@@ -315,9 +278,7 @@ export function ProfileSettingsTemplate() {
             <div className="space-y-2 sm:col-span-2">
               <div className="flex items-center justify-between gap-3">
                 <Label htmlFor="profile-description">Short description</Label>
-                <span className="text-xs text-muted-foreground">
-                  {shortDescription.length}/500
-                </span>
+                <span className="text-xs text-muted-foreground">{shortDescription.length}/500</span>
               </div>
               <Textarea
                 id="profile-description"
@@ -332,10 +293,7 @@ export function ProfileSettingsTemplate() {
         </section>
 
         <div className="flex justify-end">
-          <Button
-            disabled={!isDirty || isMutating || isUploading}
-            type="submit"
-          >
+          <Button disabled={!isDirty || isMutating || isUploading} type="submit">
             {isMutating && <Loader2 className="size-4 animate-spin" />}
             Save changes
           </Button>

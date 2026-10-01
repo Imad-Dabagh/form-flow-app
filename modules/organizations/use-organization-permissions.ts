@@ -10,6 +10,6 @@ export function useOrganizationPermissions() {
   return {
     canManageOrganization: isSuperAdmin || role === "ADMIN",
     canManageForms: isSuperAdmin || role === "ADMIN" || role === "MANAGER",
-    accessLabel: isSuperAdmin ? "Platform administrator" : role ?? "Member",
+    accessLabel: isSuperAdmin ? "Platform administrator" : (role ?? "Member"),
   };
 }

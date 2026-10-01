@@ -12,7 +12,8 @@ import type {
 } from "../types";
 
 /** GET /api/orgs/:organizationSlug/members */
-export function useFindAll({ organizationSlug }: { organizationSlug: string },
+export function useFindAll(
+  { organizationSlug }: { organizationSlug: string },
   swrConfig?: SWRConfiguration<OrganizationTeamMember[], ApiError>,
 ) {
   const { data, ...rest } = useSWR<OrganizationTeamMember[], ApiError>(
@@ -25,16 +26,19 @@ export function useFindAll({ organizationSlug }: { organizationSlug: string },
 }
 
 /** GET /api/orgs/:organizationSlug/members/lookup?email=... */
-export function useFindByEmail({ organizationSlug, email }: {
+export function useFindByEmail({
+  organizationSlug,
+  email,
+}: {
   organizationSlug: string;
   email: string;
 }) {
-  const key = organizationSlug && email
-    ? `/orgs/${organizationSlug}/members/lookup?email=${encodeURIComponent(email)}`
-    : null;
-  const { data, ...rest } = useSWR<OrganizationMemberLookup, ApiError>(
-    key,
-    (url: string) => requestData<OrganizationMemberLookup>({ method: "GET", url }),
+  const key =
+    organizationSlug && email
+      ? `/orgs/${organizationSlug}/members/lookup?email=${encodeURIComponent(email)}`
+      : null;
+  const { data, ...rest } = useSWR<OrganizationMemberLookup, ApiError>(key, (url: string) =>
+    requestData<OrganizationMemberLookup>({ method: "GET", url }),
   );
 
   return { lookup: data ?? null, ...rest };
@@ -48,9 +52,8 @@ export function useCreateOne({ organizationSlug }: { organizationSlug: string })
     ApiError,
     string,
     { email: string; role: OrganizationTeamRole }
-  >(
-    `/orgs/${organizationSlug}/members`,
-    (url, { arg }) => requestData<AddOrganizationMemberResult>({ method: "POST", url, data: arg }),
+  >(`/orgs/${organizationSlug}/members`, (url, { arg }) =>
+    requestData<AddOrganizationMemberResult>({ method: "POST", url, data: arg }),
   );
 
   async function trigger(input: { email: string; role: OrganizationTeamRole }) {
@@ -64,7 +67,10 @@ export function useCreateOne({ organizationSlug }: { organizationSlug: string })
 }
 
 /** PUT /api/orgs/:organizationSlug/members/:membershipId */
-export function useUpdateById({ organizationSlug, membershipId }: {
+export function useUpdateById({
+  organizationSlug,
+  membershipId,
+}: {
   organizationSlug: string;
   membershipId: string;
 }) {
@@ -74,9 +80,8 @@ export function useUpdateById({ organizationSlug, membershipId }: {
     ApiError,
     string,
     { role: OrganizationTeamRole }
-  >(
-    `/orgs/${organizationSlug}/members/${membershipId}`,
-    (url, { arg }) => requestData<{ id: string; role: OrganizationTeamRole }>({ method: "PUT", url, data: arg }),
+  >(`/orgs/${organizationSlug}/members/${membershipId}`, (url, { arg }) =>
+    requestData<{ id: string; role: OrganizationTeamRole }>({ method: "PUT", url, data: arg }),
   );
 
   async function trigger(input: { role: OrganizationTeamRole }) {
@@ -90,17 +95,15 @@ export function useUpdateById({ organizationSlug, membershipId }: {
 }
 
 /** DELETE /api/orgs/:organizationSlug/members/:membershipId */
-export function useDeleteById({ organizationSlug, membershipId }: {
+export function useDeleteById({
+  organizationSlug,
+  membershipId,
+}: {
   organizationSlug: string;
   membershipId: string;
 }) {
   const { mutate } = useSWRConfig();
-  const { trigger: remove, ...rest } = useSWRMutation<
-    { id: string },
-    ApiError,
-    string,
-    void
-  >(
+  const { trigger: remove, ...rest } = useSWRMutation<{ id: string }, ApiError, string, void>(
     `/orgs/${organizationSlug}/members/${membershipId}`,
     (url) => requestData<{ id: string }>({ method: "DELETE", url }),
   );

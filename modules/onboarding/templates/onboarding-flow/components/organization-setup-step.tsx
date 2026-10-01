@@ -6,10 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Building2, ImagePlus, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { organizationWorkspacePath } from "@/modules/organizations";
-import {
-  FilePicker,
-  IMAGE_FILE_ACCEPT,
-} from "@/modules/shared/components/file-upload/file-picker";
+import { FilePicker, IMAGE_FILE_ACCEPT } from "@/modules/shared/components/file-upload/file-picker";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
@@ -42,8 +39,7 @@ export function OrganizationSetupStep() {
   const [logo, setLogo] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const { trigger, error, isMutating } =
-    API.orgs.useCreateOne();
+  const { trigger, error, isMutating } = API.orgs.useCreateOne();
 
   function updateName(value: string) {
     setName(value);
@@ -67,9 +63,7 @@ export function OrganizationSetupStep() {
     setValidationError(null);
 
     if (!ORGANIZATION_SLUG_PATTERN.test(finalSlug)) {
-      setValidationError(
-        "Use lowercase letters, numbers, and single hyphens only.",
-      );
+      setValidationError("Use lowercase letters, numbers, and single hyphens only.");
       return;
     }
 
@@ -79,9 +73,7 @@ export function OrganizationSetupStep() {
         name: name.trim(),
         slug: finalSlug,
       });
-      router.replace(
-        organizationWorkspacePath(organization.slug, "/dashboard"),
-      );
+      router.replace(organizationWorkspacePath(organization.slug, "/dashboard"));
     } catch {
       // The mutation exposes the API error for the form to render.
     }
@@ -96,9 +88,7 @@ export function OrganizationSetupStep() {
     >
       <section className="rounded-[1.75rem] border border-white/80 bg-white p-6 shadow-[0_24px_80px_-38px_rgba(15,42,67,0.45)] sm:p-9 dark:border-white/10 dark:bg-[#182124] dark:shadow-black/30">
         <div>
-          <p className="text-sm font-semibold text-cyan-700 dark:text-cyan-300">
-            Your workspace
-          </p>
+          <p className="text-sm font-semibold text-cyan-700 dark:text-cyan-300">Your workspace</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
             Create your first organization
           </h2>
@@ -133,8 +123,7 @@ export function OrganizationSetupStep() {
                   isDragActive &&
                     !isDragReject &&
                     "border-primary-500 bg-primary-50 dark:bg-primary-950/30",
-                  isDragReject &&
-                    "border-red-400 bg-red-50 dark:border-red-500 dark:bg-red-500/10",
+                  isDragReject && "border-red-400 bg-red-50 dark:border-red-500 dark:bg-red-500/10",
                 ),
               })}
             >
@@ -142,8 +131,7 @@ export function OrganizationSetupStep() {
               <div
                 className={cn(
                   "group/preview relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border-2 bg-white text-slate-400 shadow-sm dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-500",
-                  !logo &&
-                    "border-dashed border-slate-300 dark:border-slate-600",
+                  !logo && "border-dashed border-slate-300 dark:border-slate-600",
                 )}
               >
                 {logo ? (
@@ -185,11 +173,7 @@ export function OrganizationSetupStep() {
                   ) : (
                     <ImagePlus className="size-4" />
                   )}
-                  {isLogoUploading
-                    ? "Uploading…"
-                    : logo
-                      ? "Change logo"
-                      : "Upload logo"}
+                  {isLogoUploading ? "Uploading…" : logo ? "Change logo" : "Upload logo"}
                 </Button>
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   {isDragActive
@@ -197,9 +181,7 @@ export function OrganizationSetupStep() {
                     : "Optional · PNG, JPG, WebP, GIF, or AVIF · 15 MB max"}
                 </p>
                 {uploadError && (
-                  <p className="mt-2 text-xs text-red-600 dark:text-red-400">
-                    {uploadError}
-                  </p>
+                  <p className="mt-2 text-xs text-red-600 dark:text-red-400">{uploadError}</p>
                 )}
               </div>
             </div>
@@ -246,8 +228,7 @@ export function OrganizationSetupStep() {
                 className="text-xs leading-5 text-slate-500 dark:text-slate-400"
                 id="organizationSlugHelp"
               >
-                formflow.app/{slug || "your-workspace"} · lowercase letters,
-                numbers, and hyphens
+                formflow.app/{slug || "your-workspace"} · lowercase letters, numbers, and hyphens
               </p>
             </div>
           </div>

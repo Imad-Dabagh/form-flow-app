@@ -2,12 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/modules/shared/components/ui/button";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/modules/shared/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/modules/shared/components/ui/tabs";
 import { organizationWorkspacePath } from "../../paths";
 import { OrganizationGeneralSettings } from "../../patterns/general-settings";
 import { OrganizationInvitations } from "../../patterns/invitations";

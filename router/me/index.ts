@@ -1,9 +1,7 @@
 "use client";
 
 import useSWR, { type SWRConfiguration } from "swr";
-import useSWRMutation, {
-  type SWRMutationConfiguration,
-} from "swr/mutation";
+import useSWRMutation, { type SWRMutationConfiguration } from "swr/mutation";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
 import type { CurrentProfile, UpdateCurrentProfileInput } from "./types";
@@ -26,9 +24,7 @@ export function useFindOne(
   const { data, ...rest } = useSWR<CurrentProfile, ApiError>(
     enabled ? "/me" : null,
     async (url) =>
-      normalizeCurrentProfile(
-        await requestData<CurrentProfile>({ method: "GET", url }),
-      ),
+      normalizeCurrentProfile(await requestData<CurrentProfile>({ method: "GET", url })),
     swrConfig,
   );
 
@@ -54,9 +50,7 @@ export function useUpdateOne(
   >(
     "/me",
     async (url, { arg }) =>
-      normalizeCurrentProfile(
-        await requestData<CurrentProfile>({ method: "PUT", url, data: arg }),
-      ),
+      normalizeCurrentProfile(await requestData<CurrentProfile>({ method: "PUT", url, data: arg })),
     {
       populateCache: true,
       revalidate: false,

@@ -18,11 +18,8 @@ function FlowState({ children }: { children: string }) {
 export function OnboardingFlowTemplate() {
   const router = useRouter();
   const profile = useCurrentProfileContext();
-  const { organizations, error, isLoading } =
-    API.orgs.useFindAll();
-  const hasPersonalDetails = Boolean(
-    profile.firstName.trim() && profile.lastName.trim(),
-  );
+  const { organizations, error, isLoading } = API.orgs.useFindAll();
+  const hasPersonalDetails = Boolean(profile.firstName.trim() && profile.lastName.trim());
 
   useEffect(() => {
     if (profile.onboardingCompletedAt) {

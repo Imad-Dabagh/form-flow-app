@@ -5,10 +5,7 @@ import { useState } from "react";
 import { ArrowRight, ImagePlus, Loader2, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrentProfileContext } from "@/modules/profile/current-profile-context";
-import {
-  FilePicker,
-  IMAGE_FILE_ACCEPT,
-} from "@/modules/shared/components/file-upload/file-picker";
+import { FilePicker, IMAGE_FILE_ACCEPT } from "@/modules/shared/components/file-upload/file-picker";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
@@ -25,8 +22,7 @@ export function PersonalDetailsStep() {
   const [lastName, setLastName] = useState(profile.lastName);
   const [profilePic, setProfilePic] = useState(profile.profilePic);
   const [isUploading, setIsUploading] = useState(false);
-  const { trigger, error, isMutating } =
-    API.me.useUpdateOne();
+  const { trigger, error, isMutating } = API.me.useUpdateOne();
 
   async function savePersonalDetails(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,15 +47,12 @@ export function PersonalDetailsStep() {
     >
       <section className="rounded-[1.75rem] border border-white/80 bg-white p-6 shadow-[0_24px_80px_-38px_rgba(15,42,67,0.45)] sm:p-9 dark:border-white/10 dark:bg-[#182124] dark:shadow-black/30">
         <div>
-          <p className="text-sm font-semibold text-cyan-700 dark:text-cyan-300">
-            Your profile
-          </p>
+          <p className="text-sm font-semibold text-cyan-700 dark:text-cyan-300">Your profile</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
             Add your personal details
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Your photo is optional. Your name helps people recognize you
-            across workspaces.
+            Your photo is optional. Your name helps people recognize you across workspaces.
           </p>
         </div>
 
@@ -89,8 +82,7 @@ export function PersonalDetailsStep() {
                   isDragActive &&
                     !isDragReject &&
                     "border-primary-500 bg-primary-50 dark:bg-primary-950/30",
-                  isDragReject &&
-                    "border-red-400 bg-red-50 dark:border-red-500 dark:bg-red-500/10",
+                  isDragReject && "border-red-400 bg-red-50 dark:border-red-500 dark:bg-red-500/10",
                 ),
               })}
             >
@@ -98,17 +90,12 @@ export function PersonalDetailsStep() {
               <div
                 className={cn(
                   "group/preview relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-full border-2 bg-white text-slate-400 shadow-sm dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-500",
-                  !profilePic &&
-                    "border-dashed border-slate-300 dark:border-slate-600",
+                  !profilePic && "border-dashed border-slate-300 dark:border-slate-600",
                 )}
               >
                 {profilePic ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    alt="Profile preview"
-                    className="size-full object-cover"
-                    src={profilePic}
-                  />
+                  <img alt="Profile preview" className="size-full object-cover" src={profilePic} />
                 ) : getInitials(firstName, lastName) !== "U" ? (
                   <span className="text-base font-bold text-[#102a43] dark:text-cyan-200">
                     {getInitials(firstName, lastName)}
@@ -145,11 +132,7 @@ export function PersonalDetailsStep() {
                   ) : (
                     <ImagePlus className="size-4" />
                   )}
-                  {isPhotoUploading
-                    ? "Uploading…"
-                    : profilePic
-                      ? "Change photo"
-                      : "Upload photo"}
+                  {isPhotoUploading ? "Uploading…" : profilePic ? "Change photo" : "Upload photo"}
                 </Button>
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   {isDragActive
@@ -157,9 +140,7 @@ export function PersonalDetailsStep() {
                     : "Optional · PNG, JPG, WebP, GIF, or AVIF · 15 MB max"}
                 </p>
                 {uploadError && (
-                  <p className="mt-2 text-xs text-red-600 dark:text-red-400">
-                    {uploadError}
-                  </p>
+                  <p className="mt-2 text-xs text-red-600 dark:text-red-400">{uploadError}</p>
                 )}
               </div>
             </div>
@@ -201,8 +182,7 @@ export function PersonalDetailsStep() {
                 value={profile.email}
               />
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Your email comes from your sign-in account and cannot be
-                changed here.
+                Your email comes from your sign-in account and cannot be changed here.
               </p>
             </div>
           </div>

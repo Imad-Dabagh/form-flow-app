@@ -45,7 +45,12 @@ export function InvitationAcceptanceTemplate({ token }: { token: string }) {
               This link may have expired, or you may need to sign in with the invited email.
             </p>
             {error?.status === 403 && (
-              <Button className="mt-5" onClick={() => void switchAccount()} type="button" variant="outline">
+              <Button
+                className="mt-5"
+                onClick={() => void switchAccount()}
+                type="button"
+                variant="outline"
+              >
                 Sign in with invited email
               </Button>
             )}
@@ -54,9 +59,15 @@ export function InvitationAcceptanceTemplate({ token }: { token: string }) {
           <>
             <h1 className="text-xl font-semibold">Join {invitation.organizationName}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              You were invited as {invitation.role === "ADMIN" ? "an admin" : "a manager"} using {invitation.email}.
+              You were invited as {invitation.role === "ADMIN" ? "an admin" : "a manager"} using{" "}
+              {invitation.email}.
             </p>
-            <Button className="mt-6 w-full" disabled={isMutating} onClick={() => void acceptInvitation()} type="button">
+            <Button
+              className="mt-6 w-full"
+              disabled={isMutating}
+              onClick={() => void acceptInvitation()}
+              type="button"
+            >
               {isMutating && <Loader2 className="size-4 animate-spin" />}
               Accept invitation
             </Button>

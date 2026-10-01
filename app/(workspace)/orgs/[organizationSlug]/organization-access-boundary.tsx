@@ -8,9 +8,7 @@ import API from "@/router";
 export function OrganizationAccessBoundary({ children }: { children: ReactNode }) {
   const { organizationSlug } = useParams<{ organizationSlug: string }>();
   const { organizations, error, isLoading } = API.orgs.useFindAll();
-  const organization = organizations.find(
-    (candidate) => candidate.slug === organizationSlug,
-  );
+  const organization = organizations.find((candidate) => candidate.slug === organizationSlug);
 
   if (isLoading) {
     return (

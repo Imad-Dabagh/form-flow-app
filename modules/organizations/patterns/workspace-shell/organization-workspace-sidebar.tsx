@@ -21,11 +21,7 @@ import { organizationWorkspacePath } from "../../paths";
 import { useOrganizationPermissions } from "../../use-organization-permissions";
 import { useOrganizationWorkspace } from "../../organization-workspace-context";
 import type { OrganizationSummary } from "@/router/orgs/types";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/modules/shared/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/components/ui/avatar";
 import { Button } from "@/modules/shared/components/ui/button";
 import { useTheme } from "@/modules/shared/components/theme-provider";
 import {
@@ -73,11 +69,7 @@ function OrganizationLogo({ organization }: { organization: OrganizationSummary 
   return (
     <Avatar className="size-7 shrink-0 rounded-md border border-border bg-background">
       {organization.logo && (
-        <AvatarImage
-          alt=""
-          className="object-contain"
-          src={organization.logo}
-        />
+        <AvatarImage alt="" className="object-contain" src={organization.logo} />
       )}
       <AvatarFallback className="rounded-md bg-primary-100 text-[10px] font-bold text-primary-800">
         {getOrganizationInitials(organization.name)}
@@ -95,10 +87,7 @@ export function OrganizationWorkspaceSidebar() {
   const { canManageOrganization } = useOrganizationPermissions();
   const { isMobile, setOpenMobile, toggleSidebar } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();
-  const dashboardPath = organizationWorkspacePath(
-    organization.slug,
-    "/dashboard",
-  );
+  const dashboardPath = organizationWorkspacePath(organization.slug, "/dashboard");
   const formsPath = organizationWorkspacePath(organization.slug, "/forms");
   const profilePath = organizationWorkspacePath(organization.slug, "/profile");
   const settingsPath = organizationWorkspacePath(organization.slug, "/settings");
@@ -107,13 +96,8 @@ export function OrganizationWorkspaceSidebar() {
     { href: formsPath, label: "Forms", icon: FileText },
   ];
   const displayName =
-    [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
-    profile.email;
-  const initials = getInitials(
-    profile.firstName,
-    profile.lastName,
-    profile.email,
-  );
+    [profile.firstName, profile.lastName].filter(Boolean).join(" ") || profile.email;
+  const initials = getInitials(profile.firstName, profile.lastName, profile.email);
 
   async function handleLogout() {
     await API.auth.signOut();
@@ -253,9 +237,7 @@ export function OrganizationWorkspaceSidebar() {
                 >
                   <button aria-label="Open profile menu" type="button">
                     <Avatar className="size-8 shrink-0 rounded-lg shadow-sm">
-                      {profile.profilePic && (
-                        <AvatarImage alt="" src={profile.profilePic} />
-                      )}
+                      {profile.profilePic && <AvatarImage alt="" src={profile.profilePic} />}
                       <AvatarFallback className="rounded-lg bg-primary-500 text-xs font-bold text-primary-foreground">
                         {initials}
                       </AvatarFallback>
@@ -272,23 +254,14 @@ export function OrganizationWorkspaceSidebar() {
                   </button>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="w-56"
-                side="top"
-                sideOffset={8}
-              >
+              <DropdownMenuContent align="start" className="w-56" side="top" sideOffset={8}>
                 <DropdownMenuItem asChild disabled={!resolvedTheme}>
                   <button
                     aria-label={
-                      resolvedTheme === "dark"
-                        ? "Switch to light mode"
-                        : "Switch to dark mode"
+                      resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"
                     }
                     className="mb-1 flex w-full items-center gap-3 rounded-lg border border-border bg-muted/50 px-3 py-2.5 text-left hover:bg-muted focus:bg-muted"
-                    onClick={() =>
-                      setTheme(resolvedTheme === "dark" ? "light" : "dark")
-                    }
+                    onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                     type="button"
                   >
                     <Moon className="size-4" />

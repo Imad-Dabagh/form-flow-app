@@ -24,9 +24,7 @@ export function useOrganizationWorkspace(): OrganizationSummary {
   const organization = useContext(OrganizationWorkspaceContext);
 
   if (!organization) {
-    throw new Error(
-      "useOrganizationWorkspace must be used within OrganizationWorkspaceProvider.",
-    );
+    throw new Error("useOrganizationWorkspace must be used within OrganizationWorkspaceProvider.");
   }
 
   return organization;

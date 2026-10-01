@@ -34,9 +34,8 @@ export function useAcceptByToken({ token }: { token: string }) {
     ApiError,
     string,
     void
-  >(
-    `/invitations/${token}/accept`,
-    (url) => requestData<{ organizationSlug: string }>({ method: "POST", url }),
+  >(`/invitations/${token}/accept`, (url) =>
+    requestData<{ organizationSlug: string }>({ method: "POST", url }),
   );
 
   async function trigger() {

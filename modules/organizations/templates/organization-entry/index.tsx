@@ -7,8 +7,7 @@ import { organizationWorkspacePath } from "../../paths";
 
 export function OrganizationEntryTemplate() {
   const router = useRouter();
-  const { organizations, error, isLoading } =
-    API.orgs.useFindAll();
+  const { organizations, error, isLoading } = API.orgs.useFindAll();
 
   useEffect(() => {
     if (organizations[0]) {
@@ -37,7 +36,8 @@ export function OrganizationEntryTemplate() {
       <div className="max-w-md">
         <h1 className="text-2xl font-semibold tracking-tight">No organization yet</h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          Create an organization to start building forms. Organization setup is the next workspace step.
+          Create an organization to start building forms. Organization setup is the next workspace
+          step.
         </p>
       </div>
     </div>

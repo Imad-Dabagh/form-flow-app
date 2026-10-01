@@ -13,7 +13,9 @@ import {
 import { CreateFormDialog } from "./create-form-dialog";
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", { day: "numeric", month: "short", year: "numeric" }).format(new Date(value));
+  return new Intl.DateTimeFormat("en", { day: "numeric", month: "short", year: "numeric" }).format(
+    new Date(value),
+  );
 }
 
 export function FormsListTemplate() {
@@ -30,7 +32,9 @@ export function FormsListTemplate() {
     <div className="mx-auto w-full max-w-[69rem] px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
       <header className="flex items-end justify-between gap-4 border-b border-border pb-7">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Organization workspace</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+            Organization workspace
+          </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">Forms</h1>
           <p className="mt-2 text-sm text-muted-foreground">Forms in {organization.name}.</p>
         </div>
@@ -56,16 +60,34 @@ export function FormsListTemplate() {
               >
                 <FileText className="size-5 shrink-0 text-primary" />
                 <span className="min-w-0 flex-1 truncate font-medium">{form.name}</span>
-                <span className="shrink-0 text-sm text-muted-foreground">Updated {formatDate(form.updatedAt)}</span>
+                <span className="shrink-0 text-sm text-muted-foreground">
+                  Updated {formatDate(form.updatedAt)}
+                </span>
               </Link>
             ))}
           </div>
           <div className="mt-5 flex items-center justify-between gap-4 text-sm text-muted-foreground">
-            <span>{formsPage.total} {formsPage.total === 1 ? "form" : "forms"}</span>
+            <span>
+              {formsPage.total} {formsPage.total === 1 ? "form" : "forms"}
+            </span>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
+              >
+                Previous
+              </Button>
               <span>Page {page}</span>
-              <Button variant="outline" size="sm" disabled={page * formsPage.pageSize >= formsPage.total} onClick={() => setPage(page + 1)}>Next</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page * formsPage.pageSize >= formsPage.total}
+                onClick={() => setPage(page + 1)}
+              >
+                Next
+              </Button>
             </div>
           </div>
         </>
@@ -73,12 +95,24 @@ export function FormsListTemplate() {
         <div className="mt-6 rounded-xl border border-dashed border-border bg-muted/20 px-5 py-14 text-center">
           <FileText className="mx-auto size-7 text-muted-foreground" />
           <h2 className="mt-4 font-medium">No forms yet</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Create the first form for this organization.</p>
-          {canManageForms && <Button className="mt-5" onClick={() => setCreateOpen(true)}>Create form</Button>}
+          <p className="mt-2 text-sm text-muted-foreground">
+            Create the first form for this organization.
+          </p>
+          {canManageForms && (
+            <Button className="mt-5" onClick={() => setCreateOpen(true)}>
+              Create form
+            </Button>
+          )}
         </div>
       )}
 
-      {canManageForms && <CreateFormDialog open={createOpen} onOpenChange={setCreateOpen} organizationSlug={organization.slug} />}
+      {canManageForms && (
+        <CreateFormDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          organizationSlug={organization.slug}
+        />
+      )}
     </div>
   );
 }

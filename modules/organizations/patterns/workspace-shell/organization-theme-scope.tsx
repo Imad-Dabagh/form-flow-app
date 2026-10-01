@@ -2,9 +2,7 @@
 
 import { useLayoutEffect, useMemo, type ReactNode } from "react";
 import { useTheme } from "@/modules/shared/components/theme-provider";
-import {
-  getOrganizationThemeStyle,
-} from "../../lib/primary-color-theme";
+import { getOrganizationThemeStyle } from "../../lib/primary-color-theme";
 import type { OrganizationPrimaryColor } from "@/router/orgs/types";
 
 interface OrganizationThemeScopeProps {
@@ -12,10 +10,7 @@ interface OrganizationThemeScopeProps {
   primaryColor: OrganizationPrimaryColor;
 }
 
-export function OrganizationThemeScope({
-  children,
-  primaryColor,
-}: OrganizationThemeScopeProps) {
+export function OrganizationThemeScope({ children, primaryColor }: OrganizationThemeScopeProps) {
   const { resolvedTheme } = useTheme();
   const mode = resolvedTheme === "dark" ? "dark" : "light";
   const themeStyle = useMemo(
