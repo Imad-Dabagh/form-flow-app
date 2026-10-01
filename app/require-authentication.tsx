@@ -14,12 +14,18 @@ function AccessState({ children }: { children: ReactNode }) {
   );
 }
 
-export function RequireAuthentication({ children }: { children: ReactNode }) {
+export function RequireAuthentication({
+  children,
+  requireProfile = true,
+}: {
+  children: ReactNode;
+  requireProfile?: boolean;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending } = API.auth.useSession();
   const isVerified = Boolean(session?.user.emailVerified);
-  const { profile, error, isLoading } = API.me.useFindOne(isVerified);
+  const { profile, error, isLoading } = API.me.useFindOne(isVerified && requireProfile);
 
   useEffect(() => {
     if (isPending || session) {
@@ -41,10 +47,13 @@ export function RequireAuthentication({ children }: { children: ReactNode }) {
   if (!isVerified) {
     return (
       <AccessState>
-        Verify your email before accessing your workspace. Check your inbox for the verification
-        link.
+        Verify your email before continuing. Check your inbox for the verification link.
       </AccessState>
     );
+  }
+
+  if (!requireProfile) {
+    return children;
   }
 
   if (isLoading) {

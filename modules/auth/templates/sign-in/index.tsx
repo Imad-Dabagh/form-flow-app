@@ -30,7 +30,13 @@ function GoogleMark() {
   );
 }
 
-export function SignInTemplate({ callbackPath }: { callbackPath: string }) {
+export function SignInTemplate({
+  callbackPath,
+  formResponse = false,
+}: {
+  callbackPath: string;
+  formResponse?: boolean;
+}) {
   const router = useRouter();
   const getCallbackURL = () => new URL(callbackPath, window.location.origin).toString();
   const [email, setEmail] = useState("");
@@ -106,6 +112,62 @@ export function SignInTemplate({ callbackPath }: { callbackPath: string }) {
   }
 
   const isPending = pendingAction !== null;
+
+  if (formResponse) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-6 py-10 sm:px-10">
+        <section className="w-full max-w-sm">
+          <div className="mb-10 flex items-center gap-3 text-lg font-semibold tracking-tight">
+            <span className="grid size-9 place-items-center rounded-xl bg-[#102a43] text-base font-black text-cyan-200">
+              F
+            </span>
+            Form Flow
+          </div>
+          <h1 className="text-3xl font-semibold tracking-[-0.035em] text-foreground">
+            Continue to the form
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            Enter your email address and we&apos;ll send you a secure link. No profile setup is needed.
+          </p>
+          {magicLinkSent ? (
+            <p className="mt-8 rounded-xl border bg-muted/30 p-4 text-sm leading-6">
+              Check your inbox for the sign-in link. It expires in five minutes.
+            </p>
+          ) : (
+            <form
+              className="mt-8 space-y-5"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void requestMagicLink();
+              }}
+            >
+              <div className="space-y-2">
+                <Label htmlFor="response-email">Email address</Label>
+                <Input
+                  id="response-email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+              </div>
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+              <Button className="w-full" disabled={isPending} size="lg" type="submit">
+                {pendingAction === "magic" ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Mail className="size-4" />
+                )}
+                Email me a link
+              </Button>
+            </form>
+          )}
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-6 py-10 sm:px-10">
