@@ -4,7 +4,7 @@ import type {
   FormQuestion,
   FormSection,
   OrganizationFormDetails,
-  UpdateOrganizationFormInput,
+  UpdateOrganizationFormContentInput,
 } from "@/router/orgs/forms";
 
 type Selection =
@@ -12,13 +12,10 @@ type Selection =
   | { kind: "question"; sectionId: string; questionId: string }
   | null;
 
-function editableForm(form: OrganizationFormDetails): UpdateOrganizationFormInput {
+function editableForm(form: OrganizationFormDetails): UpdateOrganizationFormContentInput {
   return {
-    name: form.name,
     description: form.description,
     sections: form.sections,
-    displayMode: form.displayMode,
-    isClosed: form.isClosed,
   };
 }
 
@@ -28,7 +25,7 @@ export function useFormBuilder(initialForm: OrganizationFormDetails) {
   const [isDirty, setIsDirty] = useState(false);
 
   function changeDraft(
-    update: (current: UpdateOrganizationFormInput) => UpdateOrganizationFormInput,
+    update: (current: UpdateOrganizationFormContentInput) => UpdateOrganizationFormContentInput,
   ) {
     setDraft(update);
     setIsDirty(true);

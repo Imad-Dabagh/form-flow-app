@@ -15,12 +15,13 @@ import {
   type CollisionDetection,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { ArrowLeft, Eye, FileText, Plus, Save } from "lucide-react";
+import { ArrowLeft, Eye, FileText, Plus, Save, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import API from "@/router";
 import type { FormQuestion, OrganizationFormDetails } from "@/router/orgs/forms";
 import { toApiError } from "@/lib/api-error";
 import { organizationWorkspacePath, useOrganizationPermissions } from "@/modules/organizations";
+import { CreateEditFormModal } from "@/modules/forms/components/create-edit-form-modal";
 import { Button } from "@/modules/shared/components/ui/button";
 import {
   AlertDialog,
@@ -84,6 +85,7 @@ function Builder({
   const editor = useFormBuilder(form);
   const [draggedQuestion, setDraggedQuestion] = useState<FormQuestion | null>(null);
   const [dropSectionId, setDropSectionId] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const dragStart = useRef<{
     sections: typeof editor.draft.sections;
     isDirty: boolean;
@@ -242,19 +244,26 @@ function Builder({
             <ArrowLeft className="size-4" /> Forms
           </Link>
         </Button>
-        <Button asChild size="sm" variant="outline" className="gap-2">
-          <Link
-            href={organizationWorkspacePath(organizationSlug, `/forms/${form.id}/preview`)}
-            onClick={(event) => {
-              if (editor.isDirty) {
-                event.preventDefault();
-                toast.info("Save your changes before previewing the form.");
-              }
-            }}
-          >
-            <Eye className="size-4" /> Preview
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {canEdit && (
+            <Button type="button" size="sm" variant="outline" onClick={() => setSettingsOpen(true)}>
+              <Settings2 className="size-4" /> Settings
+            </Button>
+          )}
+          <Button asChild size="sm" variant="outline" className="gap-2">
+            <Link
+              href={organizationWorkspacePath(organizationSlug, `/forms/${form.id}/preview`)}
+              onClick={(event) => {
+                if (editor.isDirty) {
+                  event.preventDefault();
+                  toast.info("Save your changes before previewing the form.");
+                }
+              }}
+            >
+              <Eye className="size-4" /> Preview
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <fieldset disabled={isMutating} className="min-w-0 disabled:opacity-80">
@@ -487,6 +496,15 @@ function Builder({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {canEdit && settingsOpen && (
+        <CreateEditFormModal
+          open
+          onOpenChange={setSettingsOpen}
+          organizationSlug={organizationSlug}
+          form={form}
+        />
+      )}
     </div>
   );
 }

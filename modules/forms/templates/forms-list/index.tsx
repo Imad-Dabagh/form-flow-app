@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FileText, Plus } from "lucide-react";
+import { ExternalLink, FileText, Pencil, Plus } from "lucide-react";
 import API from "@/router";
+import type { OrganizationForm } from "@/router/orgs/forms";
+import { CreateEditFormModal } from "@/modules/forms/components/create-edit-form-modal";
+import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
 import {
   organizationWorkspacePath,
   useOrganizationPermissions,
   useOrganizationWorkspace,
 } from "@/modules/organizations";
-import { CreateFormDialog } from "./create-form-dialog";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en", { day: "numeric", month: "short", year: "numeric" }).format(
@@ -22,7 +24,9 @@ export function FormsListTemplate() {
   const organization = useOrganizationWorkspace();
   const { canManageForms } = useOrganizationPermissions();
   const [page, setPage] = useState(1);
-  const [createOpen, setCreateOpen] = useState(false);
+  const [formModal, setFormModal] = useState<
+    { mode: "create" } | { mode: "edit"; form: OrganizationForm } | null
+  >(null);
   const { formsPage, error, isLoading } = API.orgs.forms.useFindAll({
     organizationSlug: organization.slug,
     page,
@@ -39,7 +43,7 @@ export function FormsListTemplate() {
           <p className="mt-2 text-sm text-muted-foreground">Forms in {organization.name}.</p>
         </div>
         {canManageForms && (
-          <Button onClick={() => setCreateOpen(true)} className="gap-2">
+          <Button onClick={() => setFormModal({ mode: "create" })} className="gap-2">
             <Plus className="size-4" /> Create form
           </Button>
         )}
@@ -53,17 +57,46 @@ export function FormsListTemplate() {
         <>
           <div className="mt-6 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
             {formsPage.items.map((form) => (
-              <Link
+              <div
                 key={form.id}
-                href={organizationWorkspacePath(organization.slug, `/forms/${form.id}/builder`)}
-                className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/50"
+                className="flex items-center gap-2 pr-3 transition-colors hover:bg-muted/50"
               >
-                <FileText className="size-5 shrink-0 text-primary" />
-                <span className="min-w-0 flex-1 truncate font-medium">{form.name}</span>
-                <span className="shrink-0 text-sm text-muted-foreground">
-                  Updated {formatDate(form.updatedAt)}
-                </span>
-              </Link>
+                <Link
+                  href={organizationWorkspacePath(organization.slug, `/forms/${form.id}/builder`)}
+                  className="flex min-w-0 flex-1 items-center gap-4 px-5 py-4"
+                >
+                  <FileText className="size-5 shrink-0 text-primary" />
+                  <span className="min-w-0 flex-1 truncate font-medium">{form.name}</span>
+                  <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
+                    {form.type === "PUBLIC" ? "Public" : "Requires sign-in"}
+                  </span>
+                  {form.isClosed && <Badge variant="secondary">Closed</Badge>}
+                  <span className="hidden shrink-0 text-sm text-muted-foreground md:inline">
+                    Updated {formatDate(form.updatedAt)}
+                  </span>
+                </Link>
+                <Button asChild variant="ghost" size="icon">
+                  <Link
+                    href={`/${organization.slug}/forms/${form.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open ${form.name} response form`}
+                  >
+                    <ExternalLink className="size-4" />
+                  </Link>
+                </Button>
+                {canManageForms && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Edit ${form.name}`}
+                    onClick={() => setFormModal({ mode: "edit", form })}
+                  >
+                    <Pencil className="size-4" />
+                  </Button>
+                )}
+              </div>
             ))}
           </div>
           <div className="mt-5 flex items-center justify-between gap-4 text-sm text-muted-foreground">
@@ -99,18 +132,22 @@ export function FormsListTemplate() {
             Create the first form for this organization.
           </p>
           {canManageForms && (
-            <Button className="mt-5" onClick={() => setCreateOpen(true)}>
+            <Button className="mt-5" onClick={() => setFormModal({ mode: "create" })}>
               Create form
             </Button>
           )}
         </div>
       )}
 
-      {canManageForms && (
-        <CreateFormDialog
-          open={createOpen}
-          onOpenChange={setCreateOpen}
+      {canManageForms && formModal && (
+        <CreateEditFormModal
+          key={formModal.mode === "edit" ? formModal.form.id : "create"}
+          open
+          onOpenChange={(open) => {
+            if (!open) setFormModal(null);
+          }}
           organizationSlug={organization.slug}
+          form={formModal.mode === "edit" ? formModal.form : undefined}
         />
       )}
     </div>

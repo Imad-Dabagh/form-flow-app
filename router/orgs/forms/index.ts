@@ -6,10 +6,18 @@ import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
 
 export * as questions from "./questions";
+export * as response from "./response";
+export * as settings from "./settings";
+
+export type FormType = "PUBLIC" | "AUTHENTICATED";
+export type FormDisplayMode = "SINGLE_PAGE" | "WIZARD";
 
 export interface OrganizationForm {
   id: string;
   name: string;
+  type: FormType;
+  displayMode: FormDisplayMode;
+  isClosed: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -24,8 +32,6 @@ interface FormsPage {
 export interface OrganizationFormDetails extends OrganizationForm {
   description: string;
   sections: FormSection[];
-  displayMode: "SINGLE_PAGE" | "WIZARD";
-  isClosed: boolean;
 }
 
 export type FormFieldType =
@@ -86,9 +92,26 @@ export interface FormSection {
   questions: FormQuestion[];
 }
 
-export type UpdateOrganizationFormInput = Pick<
+/** Fields available when a form is shown to someone filling it out. */
+export type FormPresentationQuestion = Omit<FormQuestion, "name">;
+export type FormPresentationSection = Omit<FormSection, "questions"> & {
+  questions: FormPresentationQuestion[];
+};
+export type FormPresentation = Pick<
   OrganizationFormDetails,
-  "name" | "description" | "sections" | "displayMode" | "isClosed"
+  "id" | "name" | "description" | "displayMode" | "isClosed"
+> & {
+  sections: FormPresentationSection[];
+};
+
+export type UpdateOrganizationFormContentInput = Pick<
+  OrganizationFormDetails,
+  "description" | "sections"
+>;
+
+export type FormSettingsInput = Pick<
+  OrganizationForm,
+  "name" | "type" | "displayMode" | "isClosed"
 >;
 
 /** GET /api/orgs/:organizationSlug/forms */
@@ -130,13 +153,13 @@ export function useCreateOne({ organizationSlug }: { organizationSlug: string })
     OrganizationForm,
     ApiError,
     string,
-    { name: string }
+    FormSettingsInput
   >(`/orgs/${organizationSlug}/forms`, (url, { arg }) =>
     requestData<OrganizationForm>({ method: "POST", url, data: arg }),
   );
 
-  async function trigger(name: string) {
-    const result = await create({ name });
+  async function trigger(input: FormSettingsInput) {
+    const result = await create(input);
     await mutate(
       (key) => typeof key === "string" && key.startsWith(`/orgs/${organizationSlug}/forms?page=`),
     );
@@ -160,10 +183,10 @@ export function useUpdateById({
     OrganizationFormDetails,
     ApiError,
     string,
-    UpdateOrganizationFormInput
+    UpdateOrganizationFormContentInput
   >(key, (url, { arg }) => requestData<OrganizationFormDetails>({ method: "PUT", url, data: arg }));
 
-  async function trigger(input: UpdateOrganizationFormInput) {
+  async function trigger(input: UpdateOrganizationFormContentInput) {
     const result = await update(input);
     await mutate(key, result, { revalidate: false });
     await mutate(
