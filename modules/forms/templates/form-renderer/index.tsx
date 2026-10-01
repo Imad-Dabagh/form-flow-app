@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import type { FormQuestion, OrganizationFormDetails } from "@/router/orgs/forms";
+import { toApiError } from "@/lib/api-error";
+import type { FormPresentation, FormPresentationQuestion } from "@/router/orgs/forms";
 import { Button } from "@/modules/shared/components/ui/button";
 import { RichTextContent } from "@/modules/shared/components/rich-text-editor/content";
 import { FormSection } from "./components/form-section";
 import type { FormAnswer, FormAnswers } from "./types";
+import { validateSections, type FormErrors } from "./validate-form-answers";
 
-function initialAnswer(question: FormQuestion): FormAnswer {
+function initialAnswer(question: FormPresentationQuestion): FormAnswer {
   const value = question.defaultValue;
   if (question.inputType === "file") return [];
   if (question.inputType === "checkboxes" || question.inputType === "multi-select") {
@@ -20,7 +22,7 @@ function initialAnswer(question: FormQuestion): FormAnswer {
   return typeof value === "string" || typeof value === "number" ? value : "";
 }
 
-function initialAnswers(form: OrganizationFormDetails): FormAnswers {
+function initialAnswers(form: FormPresentation): FormAnswers {
   return Object.fromEntries(
     form.sections.flatMap((section) =>
       section.questions.map((question) => [question._id, initialAnswer(question)]),
@@ -28,8 +30,19 @@ function initialAnswers(form: OrganizationFormDetails): FormAnswers {
   );
 }
 
-export function FormRenderer({ form }: { form: OrganizationFormDetails }) {
-  const [answers, setAnswers] = useState<FormAnswers>(() => initialAnswers(form));
+export function FormRenderer({
+  form,
+  initialValues,
+  onSubmit,
+}: {
+  form: FormPresentation;
+  initialValues?: Partial<FormAnswers>;
+  onSubmit?: (answers: FormAnswers) => Promise<void> | void;
+}) {
+  const [answers, setAnswers] = useState<FormAnswers>(() => ({ ...initialAnswers(form), ...initialValues }));
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(0);
   const sections = form.sections.filter((section) => !section.isHidden);
   const isWizard = form.displayMode === "WIZARD";
@@ -38,6 +51,74 @@ export function FormRenderer({ form }: { form: OrganizationFormDetails }) {
 
   function updateAnswer(questionId: string, value: FormAnswer) {
     setAnswers((current) => ({ ...current, [questionId]: value }));
+    setErrors((current) => {
+      if (!(questionId in current)) return current;
+      const next = { ...current };
+      delete next[questionId];
+      return next;
+    });
+    setSubmitError(null);
+  }
+
+  function focusQuestion(questionId: string) {
+    requestAnimationFrame(() => {
+      document.getElementById(`question-${questionId}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+      document.getElementById(`question-${questionId}`)?.focus();
+    });
+  }
+
+  function validateAndShow(targetSections: typeof sections) {
+    const nextErrors = validateSections(targetSections, answers);
+    setErrors(nextErrors);
+    const firstId = Object.keys(nextErrors)[0];
+    if (firstId) focusQuestion(firstId);
+    return !firstId;
+  }
+
+  function nextStep() {
+    if (!validateAndShow([sections[currentStep]])) return;
+    setStep(currentStep + 1);
+  }
+
+  async function submit() {
+    if (!onSubmit || isSubmitting || !sections.length) return;
+    const nextErrors = validateSections(sections, answers);
+    const firstId = Object.keys(nextErrors)[0];
+    if (firstId) {
+      setErrors(nextErrors);
+      const sectionIndex = sections.findIndex((section) => section.questions.some((question) => question._id === firstId));
+      if (isWizard && sectionIndex >= 0) setStep(sectionIndex);
+      focusQuestion(firstId);
+      return;
+    }
+
+    const visibleQuestionIds = new Set(sections.flatMap((section) => section.questions.map((question) => question._id)));
+    const submittedAnswers = Object.fromEntries(
+      Object.entries(answers).filter(([id, value]) => visibleQuestionIds.has(id) &&
+        value != null && !(typeof value === "string" && !value.trim()) &&
+        !(Array.isArray(value) && value.length === 0)),
+    ) as FormAnswers;
+    setErrors({});
+    setSubmitError(null);
+    setIsSubmitting(true);
+    try {
+      await onSubmit(submittedAnswers);
+    } catch (error) {
+      const apiError = toApiError(error);
+      const questionId = apiError.details && typeof apiError.details === "object" &&
+        "questionId" in apiError.details && typeof apiError.details.questionId === "string"
+        ? apiError.details.questionId : null;
+      if (questionId && visibleQuestionIds.has(questionId)) {
+        setErrors({ [questionId]: apiError.message });
+        const sectionIndex = sections.findIndex((section) => section.questions.some((question) => question._id === questionId));
+        if (isWizard && sectionIndex >= 0) setStep(sectionIndex);
+        focusQuestion(questionId);
+      } else {
+        setSubmitError(apiError.message);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -71,6 +152,7 @@ export function FormRenderer({ form }: { form: OrganizationFormDetails }) {
           key={section._id}
           section={section}
           answers={answers}
+          errors={errors}
           onAnswerChange={updateAnswer}
         />
       ))}
@@ -81,21 +163,30 @@ export function FormRenderer({ form }: { form: OrganizationFormDetails }) {
         </div>
       )}
 
-      {isWizard && sections.length > 1 && (
-        <div className="flex justify-between gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={currentStep === 0}
-            onClick={() => setStep(currentStep - 1)}
-          >
-            Previous
-          </Button>
-          {currentStep < sections.length - 1 && (
-            <Button type="button" onClick={() => setStep(currentStep + 1)}>
-              Next
-            </Button>
-          )}
+      {sections.length > 0 && ((isWizard && sections.length > 1) || onSubmit) && (
+        <div className="space-y-3">
+          {submitError && <p role="alert" className="text-sm text-destructive">{submitError}</p>}
+          <div className="flex justify-between gap-3">
+            {isWizard && sections.length > 1 && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={currentStep === 0 || isSubmitting}
+                onClick={() => setStep(currentStep - 1)}
+              >
+                Previous
+              </Button>
+            )}
+            {isWizard && currentStep < sections.length - 1 ? (
+              <Button type="button" disabled={isSubmitting} onClick={nextStep}>
+                Next
+              </Button>
+            ) : onSubmit ? (
+              <Button type="button" disabled={isSubmitting} onClick={submit}>
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </Button>
+            ) : null}
+          </div>
         </div>
       )}
     </div>

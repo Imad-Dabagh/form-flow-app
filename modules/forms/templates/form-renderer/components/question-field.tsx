@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import type { FormQuestion } from "@/router/orgs/forms";
+import type { FormPresentationQuestion } from "@/router/orgs/forms";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Checkbox } from "@/modules/shared/components/ui/checkbox";
 import { Input } from "@/modules/shared/components/ui/input";
@@ -21,14 +21,17 @@ import type { FormAnswer } from "../types";
 export function QuestionField({
   question,
   value,
+  error,
   onChange,
 }: {
-  question: FormQuestion;
+  question: FormPresentationQuestion;
   value: FormAnswer;
+  error?: string;
   onChange: (value: FormAnswer) => void;
 }) {
   const inputId = `question-${question._id}`;
   const labelId = `${inputId}-label`;
+  const errorId = `${inputId}-error`;
   const textValue = typeof value === "string" || typeof value === "number" ? String(value) : "";
   const selectedValues = Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
@@ -41,6 +44,8 @@ export function QuestionField({
           <Checkbox
             id={inputId}
             checked={value === true}
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : undefined}
             onCheckedChange={(checked) => onChange(checked === true)}
             className="mt-0.5"
           />
@@ -52,6 +57,7 @@ export function QuestionField({
         {question.description && (
           <p className="pl-7 text-sm text-muted-foreground">{question.description}</p>
         )}
+        {error && <p id={errorId} role="alert" className="pl-7 text-sm text-destructive">{error}</p>}
       </div>
     );
   }
@@ -74,6 +80,8 @@ export function QuestionField({
           id={inputId}
           type={question.inputType === "string" ? "text" : question.inputType}
           value={textValue}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           placeholder={question.placeholder}
           onChange={(event) => onChange(event.target.value)}
         />
@@ -84,6 +92,8 @@ export function QuestionField({
         <Textarea
           id={inputId}
           value={textValue}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           rows={4}
           placeholder={question.placeholder}
           onChange={(event) => onChange(event.target.value)}
@@ -93,7 +103,7 @@ export function QuestionField({
     case "select":
       control = (
         <Select value={textValue || undefined} onValueChange={onChange}>
-          <SelectTrigger id={inputId} className="w-full">
+          <SelectTrigger id={inputId} className="w-full" aria-invalid={!!error} aria-describedby={error ? errorId : undefined}>
             <SelectValue placeholder={question.placeholder || "Select an option"} />
           </SelectTrigger>
           <SelectContent>
@@ -108,7 +118,7 @@ export function QuestionField({
       break;
     case "radio":
       control = (
-        <RadioGroup value={textValue} onValueChange={onChange} aria-labelledby={labelId}>
+        <RadioGroup id={inputId} value={textValue} onValueChange={onChange} aria-labelledby={labelId} aria-invalid={!!error} aria-describedby={error ? errorId : undefined}>
           {(question.options ?? []).map((option) => (
             <div key={option.value} className="flex items-center gap-2">
               <RadioGroupItem id={`${inputId}-${option.value}`} value={option.value} />
@@ -122,7 +132,7 @@ export function QuestionField({
       break;
     case "checkboxes":
       control = (
-        <div className="space-y-3" role="group" aria-labelledby={labelId}>
+        <div id={inputId} className="space-y-3" role="group" aria-labelledby={labelId} aria-invalid={!!error} aria-describedby={error ? errorId : undefined} tabIndex={-1}>
           {(question.options ?? []).map((option) => (
             <div key={option.value} className="flex items-center gap-2">
               <Checkbox
@@ -144,6 +154,8 @@ export function QuestionField({
           <PopoverTrigger asChild>
             <Button
               id={inputId}
+              aria-invalid={!!error}
+              aria-describedby={error ? errorId : undefined}
               type="button"
               variant="outline"
               className="w-full justify-between font-normal"
@@ -185,6 +197,8 @@ export function QuestionField({
           id={inputId}
           type={question.typeConfig?.type === "time" ? "time" : "date"}
           value={textValue}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           onChange={(event) => onChange(event.target.value)}
         />
       );
@@ -200,6 +214,9 @@ export function QuestionField({
         <div className="space-y-3">
           <RadioGroup
             value={textValue}
+            id={inputId}
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : undefined}
             onValueChange={(selected) => onChange(Number(selected))}
             aria-labelledby={labelId}
             className="flex flex-wrap gap-3 sm:gap-5"
@@ -237,6 +254,8 @@ export function QuestionField({
         <div className="space-y-2">
           <Input
             id={inputId}
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : undefined}
             type="file"
             multiple
             accept={accept}
@@ -276,6 +295,7 @@ export function QuestionField({
         )}
       </div>
       {control}
+      {error && <p id={errorId} role="alert" className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }

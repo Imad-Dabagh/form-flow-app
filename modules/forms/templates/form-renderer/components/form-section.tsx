@@ -1,14 +1,17 @@
-import type { FormSection as FormSectionData } from "@/router/orgs/forms";
+import type { FormPresentationSection } from "@/router/orgs/forms";
 import { QuestionField } from "./question-field";
 import type { FormAnswer, FormAnswers } from "../types";
+import type { FormErrors } from "../validate-form-answers";
 
 export function FormSection({
   section,
   answers,
+  errors,
   onAnswerChange,
 }: {
-  section: FormSectionData;
+  section: FormPresentationSection;
   answers: FormAnswers;
+  errors: FormErrors;
   onAnswerChange: (questionId: string, value: FormAnswer) => void;
 }) {
   return (
@@ -25,6 +28,7 @@ export function FormSection({
             <QuestionField
               question={question}
               value={answers[question._id] ?? null}
+              error={errors[question._id]}
               onChange={(value) => onAnswerChange(question._id, value)}
             />
           </div>
