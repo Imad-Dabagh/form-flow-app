@@ -15,7 +15,9 @@ dist/
 npm-debug.log*
 
 # OS / editor
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # Optional caches
 coverage/

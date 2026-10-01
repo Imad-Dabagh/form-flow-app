@@ -1,0 +1,10 @@
+node_modules/
+.next/
+dist/
+coverage/
+.cache/
+*.tsbuildinfo
+next-env.d.ts
+package-lock.json
+pnpm-lock.yaml
+modules/forms/templates/form-builder-app/
