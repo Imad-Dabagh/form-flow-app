@@ -53,9 +53,17 @@ export function useSubmit({ formId }: { formId: string }) {
     PublicFormSubmission,
     ApiError,
     string,
-    FormData | { formAnswers: Record<string, unknown> }
+    {
+      payload: FormData | { formAnswers: Record<string, unknown> };
+      idempotencyKey: string;
+    }
   >(`/public/forms/${formId}/submissions/submit`, (url, { arg }) =>
-    requestData<PublicFormSubmission>({ method: "PUT", url, data: arg }),
+    requestData<PublicFormSubmission>({
+      method: "PUT",
+      url,
+      data: arg.payload,
+      headers: { "Idempotency-Key": arg.idempotencyKey },
+    }),
   );
 
   return { trigger, ...rest };

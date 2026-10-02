@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toApiError } from "@/lib/api-error";
 import type { FormPresentation, FormPresentationQuestion } from "@/router/orgs/forms";
 import { Button } from "@/modules/shared/components/ui/button";
@@ -37,7 +37,7 @@ export function FormRenderer({
 }: {
   form: FormPresentation;
   initialValues?: Partial<FormAnswers>;
-  onSubmit?: (answers: FormAnswers) => Promise<void> | void;
+  onSubmit?: (answers: FormAnswers, idempotencyKey: string) => Promise<void> | void;
 }) {
   const [answers, setAnswers] = useState<FormAnswers>(() => {
     const answers = initialAnswers(form);
@@ -51,6 +51,7 @@ export function FormRenderer({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(0);
   const [focusTarget, setFocusTarget] = useState<{ kind: "question" | "section"; id: string } | null>(null);
+  const submissionKey = useRef<string | null>(null);
   const sections = form.sections.filter((section) => !section.isHidden);
   const isWizard = form.displayMode === "WIZARD";
   const currentStep = Math.min(step, Math.max(0, sections.length - 1));
@@ -68,6 +69,7 @@ export function FormRenderer({
   }, [currentStep, focusTarget]);
 
   function updateAnswer(questionId: string, value: FormAnswer) {
+    submissionKey.current = null;
     setAnswers((current) => ({ ...current, [questionId]: value }));
     setErrors((current) => {
       if (!(questionId in current)) return current;
@@ -118,7 +120,8 @@ export function FormRenderer({
     setSubmitError(null);
     setIsSubmitting(true);
     try {
-      await onSubmit(submittedAnswers);
+      submissionKey.current ??= crypto.randomUUID();
+      await onSubmit(submittedAnswers, submissionKey.current);
     } catch (error) {
       const apiError = toApiError(error);
       const questionId = apiError.details && typeof apiError.details === "object" &&

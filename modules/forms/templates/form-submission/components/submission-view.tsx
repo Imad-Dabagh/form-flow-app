@@ -14,7 +14,7 @@ export function SubmissionView({
   error?: ApiError;
   isLoading: boolean;
   submitted: boolean;
-  onSubmit: (answers: FormAnswers) => Promise<void>;
+  onSubmit: (answers: FormAnswers, idempotencyKey: string) => Promise<void>;
 }) {
   if (isLoading) {
     return <p className="mx-auto max-w-3xl px-4 py-10 text-sm text-muted-foreground">Loading form…</p>;

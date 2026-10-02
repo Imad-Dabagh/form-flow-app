@@ -32,8 +32,8 @@ export function AuthenticatedFormSubmissionTemplate() {
     return () => { active = false; };
   }, [formId, organizationSlug]);
 
-  async function submit(answers: FormAnswers) {
-    await submitForm(prepareSubmission(form, answers));
+  async function submit(answers: FormAnswers, idempotencyKey: string) {
+    await submitForm({ payload: prepareSubmission(form, answers), idempotencyKey });
     setSubmitted(true);
   }
 
