@@ -15,14 +15,23 @@ import {
   type CollisionDetection,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { ArrowLeft, Eye, FileText, Plus, Save, Settings2 } from "lucide-react";
+import { Eye, FileText, Plus, Save, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import API from "@/router";
 import type { FormQuestion, OrganizationFormDetails } from "@/router/orgs/forms";
 import { toApiError } from "@/lib/api-error";
-import { organizationWorkspacePath, useOrganizationPermissions } from "@/modules/organizations";
+import {
+  organizationWorkspacePath,
+  useOrganizationPermissions,
+  useOrganizationWorkspace,
+} from "@/modules/organizations";
 import { CreateEditFormModal } from "@/modules/forms/components/create-edit-form-modal";
 import { Button } from "@/modules/shared/components/ui/button";
+import {
+  WorkspacePage,
+  PageNavigation,
+  PageBreadcrumbs,
+} from "@/modules/shared/components/workspace";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +49,7 @@ import { SidebarSettings } from "./components/sidebar-settings";
 import { useFormBuilder } from "./hooks/use-form-builder";
 
 export function FormBuilderTemplate() {
+  const organization = useOrganizationWorkspace();
   const { organizationSlug, formId } = useParams<{
     organizationSlug: string;
     formId: string;
@@ -50,17 +60,25 @@ export function FormBuilderTemplate() {
     formId,
   });
 
-  if (isLoading)
+  if (isLoading || error || !form)
     return (
-      <div className="max-w-6xl px-4 py-10 mx-auto text-sm text-muted-foreground">
-        Loading form…
-      </div>
-    );
-  if (error || !form)
-    return (
-      <div className="max-w-6xl px-4 py-10 mx-auto text-sm text-destructive">
-        {error?.message ?? "Form not found."}
-      </div>
+      <WorkspacePage>
+        <PageNavigation title={form?.name ?? "Form builder"}>
+          <PageBreadcrumbs
+            items={[
+              {
+                label: organization.name,
+                href: organizationWorkspacePath(organizationSlug, "/dashboard"),
+              },
+              { label: "Forms", href: organizationWorkspacePath(organizationSlug, "/forms") },
+              { label: form?.name ?? (isLoading ? "Loading form…" : "Form unavailable") },
+            ]}
+          />
+        </PageNavigation>
+        <p className={isLoading ? "text-sm text-muted-foreground" : "text-sm text-destructive"}>
+          {isLoading ? "Loading form…" : (error?.message ?? "Form not found.")}
+        </p>
+      </WorkspacePage>
     );
 
   return (
@@ -82,6 +100,7 @@ function Builder({
   organizationSlug: string;
   canEdit: boolean;
 }) {
+  const organization = useOrganizationWorkspace();
   const editor = useFormBuilder(form);
   const [draggedQuestion, setDraggedQuestion] = useState<FormQuestion | null>(null);
   const [dropSectionId, setDropSectionId] = useState<string | null>(null);
@@ -237,14 +256,19 @@ function Builder({
   }
 
   return (
-    <div className="w-full px-4 pb-10 mx-auto max-w-7xl pt-7 sm:px-6 lg:px-8">
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <Button asChild size="sm" variant="ghost" className="gap-2">
-          <Link href={organizationWorkspacePath(organizationSlug, "/forms")}>
-            <ArrowLeft className="size-4" /> Forms
-          </Link>
-        </Button>
-        <div className="flex items-center gap-2">
+    <WorkspacePage>
+      <PageNavigation title={form.name}>
+        <PageBreadcrumbs
+          items={[
+            {
+              label: organization.name,
+              href: organizationWorkspacePath(organizationSlug, "/dashboard"),
+            },
+            { label: "Forms", href: organizationWorkspacePath(organizationSlug, "/forms") },
+            { label: form.name },
+          ]}
+        />
+        <div className="flex shrink-0 items-center gap-2">
           {canEdit && (
             <Button type="button" size="sm" variant="outline" onClick={() => setSettingsOpen(true)}>
               <Settings2 className="size-4" /> Settings
@@ -264,7 +288,7 @@ function Builder({
             </Link>
           </Button>
         </div>
-      </div>
+      </PageNavigation>
 
       <fieldset disabled={isMutating} className="min-w-0 disabled:opacity-80">
         <RichTextEditor
@@ -283,7 +307,7 @@ function Builder({
           <div className="flex min-w-0 flex-col gap-5 self-stretch">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h1 className="text-xl font-semibold">Sections & questions</h1>
+                <h2 className="text-xl font-semibold">Sections & questions</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Build the content people will fill out.
                 </p>
@@ -505,6 +529,6 @@ function Builder({
           form={form}
         />
       )}
-    </div>
+    </WorkspacePage>
   );
 }
