@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
+import { MAX_SUBMISSION_FILES, MAX_UPLOAD_BYTES, uploadExtensions } from "@/modules/forms/upload-policy";
 import type { FormPresentationQuestion } from "@/router/orgs/forms";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Checkbox } from "@/modules/shared/components/ui/checkbox";
@@ -118,7 +119,7 @@ export function QuestionField({
       break;
     case "radio":
       control = (
-        <RadioGroup id={inputId} value={textValue} onValueChange={onChange} aria-labelledby={labelId} aria-invalid={!!error} aria-describedby={error ? errorId : undefined}>
+        <RadioGroup id={inputId} value={textValue} onValueChange={onChange} aria-labelledby={labelId} aria-invalid={!!error} aria-describedby={error ? errorId : undefined} tabIndex={-1}>
           {(question.options ?? []).map((option) => (
             <div key={option.value} className="flex items-center gap-2">
               <RadioGroupItem id={`${inputId}-${option.value}`} value={option.value} />
@@ -219,6 +220,7 @@ export function QuestionField({
             aria-describedby={error ? errorId : undefined}
             onValueChange={(selected) => onChange(Number(selected))}
             aria-labelledby={labelId}
+            tabIndex={-1}
             className="flex flex-wrap gap-3 sm:gap-5"
           >
             {choices.map((choice) => (
@@ -241,31 +243,66 @@ export function QuestionField({
       break;
     }
     case "file": {
-      const extensions = question.typeConfig?.allowedExtensions ?? [];
-      const accept = extensions.length
-        ? extensions.map((extension) => `.${extension.replace(/^\./, "")}`).join(",")
-        : question.typeConfig?.uploadCategory === "images"
-          ? "image/*"
-          : undefined;
+      const category = question.typeConfig?.uploadCategory ?? "all";
+      const extensions = question.typeConfig?.allowedExtensions?.length
+        ? question.typeConfig.allowedExtensions
+        : uploadExtensions[category];
+      const accept = extensions
+        .flatMap((extension) => extension === "jpg" ? [".jpg", ".jpeg"] : [`.${extension}`])
+        .join(",");
       const files = Array.isArray(value)
         ? value.filter((item): item is File => typeof File !== "undefined" && item instanceof File)
         : [];
+      const helpId = `${inputId}-help`;
       control = (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Input
             id={inputId}
             aria-invalid={!!error}
-            aria-describedby={error ? errorId : undefined}
+            aria-describedby={`${helpId}${error ? ` ${errorId}` : ""}`}
             type="file"
             multiple
             accept={accept}
             className="h-auto py-2"
-            onChange={(event) => onChange(Array.from(event.target.files ?? []))}
+            onChange={(event) => {
+              const selected = Array.from(event.currentTarget.files ?? []);
+              if (!selected.length) return;
+              onChange([
+                ...files,
+                ...selected.filter((candidate) => !files.some((file) =>
+                  file.name === candidate.name && file.size === candidate.size && file.lastModified === candidate.lastModified,
+                )),
+              ]);
+              event.currentTarget.value = "";
+            }}
           />
+          <p id={helpId} className="text-xs leading-5 text-muted-foreground">
+            {`Allowed formats: ${extensions.map((extension) => extension.toUpperCase()).join(", ")}. `}
+            {`${MAX_UPLOAD_BYTES / (1024 * 1024)} MB per file; up to ${MAX_SUBMISSION_FILES} files per response.`}
+          </p>
           {files.length > 0 && (
-            <p className="text-xs text-muted-foreground">
-              {files.map((file) => file.name).join(", ")}
-            </p>
+            <ul className="space-y-2" aria-label="Selected files">
+              {files.map((file, index) => (
+                <li key={`${file.name}-${file.size}-${file.lastModified}-${index}`} className="flex min-w-0 items-center gap-2 rounded-md border bg-muted/30 py-1.5 pl-3 pr-1.5">
+                  <span className="min-w-0 flex-1 truncate text-sm" title={file.name}>{file.name}</span>
+                  <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                    {file.size < 1024 * 1024
+                      ? `${(file.size / 1024).toFixed(1)} KB`
+                      : `${(file.size / (1024 * 1024)).toFixed(1)} MB`}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-9 shrink-0"
+                    aria-label={`Remove ${file.name}`}
+                    onClick={() => onChange(files.filter((_, fileIndex) => fileIndex !== index))}
+                  >
+                    <X className="size-4" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       );
