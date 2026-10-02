@@ -9,6 +9,11 @@ import { CreateEditFormModal } from "@/modules/forms/components/create-edit-form
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
 import {
+  WorkspacePage,
+  PageNavigation,
+  PageBreadcrumbs,
+} from "@/modules/shared/components/workspace";
+import {
   organizationWorkspacePath,
   useOrganizationPermissions,
   useOrganizationWorkspace,
@@ -33,29 +38,31 @@ export function FormsListTemplate() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-[69rem] px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
-      <header className="flex items-end justify-between gap-4 border-b border-border pb-7">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            Organization workspace
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">Forms</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Forms in {organization.name}.</p>
-        </div>
+    <WorkspacePage>
+      <PageNavigation title="Forms">
+        <PageBreadcrumbs
+          items={[
+            {
+              label: organization.name,
+              href: organizationWorkspacePath(organization.slug, "/dashboard"),
+            },
+            { label: "Forms" },
+          ]}
+        />
         {canManageForms && (
-          <Button onClick={() => setFormModal({ mode: "create" })} className="gap-2">
+          <Button onClick={() => setFormModal({ mode: "create" })} className="shrink-0 gap-2">
             <Plus className="size-4" /> Create form
           </Button>
         )}
-      </header>
+      </PageNavigation>
 
       {isLoading ? (
         <p className="py-12 text-sm text-muted-foreground">Loading forms…</p>
       ) : error ? (
         <p className="py-12 text-sm text-destructive">{error.message}</p>
       ) : formsPage?.items.length ? (
-        <>
-          <div className="mt-6 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+        <div className="space-y-5">
+          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
             {formsPage.items.map((form) => (
               <div
                 key={form.id}
@@ -99,7 +106,7 @@ export function FormsListTemplate() {
               </div>
             ))}
           </div>
-          <div className="mt-5 flex items-center justify-between gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
             <span>
               {formsPage.total} {formsPage.total === 1 ? "form" : "forms"}
             </span>
@@ -123,9 +130,9 @@ export function FormsListTemplate() {
               </Button>
             </div>
           </div>
-        </>
+        </div>
       ) : (
-        <div className="mt-6 rounded-xl border border-dashed border-border bg-muted/20 px-5 py-14 text-center">
+        <div className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-14 text-center">
           <FileText className="mx-auto size-7 text-muted-foreground" />
           <h2 className="mt-4 font-medium">No forms yet</h2>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -150,6 +157,6 @@ export function FormsListTemplate() {
           form={formModal.mode === "edit" ? formModal.form : undefined}
         />
       )}
-    </div>
+    </WorkspacePage>
   );
 }
