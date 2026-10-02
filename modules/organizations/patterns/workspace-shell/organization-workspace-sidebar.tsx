@@ -115,7 +115,7 @@ export function OrganizationWorkspaceSidebar() {
     >
       <SidebarHeader className="h-14 shrink-0 justify-center px-3 py-0 group-data-[collapsible=icon]:px-1">
         <div className="flex min-w-0 items-center gap-1.5 group-data-[collapsible=icon]:hidden">
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <button
                 aria-label={`Switch organization, current: ${organization.name}`}
@@ -228,7 +228,7 @@ export function OrganizationWorkspaceSidebar() {
       <SidebarFooter className="border-t border-sidebar-border p-3 group-data-[collapsible=icon]:p-1">
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   asChild
