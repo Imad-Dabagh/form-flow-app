@@ -12,7 +12,9 @@ export function AuthenticatedFormSubmissionTemplate() {
   const { organizationSlug, formId } = useParams<{ organizationSlug: string; formId: string }>();
   const [accessReady, setAccessReady] = useState(false);
   const [accessError, setAccessError] = useState<ApiError | undefined>();
-  const { form, error, isLoading } = API.orgs.forms.response.useFindById({
+  const [accessAttempt, setAccessAttempt] = useState(0);
+  const [closed, setClosed] = useState(false);
+  const { form, error, isLoading, mutate } = API.orgs.forms.response.useFindById({
     organizationSlug,
     formId,
     enabled: accessReady,
@@ -30,11 +32,26 @@ export function AuthenticatedFormSubmissionTemplate() {
         if (active) setAccessError(toApiError(error));
       });
     return () => { active = false; };
-  }, [formId, organizationSlug]);
+  }, [accessAttempt, formId, organizationSlug]);
 
   async function submit(answers: FormAnswers, idempotencyKey: string) {
-    await submitForm({ payload: prepareSubmission(form, answers), idempotencyKey });
-    setSubmitted(true);
+    try {
+      await submitForm({ payload: prepareSubmission(form, answers), idempotencyKey });
+      setSubmitted(true);
+    } catch (error) {
+      if (toApiError(error).code === "FORM_CLOSED") setClosed(true);
+      throw error;
+    }
+  }
+
+  function retry() {
+    if (accessError) {
+      setAccessReady(false);
+      setAccessError(undefined);
+      setAccessAttempt((current) => current + 1);
+    } else {
+      void mutate();
+    }
   }
 
   return (
@@ -43,6 +60,8 @@ export function AuthenticatedFormSubmissionTemplate() {
       error={accessError ?? error}
       isLoading={!accessReady && !accessError || isLoading}
       submitted={submitted}
+      closed={closed}
+      onRetry={retry}
       onSubmit={submit}
     />
   );
