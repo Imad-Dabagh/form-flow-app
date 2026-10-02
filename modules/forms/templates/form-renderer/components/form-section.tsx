@@ -17,7 +17,9 @@ export function FormSection({
   return (
     <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
       <header className="border-b bg-muted/30 px-5 py-4 sm:px-6">
-        <h2 className="text-lg font-semibold">{section.title}</h2>
+        <h2 id={`section-${section._id}`} tabIndex={-1} className="scroll-mt-6 text-lg font-semibold">
+          {section.title}
+        </h2>
         {section.description && (
           <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
         )}

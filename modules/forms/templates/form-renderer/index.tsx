@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toApiError } from "@/lib/api-error";
 import type { FormPresentation, FormPresentationQuestion } from "@/router/orgs/forms";
 import { Button } from "@/modules/shared/components/ui/button";
@@ -50,10 +50,22 @@ export function FormRenderer({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(0);
+  const [focusTarget, setFocusTarget] = useState<{ kind: "question" | "section"; id: string } | null>(null);
   const sections = form.sections.filter((section) => !section.isHidden);
   const isWizard = form.displayMode === "WIZARD";
   const currentStep = Math.min(step, Math.max(0, sections.length - 1));
   const visibleSections = isWizard ? sections.slice(currentStep, currentStep + 1) : sections;
+
+  useEffect(() => {
+    if (!focusTarget) return;
+    const frame = requestAnimationFrame(() => {
+      const element = document.getElementById(`${focusTarget.kind}-${focusTarget.id}`);
+      element?.scrollIntoView({ block: focusTarget.kind === "question" ? "center" : "start", behavior: "smooth" });
+      element?.focus({ preventScroll: true });
+      setFocusTarget(null);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [currentStep, focusTarget]);
 
   function updateAnswer(questionId: string, value: FormAnswer) {
     setAnswers((current) => ({ ...current, [questionId]: value }));
@@ -67,10 +79,7 @@ export function FormRenderer({
   }
 
   function focusQuestion(questionId: string) {
-    requestAnimationFrame(() => {
-      document.getElementById(`question-${questionId}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
-      document.getElementById(`question-${questionId}`)?.focus();
-    });
+    setFocusTarget({ kind: "question", id: questionId });
   }
 
   function validateAndShow(targetSections: typeof sections) {
@@ -84,6 +93,7 @@ export function FormRenderer({
   function nextStep() {
     if (!validateAndShow([sections[currentStep]])) return;
     setStep(currentStep + 1);
+    setFocusTarget({ kind: "section", id: sections[currentStep + 1]._id });
   }
 
   async function submit() {
@@ -144,7 +154,15 @@ export function FormRenderer({
             </span>
             <span>{Math.round(((currentStep + 1) / sections.length) * 100)}%</span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-1.5 overflow-hidden rounded-full bg-muted"
+            role="progressbar"
+            aria-label="Form progress"
+            aria-valuemin={0}
+            aria-valuemax={sections.length}
+            aria-valuenow={currentStep + 1}
+            aria-valuetext={`Section ${currentStep + 1} of ${sections.length}`}
+          >
             <div
               className="h-full rounded-full bg-primary transition-all"
               style={{ width: `${((currentStep + 1) / sections.length) * 100}%` }}
@@ -178,17 +196,20 @@ export function FormRenderer({
                 type="button"
                 variant="outline"
                 disabled={currentStep === 0 || isSubmitting}
-                onClick={() => setStep(currentStep - 1)}
+                onClick={() => {
+                  setStep(currentStep - 1);
+                  setFocusTarget({ kind: "section", id: sections[currentStep - 1]._id });
+                }}
               >
                 Previous
               </Button>
             )}
             {isWizard && currentStep < sections.length - 1 ? (
-              <Button type="button" disabled={isSubmitting} onClick={nextStep}>
+              <Button type="button" className="ml-auto" disabled={isSubmitting} onClick={nextStep}>
                 Next
               </Button>
             ) : onSubmit ? (
-              <Button type="button" disabled={isSubmitting} onClick={submit}>
+              <Button type="button" className="ml-auto" disabled={isSubmitting} onClick={submit}>
                 {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             ) : null}
