@@ -77,7 +77,7 @@ export function FormsListTemplate() {
                 </Link>
                 <Button asChild variant="ghost" size="icon">
                   <Link
-                    href={`/${organization.slug}/forms/${form.id}`}
+                    href={`/${organization.slug}/submit/${form.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Open ${form.name} response form`}
