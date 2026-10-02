@@ -18,7 +18,6 @@ function validateQuestion(question: FormPresentationQuestion, value: FormAnswer 
 
   if (["string", "text", "email", "countries"].includes(question.inputType)) {
     if (typeof value !== "string") return "Enter valid text.";
-    if (question.validation?.regex) return "Custom text validation is not available yet.";
     if (question.validation?.minLength !== undefined && value.length < question.validation.minLength) {
       return `Enter at least ${question.validation.minLength} characters.`;
     }

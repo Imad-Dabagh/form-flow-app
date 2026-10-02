@@ -79,7 +79,6 @@ export interface FormQuestion {
     maxLength?: number;
     min?: number;
     max?: number;
-    regex?: string;
   };
   defaultValue?: unknown;
 }
