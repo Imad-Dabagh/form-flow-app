@@ -39,7 +39,13 @@ export function FormRenderer({
   initialValues?: Partial<FormAnswers>;
   onSubmit?: (answers: FormAnswers) => Promise<void> | void;
 }) {
-  const [answers, setAnswers] = useState<FormAnswers>(() => ({ ...initialAnswers(form), ...initialValues }));
+  const [answers, setAnswers] = useState<FormAnswers>(() => {
+    const answers = initialAnswers(form);
+    for (const [questionId, value] of Object.entries(initialValues ?? {})) {
+      if (value !== undefined) answers[questionId] = value;
+    }
+    return answers;
+  });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
