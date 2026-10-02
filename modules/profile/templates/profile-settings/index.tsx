@@ -13,12 +13,20 @@ import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
 import { Textarea } from "@/modules/shared/components/ui/textarea";
 import API from "@/router";
+import { organizationWorkspacePath, useOrganizationWorkspace } from "@/modules/organizations";
+import {
+  WorkspacePage,
+  PageNavigation,
+  PageBreadcrumbs,
+  PageSection,
+} from "@/modules/shared/components/workspace";
 
 function getInitials(firstName: string, lastName: string): string {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "U";
 }
 
 export function ProfileSettingsTemplate() {
+  const organization = useOrganizationWorkspace();
   const profile = useCurrentProfileContext();
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
@@ -67,15 +75,20 @@ export function ProfileSettingsTemplate() {
   }
 
   return (
-    <div className="w-full max-w-4xl px-4 py-6 mx-auto sm:px-6 sm:py-8 lg:px-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">Your profile</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Keep the details your teammates see up to date.
-        </p>
-      </div>
+    <WorkspacePage>
+      <PageNavigation title="Profile">
+        <PageBreadcrumbs
+          items={[
+            {
+              label: organization.name,
+              href: organizationWorkspacePath(organization.slug, "/dashboard"),
+            },
+            { label: "Profile" },
+          ]}
+        />
+      </PageNavigation>
 
-      <form className="space-y-6" onSubmit={saveProfile}>
+      <form className="w-full min-w-0 space-y-8" onSubmit={saveProfile}>
         <section className="overflow-hidden border rounded-xl border-border bg-card">
           <FilePicker
             accept={IMAGE_FILE_ACCEPT}
@@ -223,13 +236,11 @@ export function ProfileSettingsTemplate() {
           </div>
         </section>
 
-        <section className="p-5 border rounded-xl border-border bg-card sm:p-6">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold">Personal details</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Your name and contact details across workspaces.
-            </p>
-          </div>
+        <PageSection
+          className="p-5 border rounded-xl border-border bg-card sm:p-6"
+          title="Personal details"
+          description="Your name and contact details across workspaces."
+        >
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="profile-first-name">First name</Label>
@@ -290,7 +301,7 @@ export function ProfileSettingsTemplate() {
               />
             </div>
           </div>
-        </section>
+        </PageSection>
 
         <div className="flex justify-end">
           <Button disabled={!isDirty || isMutating || isUploading} type="submit">
@@ -299,6 +310,6 @@ export function ProfileSettingsTemplate() {
           </Button>
         </div>
       </form>
-    </div>
+    </WorkspacePage>
   );
 }
