@@ -94,7 +94,7 @@ export function CreateEditFormModal({
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit form" : "Create form"}</DialogTitle>
           <DialogDescription>
-            Set the form name, response access, and display options.
+            Set the form name, submission access, and display options.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-5">
@@ -134,7 +134,7 @@ export function CreateEditFormModal({
                 <span className="min-w-0 space-y-1">
                   <span className="block text-sm font-medium">Requires sign-in</span>
                   <span className="block text-xs text-muted-foreground">
-                    Respondents use their account.
+                    Users sign in before submitting.
                   </span>
                 </span>
               </Label>
