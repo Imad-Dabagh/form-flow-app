@@ -71,7 +71,11 @@ export function FormBuilderTemplate() {
                 href: organizationWorkspacePath(organizationSlug, "/dashboard"),
               },
               { label: "Forms", href: organizationWorkspacePath(organizationSlug, "/forms") },
-              { label: form?.name ?? (isLoading ? "Loading form…" : "Form unavailable") },
+              {
+                label: form?.name ?? (isLoading ? "Loading form…" : "Form unavailable"),
+                href: form ? organizationWorkspacePath(organizationSlug, `/forms/${formId}`) : undefined,
+              },
+              { label: "Builder" },
             ]}
           />
         </PageNavigation>
@@ -265,7 +269,11 @@ function Builder({
               href: organizationWorkspacePath(organizationSlug, "/dashboard"),
             },
             { label: "Forms", href: organizationWorkspacePath(organizationSlug, "/forms") },
-            { label: form.name },
+            {
+              label: form.name,
+              href: organizationWorkspacePath(organizationSlug, `/forms/${form.id}`),
+            },
+            { label: "Builder" },
           ]}
         />
         <div className="flex shrink-0 items-center gap-2">

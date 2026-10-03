@@ -69,7 +69,7 @@ export function FormsListTemplate() {
                 className="flex items-center gap-2 pr-3 transition-colors hover:bg-muted/50"
               >
                 <Link
-                  href={organizationWorkspacePath(organization.slug, `/forms/${form.id}/builder`)}
+                  href={organizationWorkspacePath(organization.slug, `/forms/${form.id}`)}
                   className="flex min-w-0 flex-1 items-center gap-4 px-5 py-4"
                 >
                   <FileText className="size-5 shrink-0 text-primary" />
@@ -84,10 +84,10 @@ export function FormsListTemplate() {
                 </Link>
                 <Button asChild variant="ghost" size="icon">
                   <Link
-                    href={`/${organization.slug}/submit/${form.id}`}
+                    href={`/orgs/${organization.slug}/submit/${form.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`Open ${form.name} response form`}
+                    aria-label={`Open ${form.name} submission form`}
                   >
                     <ExternalLink className="size-4" />
                   </Link>

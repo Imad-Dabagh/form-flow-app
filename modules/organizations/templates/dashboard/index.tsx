@@ -75,7 +75,7 @@ export function OrganizationDashboardTemplate() {
             {recentForms.map((form) => (
               <Link
                 className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-muted/50"
-                href={organizationWorkspacePath(organization.slug, `/forms/${form.id}/builder`)}
+                href={organizationWorkspacePath(organization.slug, `/forms/${form.id}`)}
                 key={form.id}
               >
                 <div className="min-w-0">
