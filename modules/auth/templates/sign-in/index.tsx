@@ -32,10 +32,10 @@ function GoogleMark() {
 
 export function SignInTemplate({
   callbackPath,
-  formResponse = false,
+  formSubmission = false,
 }: {
   callbackPath: string;
-  formResponse?: boolean;
+  formSubmission?: boolean;
 }) {
   const router = useRouter();
   const getCallbackURL = () => new URL(callbackPath, window.location.origin).toString();
@@ -113,7 +113,7 @@ export function SignInTemplate({
 
   const isPending = pendingAction !== null;
 
-  if (formResponse) {
+  if (formSubmission) {
     return (
       <div className="flex min-h-screen items-center justify-center px-6 py-10 sm:px-10">
         <section className="w-full max-w-sm">
@@ -142,9 +142,9 @@ export function SignInTemplate({
               }}
             >
               <div className="space-y-2">
-                <Label htmlFor="response-email">Email address</Label>
+                <Label htmlFor="submission-email">Email address</Label>
                 <Input
-                  id="response-email"
+                  id="submission-email"
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"

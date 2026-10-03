@@ -9,7 +9,7 @@ export default async function SignInPage({
   const { next } = await searchParams;
   const callbackPath = getAuthCallbackPath(typeof next === "string" ? next : null);
 
-  const formResponse = /^\/[a-z0-9]+(?:-[a-z0-9]+)*\/submit\/[a-f\d]{24}$/i.test(callbackPath);
+  const formSubmission = /^\/orgs\/[a-z0-9]+(?:-[a-z0-9]+)*\/submit\/[a-f\d]{24}$/i.test(callbackPath);
 
-  return <SignInTemplate callbackPath={callbackPath} formResponse={formResponse} />;
+  return <SignInTemplate callbackPath={callbackPath} formSubmission={formSubmission} />;
 }
