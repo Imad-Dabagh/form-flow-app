@@ -6,8 +6,9 @@ import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
 
 export * as questions from "./questions";
-export * as response from "./response";
+export * as submission from "./submission";
 export * as settings from "./settings";
+export * as submissions from "./submissions";
 
 export type FormType = "PUBLIC" | "AUTHENTICATED";
 export type FormDisplayMode = "SINGLE_PAGE" | "WIZARD";

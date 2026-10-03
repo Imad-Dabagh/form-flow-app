@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Check } from "lucide-react";
 import { toApiError } from "@/lib/api-error";
 import type { FormPresentation, FormPresentationQuestion } from "@/router/orgs/forms";
 import { Button } from "@/modules/shared/components/ui/button";
@@ -33,10 +34,16 @@ function initialAnswers(form: FormPresentation): FormAnswers {
 export function FormRenderer({
   form,
   initialValues,
+  hasDraft = false,
+  draftNotice,
+  onSave,
   onSubmit,
 }: {
   form: FormPresentation;
   initialValues?: Partial<FormAnswers>;
+  hasDraft?: boolean;
+  draftNotice?: string;
+  onSave?: (answers: FormAnswers) => Promise<void>;
   onSubmit?: (answers: FormAnswers, idempotencyKey: string) => Promise<void> | void;
 }) {
   const [answers, setAnswers] = useState<FormAnswers>(() => {
@@ -49,6 +56,9 @@ export function FormRenderer({
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [progressSaved, setProgressSaved] = useState(false);
   const [step, setStep] = useState(0);
   const [focusTarget, setFocusTarget] = useState<{ kind: "question" | "section"; id: string } | null>(null);
   const submissionKey = useRef<string | null>(null);
@@ -78,6 +88,7 @@ export function FormRenderer({
       return next;
     });
     setSubmitError(null);
+    setSaveError(null);
   }
 
   function focusQuestion(questionId: string) {
@@ -98,8 +109,22 @@ export function FormRenderer({
     setFocusTarget({ kind: "section", id: sections[currentStep + 1]._id });
   }
 
+  async function saveForLater() {
+    if (!onSave || isSaving || isSubmitting) return;
+    setSaveError(null);
+    setIsSaving(true);
+    try {
+      await onSave(answers);
+      setProgressSaved(true);
+    } catch (error) {
+      setSaveError(toApiError(error).message);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   async function submit() {
-    if (!onSubmit || isSubmitting || !sections.length) return;
+    if (!onSubmit || isSubmitting || isSaving || !sections.length) return;
     const nextErrors = validateSections(sections, answers);
     const firstId = Object.keys(nextErrors)[0];
     if (firstId) {
@@ -140,9 +165,36 @@ export function FormRenderer({
     }
   }
 
+  if (progressSaved) {
+    return (
+      <div className="rounded-xl border bg-card px-6 py-10 text-center shadow-sm sm:px-10">
+        <span className="mx-auto flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <Check className="size-5" aria-hidden="true" />
+        </span>
+        <h1 className="mt-5 text-xl font-semibold tracking-tight sm:text-2xl">Progress saved</h1>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+          Return to this form while signed in to continue your submission.
+        </p>
+        <Button type="button" className="mt-6" onClick={() => setProgressSaved(false)}>
+          Keep editing
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {draftNotice && (
+        <p role="status" className="rounded-lg border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+          {draftNotice}
+        </p>
+      )}
       <header className="rounded-xl border bg-card px-5 py-6 shadow-sm sm:px-7 sm:py-7">
+        {hasDraft && (
+          <span className="mb-3 inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+            Draft in progress
+          </span>
+        )}
         <h1 className="text-2xl font-semibold tracking-tight">{form.name}</h1>
         {form.description && (
           <RichTextContent html={form.description} className="mt-3 text-muted-foreground" />
@@ -174,15 +226,17 @@ export function FormRenderer({
         </div>
       )}
 
-      {visibleSections.map((section) => (
-        <FormSection
-          key={section._id}
-          section={section}
-          answers={answers}
-          errors={errors}
-          onAnswerChange={updateAnswer}
-        />
-      ))}
+      <fieldset disabled={isSaving || isSubmitting} className="min-w-0 space-y-6 disabled:opacity-80">
+        {visibleSections.map((section) => (
+          <FormSection
+            key={section._id}
+            section={section}
+            answers={answers}
+            errors={errors}
+            onAnswerChange={updateAnswer}
+          />
+        ))}
+      </fieldset>
 
       {sections.length === 0 && (
         <div className="rounded-xl border border-dashed px-6 py-12 text-center text-sm text-muted-foreground">
@@ -193,12 +247,13 @@ export function FormRenderer({
       {sections.length > 0 && ((isWizard && sections.length > 1) || onSubmit) && (
         <div className="space-y-3">
           {submitError && <p role="alert" className="text-sm text-destructive">{submitError}</p>}
-          <div className="flex justify-between gap-3">
+          {saveError && <p role="alert" className="text-sm text-destructive">{saveError}</p>}
+          <div className="flex flex-wrap justify-between gap-3">
             {isWizard && sections.length > 1 && (
               <Button
                 type="button"
                 variant="outline"
-                disabled={currentStep === 0 || isSubmitting}
+                disabled={currentStep === 0 || isSubmitting || isSaving}
                 onClick={() => {
                   setStep(currentStep - 1);
                   setFocusTarget({ kind: "section", id: sections[currentStep - 1]._id });
@@ -207,12 +262,17 @@ export function FormRenderer({
                 Previous
               </Button>
             )}
+            {onSave && (
+              <Button type="button" variant="outline" disabled={isSaving || isSubmitting} onClick={saveForLater}>
+                {isSaving ? "Saving…" : "Continue later"}
+              </Button>
+            )}
             {isWizard && currentStep < sections.length - 1 ? (
-              <Button type="button" className="ml-auto" disabled={isSubmitting} onClick={nextStep}>
+              <Button type="button" className="ml-auto" disabled={isSubmitting || isSaving} onClick={nextStep}>
                 Next
               </Button>
             ) : onSubmit ? (
-              <Button type="button" className="ml-auto" disabled={isSubmitting} onClick={submit}>
+              <Button type="button" className="ml-auto" disabled={isSubmitting || isSaving} onClick={submit}>
                 {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             ) : null}

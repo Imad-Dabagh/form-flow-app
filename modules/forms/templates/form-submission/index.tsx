@@ -28,11 +28,11 @@ export function PublicFormSubmissionTemplate() {
   return (
     <SubmissionView
       form={form}
-      error={error}
       isLoading={isLoading}
+      error={error}
       submitted={submitted}
       closed={closed}
-      onRetry={() => void mutate()}
+      onRetry={() => { void mutate(); }}
       onSubmit={submit}
     />
   );

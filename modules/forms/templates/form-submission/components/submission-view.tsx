@@ -11,6 +11,10 @@ export function SubmissionView({
   submitted,
   closed = false,
   onRetry,
+  initialValues,
+  hasDraft,
+  draftNotice,
+  onSave,
   onSubmit,
 }: {
   form?: FormPresentation;
@@ -19,10 +23,14 @@ export function SubmissionView({
   submitted: boolean;
   closed?: boolean;
   onRetry?: () => void;
+  initialValues?: Partial<FormAnswers>;
+  hasDraft?: boolean;
+  draftNotice?: string;
+  onSave?: (answers: FormAnswers) => Promise<void>;
   onSubmit: (answers: FormAnswers, idempotencyKey: string) => Promise<void>;
 }) {
   if (submitted) {
-    return <SubmissionState kind="success" title="Response submitted" description={`Your response to ${form?.name ?? "this form"} has been received.`} />;
+    return <SubmissionState kind="success" title="Form submitted" description={`Your submission to ${form?.name ?? "this form"} has been received.`} />;
   }
 
   if (isLoading) {
@@ -42,12 +50,20 @@ export function SubmissionView({
   }
 
   if (closed || form.isClosed) {
-    return <SubmissionState kind="closed" title={form.name} description="This form is closed and is no longer accepting responses." />;
+    return <SubmissionState kind="closed" title={form.name} description="This form is closed and is no longer accepting submissions." />;
   }
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 pb-16 pt-7 sm:px-6">
-      <FormRenderer key={form.id} form={form} onSubmit={onSubmit} />
+      <FormRenderer
+        key={form.id}
+        form={form}
+        initialValues={initialValues}
+        hasDraft={hasDraft}
+        draftNotice={draftNotice}
+        onSave={onSave}
+        onSubmit={onSubmit}
+      />
     </main>
   );
 }

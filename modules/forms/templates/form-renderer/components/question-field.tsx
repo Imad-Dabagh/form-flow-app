@@ -18,6 +18,13 @@ import {
 } from "@/modules/shared/components/ui/select";
 import { Textarea } from "@/modules/shared/components/ui/textarea";
 import type { FormAnswer } from "../types";
+import type { SavedDraftFile } from "@/router/form-drafts";
+
+function isSavedFile(value: unknown): value is SavedDraftFile {
+  return typeof value === "object" && value !== null &&
+    "id" in value && typeof value.id === "string" &&
+    "url" in value && typeof value.url === "string";
+}
 
 export function QuestionField({
   question,
@@ -251,7 +258,8 @@ export function QuestionField({
         .flatMap((extension) => extension === "jpg" ? [".jpg", ".jpeg"] : [`.${extension}`])
         .join(",");
       const files = Array.isArray(value)
-        ? value.filter((item): item is File => typeof File !== "undefined" && item instanceof File)
+        ? value.filter((item): item is File | SavedDraftFile =>
+            (typeof File !== "undefined" && item instanceof File) || isSavedFile(item))
         : [];
       const helpId = `${inputId}-help`;
       control = (
@@ -270,7 +278,8 @@ export function QuestionField({
               onChange([
                 ...files,
                 ...selected.filter((candidate) => !files.some((file) =>
-                  file.name === candidate.name && file.size === candidate.size && file.lastModified === candidate.lastModified,
+                  file.name === candidate.name && file.size === candidate.size &&
+                  file instanceof File && file.lastModified === candidate.lastModified,
                 )),
               ]);
               event.currentTarget.value = "";
@@ -278,12 +287,12 @@ export function QuestionField({
           />
           <p id={helpId} className="text-xs leading-5 text-muted-foreground">
             {`Allowed formats: ${extensions.map((extension) => extension.toUpperCase()).join(", ")}. `}
-            {`${MAX_UPLOAD_BYTES / (1024 * 1024)} MB per file; up to ${MAX_SUBMISSION_FILES} files per response.`}
+            {`${MAX_UPLOAD_BYTES / (1024 * 1024)} MB per file; up to ${MAX_SUBMISSION_FILES} files per submission.`}
           </p>
           {files.length > 0 && (
             <ul className="space-y-2" aria-label="Selected files">
               {files.map((file, index) => (
-                <li key={`${file.name}-${file.size}-${file.lastModified}-${index}`} className="flex min-w-0 items-center gap-2 rounded-md border bg-muted/30 py-1.5 pl-3 pr-1.5">
+                <li key={isSavedFile(file) ? file.id : `${file.name}-${file.size}-${file.lastModified}-${index}`} className="flex min-w-0 items-center gap-2 rounded-md border bg-muted/30 py-1.5 pl-3 pr-1.5">
                   <span className="min-w-0 flex-1 truncate text-sm" title={file.name}>{file.name}</span>
                   <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
                     {file.size < 1024 * 1024

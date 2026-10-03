@@ -29,8 +29,8 @@ export function FormPreviewTemplate() {
             },
             { label: "Forms", href: organizationWorkspacePath(organizationSlug, "/forms") },
             {
-              label: form?.name ?? "Builder",
-              href: organizationWorkspacePath(organizationSlug, `/forms/${formId}/builder`),
+              label: form?.name ?? "Form",
+              href: form ? organizationWorkspacePath(organizationSlug, `/forms/${formId}`) : undefined,
             },
             { label: "Preview" },
           ]}
