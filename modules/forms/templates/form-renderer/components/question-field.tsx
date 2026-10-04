@@ -1,9 +1,15 @@
 "use client";
 
+import { format, isValid, parseISO } from "date-fns";
 import { ChevronDown, X } from "lucide-react";
-import { MAX_SUBMISSION_FILES, MAX_UPLOAD_BYTES, uploadExtensions } from "@/modules/forms/upload-policy";
+import {
+  MAX_SUBMISSION_FILES,
+  MAX_UPLOAD_BYTES,
+  uploadExtensions,
+} from "@/modules/forms/upload-policy";
 import type { FormPresentationQuestion } from "@/router/orgs/forms";
 import { Button } from "@/modules/shared/components/ui/button";
+import { DatePicker } from "@/modules/shared/components/date-picker";
 import { Checkbox } from "@/modules/shared/components/ui/checkbox";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
@@ -21,9 +27,14 @@ import type { FormAnswer } from "../types";
 import type { SavedSubmissionFile } from "@/router/me/form-submission";
 
 function isSavedFile(value: unknown): value is SavedSubmissionFile {
-  return typeof value === "object" && value !== null &&
-    "id" in value && typeof value.id === "string" &&
-    "url" in value && typeof value.url === "string";
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    typeof value.id === "string" &&
+    "url" in value &&
+    typeof value.url === "string"
+  );
 }
 
 export function QuestionField({
@@ -65,7 +76,11 @@ export function QuestionField({
         {question.description && (
           <p className="pl-7 text-sm text-muted-foreground">{question.description}</p>
         )}
-        {error && <p id={errorId} role="alert" className="pl-7 text-sm text-destructive">{error}</p>}
+        {error && (
+          <p id={errorId} role="alert" className="pl-7 text-sm text-destructive">
+            {error}
+          </p>
+        )}
       </div>
     );
   }
@@ -114,7 +129,12 @@ export function QuestionField({
     case "select":
       control = (
         <Select value={textValue || undefined} onValueChange={onChange}>
-          <SelectTrigger id={inputId} className="w-full" aria-invalid={!!error} aria-describedby={error ? errorId : undefined}>
+          <SelectTrigger
+            id={inputId}
+            className="w-full"
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : undefined}
+          >
             <SelectValue placeholder={question.placeholder || "Select an option"} />
           </SelectTrigger>
           <SelectContent>
@@ -129,7 +149,15 @@ export function QuestionField({
       break;
     case "radio":
       control = (
-        <RadioGroup id={inputId} value={textValue} onValueChange={onChange} aria-labelledby={labelId} aria-invalid={!!error} aria-describedby={error ? errorId : undefined} tabIndex={-1}>
+        <RadioGroup
+          id={inputId}
+          value={textValue}
+          onValueChange={onChange}
+          aria-labelledby={labelId}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
+          tabIndex={-1}
+        >
           {(question.options ?? []).map((option) => (
             <div key={option.value} className="flex items-center gap-2">
               <RadioGroupItem id={`${inputId}-${option.value}`} value={option.value} />
@@ -143,7 +171,15 @@ export function QuestionField({
       break;
     case "checkboxes":
       control = (
-        <div id={inputId} className="space-y-3" role="group" aria-labelledby={labelId} aria-invalid={!!error} aria-describedby={error ? errorId : undefined} tabIndex={-1}>
+        <div
+          id={inputId}
+          className="space-y-3"
+          role="group"
+          aria-labelledby={labelId}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
+          tabIndex={-1}
+        >
           {(question.options ?? []).map((option) => (
             <div key={option.value} className="flex items-center gap-2">
               <Checkbox
@@ -203,16 +239,27 @@ export function QuestionField({
       );
       break;
     case "datetime":
-      control = (
-        <Input
-          id={inputId}
-          type={question.typeConfig?.type === "time" ? "time" : "date"}
-          value={textValue}
-          aria-invalid={!!error}
-          aria-describedby={error ? errorId : undefined}
-          onChange={(event) => onChange(event.target.value)}
-        />
-      );
+      control =
+        question.typeConfig?.type === "time" ? (
+          <Input
+            id={inputId}
+            type="time"
+            value={textValue}
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : undefined}
+            onChange={(event) => onChange(event.target.value)}
+          />
+        ) : (
+          <DatePicker
+            id={inputId}
+            mode="single"
+            value={textValue && isValid(parseISO(textValue)) ? parseISO(textValue) : undefined}
+            onChange={(date) => onChange(date ? format(date, "yyyy-MM-dd") : "")}
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : undefined}
+            placeholder="Select date"
+          />
+        );
       break;
     case "linear-scale": {
       const min = question.typeConfig?.min ?? 1;
@@ -258,11 +305,13 @@ export function QuestionField({
         ? question.typeConfig.allowedExtensions
         : uploadExtensions[category];
       const accept = extensions
-        .flatMap((extension) => extension === "jpg" ? [".jpg", ".jpeg"] : [`.${extension}`])
+        .flatMap((extension) => (extension === "jpg" ? [".jpg", ".jpeg"] : [`.${extension}`]))
         .join(",");
       const files = Array.isArray(value)
-        ? value.filter((item): item is File | SavedSubmissionFile =>
-            (typeof File !== "undefined" && item instanceof File) || isSavedFile(item))
+        ? value.filter(
+            (item): item is File | SavedSubmissionFile =>
+              (typeof File !== "undefined" && item instanceof File) || isSavedFile(item),
+          )
         : [];
       const helpId = `${inputId}-help`;
       control = (
@@ -280,10 +329,16 @@ export function QuestionField({
               if (!selected.length) return;
               onChange([
                 ...files,
-                ...selected.filter((candidate) => !files.some((file) =>
-                  file.name === candidate.name && file.size === candidate.size &&
-                  file instanceof File && file.lastModified === candidate.lastModified,
-                )),
+                ...selected.filter(
+                  (candidate) =>
+                    !files.some(
+                      (file) =>
+                        file.name === candidate.name &&
+                        file.size === candidate.size &&
+                        file instanceof File &&
+                        file.lastModified === candidate.lastModified,
+                    ),
+                ),
               ]);
               event.currentTarget.value = "";
             }}
@@ -295,8 +350,17 @@ export function QuestionField({
           {files.length > 0 && (
             <ul className="space-y-2" aria-label="Selected files">
               {files.map((file, index) => (
-                <li key={isSavedFile(file) ? file.id : `${file.name}-${file.size}-${file.lastModified}-${index}`} className="flex min-w-0 items-center gap-2 rounded-md border bg-muted/30 py-1.5 pl-3 pr-1.5">
-                  <span className="min-w-0 flex-1 truncate text-sm" title={file.name}>{file.name}</span>
+                <li
+                  key={
+                    isSavedFile(file)
+                      ? file.id
+                      : `${file.name}-${file.size}-${file.lastModified}-${index}`
+                  }
+                  className="flex min-w-0 items-center gap-2 rounded-md border bg-muted/30 py-1.5 pl-3 pr-1.5"
+                >
+                  <span className="min-w-0 flex-1 truncate text-sm" title={file.name}>
+                    {file.name}
+                  </span>
                   <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
                     {file.size < 1024 * 1024
                       ? `${(file.size / 1024).toFixed(1)} KB`
@@ -344,7 +408,11 @@ export function QuestionField({
         )}
       </div>
       {control}
-      {error && <p id={errorId} role="alert" className="text-sm text-destructive">{error}</p>}
+      {error && (
+        <p id={errorId} role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
