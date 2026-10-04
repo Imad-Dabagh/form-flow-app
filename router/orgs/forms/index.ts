@@ -22,8 +22,12 @@ export interface OrganizationForm {
   updatedAt: string;
 }
 
+export interface OrganizationFormListItem extends OrganizationForm {
+  archivedAt: string | null;
+}
+
 interface FormsPage {
-  items: OrganizationForm[];
+  items: OrganizationFormListItem[];
   total: number;
   page: number;
   pageSize: number;
@@ -117,11 +121,23 @@ export type FormSettingsInput = Pick<
 export function useFindAll({
   organizationSlug,
   page = 1,
+  search = "",
+  type = "all",
+  status = "active",
+  closed = "all",
 }: {
   organizationSlug: string;
   page?: number;
+  search?: string;
+  type?: FormType | "all";
+  status?: "active" | "archived";
+  closed?: "all" | "open" | "closed";
 }) {
-  const key = organizationSlug ? `/orgs/${organizationSlug}/forms?page=${page}` : null;
+  const params = new URLSearchParams({ page: String(page), status });
+  if (search.trim()) params.set("search", search.trim());
+  if (type !== "all") params.set("type", type);
+  if (status === "active" && closed !== "all") params.set("closed", closed);
+  const key = organizationSlug ? `/orgs/${organizationSlug}/forms?${params}` : null;
   const { data, ...rest } = useSWR<FormsPage, ApiError>(key, (url: string) =>
     requestData<FormsPage>({ method: "GET", url }),
   );
@@ -162,6 +178,35 @@ export function useCreateOne({ organizationSlug }: { organizationSlug: string })
     await mutate(
       (key) => typeof key === "string" && key.startsWith(`/orgs/${organizationSlug}/forms?page=`),
     );
+    return result;
+  }
+
+  return { trigger, ...rest };
+}
+
+/** PUT /api/orgs/:organizationSlug/forms/:formId/archive */
+export function useSetArchivedById({ organizationSlug }: { organizationSlug: string }) {
+  const { mutate } = useSWRConfig();
+  const formsKey = `/orgs/${organizationSlug}/forms`;
+  const { trigger: setArchived, ...rest } = useSWRMutation<
+    { id: string; archivedAt: string | null },
+    ApiError,
+    string,
+    { formId: string; archived: boolean }
+  >(formsKey, (url, { arg }) =>
+    requestData<{ id: string; archivedAt: string | null }>({
+      method: "PUT",
+      url: `${url}/${arg.formId}/archive`,
+      data: { archived: arg.archived },
+    }),
+  );
+
+  async function trigger(input: { formId: string; archived: boolean }) {
+    const result = await setArchived(input);
+    if (input.archived) {
+      await mutate(`${formsKey}/${input.formId}`, undefined, { revalidate: false });
+    }
+    await mutate((key) => typeof key === "string" && key.startsWith(`${formsKey}?page=`));
     return result;
   }
 
