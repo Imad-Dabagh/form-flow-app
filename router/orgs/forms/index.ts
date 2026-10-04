@@ -6,7 +6,6 @@ import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
 
 export * as questions from "./questions";
-export * as submission from "./submission";
 export * as settings from "./settings";
 export * as submissions from "./submissions";
 
@@ -58,7 +57,6 @@ export interface FormOption {
 
 export interface FormQuestion {
   _id: string;
-  name: string;
   title: string;
   inputType: FormFieldType;
   description?: string;
@@ -93,7 +91,7 @@ export interface FormSection {
 }
 
 /** Fields available when a form is shown to someone filling it out. */
-export type FormPresentationQuestion = Omit<FormQuestion, "name">;
+export type FormPresentationQuestion = FormQuestion;
 export type FormPresentationSection = Omit<FormSection, "questions"> & {
   questions: FormPresentationQuestion[];
 };

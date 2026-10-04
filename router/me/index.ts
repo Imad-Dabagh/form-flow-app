@@ -6,6 +6,8 @@ import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
 import type { CurrentProfile, UpdateCurrentProfileInput } from "./types";
 
+export * as formSubmission from "./form-submission";
+
 function normalizeCurrentProfile(profile: CurrentProfile): CurrentProfile {
   return {
     ...profile,

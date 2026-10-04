@@ -34,15 +34,15 @@ function initialAnswers(form: FormPresentation): FormAnswers {
 export function FormRenderer({
   form,
   initialValues,
-  hasDraft = false,
-  draftNotice,
+  hasSavedProgress = false,
+  readOnly = false,
   onSave,
   onSubmit,
 }: {
   form: FormPresentation;
   initialValues?: Partial<FormAnswers>;
-  hasDraft?: boolean;
-  draftNotice?: string;
+  hasSavedProgress?: boolean;
+  readOnly?: boolean;
   onSave?: (answers: FormAnswers) => Promise<void>;
   onSubmit?: (answers: FormAnswers, idempotencyKey: string) => Promise<void> | void;
 }) {
@@ -104,7 +104,7 @@ export function FormRenderer({
   }
 
   function nextStep() {
-    if (!validateAndShow([sections[currentStep]])) return;
+    if (!readOnly && !validateAndShow([sections[currentStep]])) return;
     setStep(currentStep + 1);
     setFocusTarget({ kind: "section", id: sections[currentStep + 1]._id });
   }
@@ -184,15 +184,15 @@ export function FormRenderer({
 
   return (
     <div className="space-y-6">
-      {draftNotice && (
-        <p role="status" className="rounded-lg border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
-          {draftNotice}
+      {readOnly && (
+        <p role="status" className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
+          Submitted · Your answers are shown below for reference.
         </p>
       )}
       <header className="rounded-xl border bg-card px-5 py-6 shadow-sm sm:px-7 sm:py-7">
-        {hasDraft && (
+        {hasSavedProgress && (
           <span className="mb-3 inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-            Draft in progress
+            Saved progress
           </span>
         )}
         <h1 className="text-2xl font-semibold tracking-tight">{form.name}</h1>
@@ -226,7 +226,7 @@ export function FormRenderer({
         </div>
       )}
 
-      <fieldset disabled={isSaving || isSubmitting} className="min-w-0 space-y-6 disabled:opacity-80">
+      <fieldset disabled={readOnly || isSaving || isSubmitting} className="min-w-0 space-y-6 disabled:opacity-80">
         {visibleSections.map((section) => (
           <FormSection
             key={section._id}

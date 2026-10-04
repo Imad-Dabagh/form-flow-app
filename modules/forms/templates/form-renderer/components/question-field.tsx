@@ -18,9 +18,9 @@ import {
 } from "@/modules/shared/components/ui/select";
 import { Textarea } from "@/modules/shared/components/ui/textarea";
 import type { FormAnswer } from "../types";
-import type { SavedDraftFile } from "@/router/form-drafts";
+import type { SavedSubmissionFile } from "@/router/me/form-submission";
 
-function isSavedFile(value: unknown): value is SavedDraftFile {
+function isSavedFile(value: unknown): value is SavedSubmissionFile {
   return typeof value === "object" && value !== null &&
     "id" in value && typeof value.id === "string" &&
     "url" in value && typeof value.url === "string";
@@ -258,7 +258,7 @@ export function QuestionField({
         .flatMap((extension) => extension === "jpg" ? [".jpg", ".jpeg"] : [`.${extension}`])
         .join(",");
       const files = Array.isArray(value)
-        ? value.filter((item): item is File | SavedDraftFile =>
+        ? value.filter((item): item is File | SavedSubmissionFile =>
             (typeof File !== "undefined" && item instanceof File) || isSavedFile(item))
         : [];
       const helpId = `${inputId}-help`;

@@ -1,42 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
-import { toApiError, type ApiError } from "@/lib/api-error";
-import API from "@/router";
+import { toApiError } from "@/lib/api-error";
 import type { FormAnswers } from "../form-renderer/types";
 import { SubmissionView } from "./components/submission-view";
-import { useSubmissionDraft } from "./use-submission-draft";
+import { useCurrentUserSubmission } from "./use-current-user-submission";
 
 export function AuthenticatedFormSubmissionTemplate() {
-  const { organizationSlug, formId } = useParams<{ organizationSlug: string; formId: string }>();
-  const [accessReady, setAccessReady] = useState(false);
-  const [accessError, setAccessError] = useState<ApiError | undefined>();
-  const [accessAttempt, setAccessAttempt] = useState(0);
+  const { formId } = useParams<{ formId: string }>();
+  const submission = useCurrentUserSubmission(formId);
+  const current = submission.current;
   const [closed, setClosed] = useState(false);
-  const { form, error, isLoading, mutate } = API.orgs.forms.submission.useForm({
-    organizationSlug,
-    formId,
-    enabled: accessReady,
-  });
   const [submitted, setSubmitted] = useState(false);
-  const draft = useSubmissionDraft({ form, formId, organizationSlug });
-
-  useEffect(() => {
-    let active = true;
-    API.orgs.forms.submission.ensureAccess({ formId, organizationSlug })
-      .then(() => {
-        if (active) setAccessReady(true);
-      })
-      .catch((error: unknown) => {
-        if (active) setAccessError(toApiError(error));
-      });
-    return () => { active = false; };
-  }, [accessAttempt, formId, organizationSlug]);
 
   async function submit(answers: FormAnswers) {
     try {
-      await draft.finalize(answers);
+      await submission.finalize(answers);
       setSubmitted(true);
     } catch (error) {
       if (toApiError(error).code === "FORM_CLOSED") setClosed(true);
@@ -44,29 +24,18 @@ export function AuthenticatedFormSubmissionTemplate() {
     }
   }
 
-  function retry() {
-    if (accessError) {
-      setAccessReady(false);
-      setAccessError(undefined);
-      setAccessAttempt((current) => current + 1);
-    } else {
-      void mutate();
-      draft.retry();
-    }
-  }
-
   return (
     <SubmissionView
-      form={form}
-      error={accessError ?? error ?? (draft.status === "error" ? toApiError(draft.error) : undefined)}
-      isLoading={!accessReady && !accessError || isLoading || Boolean(form && draft.status === "loading")}
+      form={current?.form}
+      error={submission.error}
+      isLoading={submission.isLoading}
       submitted={submitted}
-      closed={closed}
-      onRetry={retry}
-      initialValues={draft.initialValues}
-      hasDraft={Boolean(draft.draft)}
-      draftNotice={draft.notice}
-      onSave={async (answers) => { await draft.save(answers); }}
+      completedAt={current?.submission.submittedAt}
+      closed={closed || submission.error?.code === "FORM_CLOSED"}
+      onRetry={() => { void submission.retry(); }}
+      initialValues={current?.submission.answers as Partial<FormAnswers> | undefined}
+      hasSavedProgress={Boolean(current && Object.keys(current.submission.answers).length)}
+      onSave={async (answers) => { await submission.save(answers); }}
       onSubmit={submit}
     />
   );

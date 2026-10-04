@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { uid } from "uid/secure";
 import type {
   FormQuestion,
   FormSection,
@@ -38,7 +38,7 @@ export function useFormBuilder(initialForm: OrganizationFormDetails) {
 
   function addSection() {
     const section: FormSection = {
-      _id: uuidv4(),
+      _id: uid(),
       title: "New section",
       description: "",
       isHidden: false,
@@ -62,12 +62,11 @@ export function useFormBuilder(initialForm: OrganizationFormDetails) {
     if (!source) return;
     const copy: FormSection = {
       ...source,
-      _id: uuidv4(),
+      _id: uid(),
       title: `${source.title} (copy)`,
       questions: source.questions.map((question) => ({
         ...question,
-        _id: uuidv4(),
-        name: `entry.${uuidv4()}`,
+        _id: uid(),
       })),
     };
     changeDraft((current) => {
@@ -129,8 +128,7 @@ export function useFormBuilder(initialForm: OrganizationFormDetails) {
       file: "Upload file",
     };
     const question: FormQuestion = {
-      _id: uuidv4(),
-      name: `entry.${uuidv4()}`,
+      _id: uid(),
       title: titles[inputType],
       description: "",
       placeholder: "",
@@ -189,8 +187,7 @@ export function useFormBuilder(initialForm: OrganizationFormDetails) {
     if (!source) return;
     const copy: FormQuestion = {
       ...source,
-      _id: uuidv4(),
-      name: `entry.${uuidv4()}`,
+      _id: uid(),
       title: `${source.title} (copy)`,
     };
     changeDraft((current) => ({

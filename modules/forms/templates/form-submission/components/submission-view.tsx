@@ -9,11 +9,11 @@ export function SubmissionView({
   error,
   isLoading,
   submitted,
+  completedAt,
   closed = false,
   onRetry,
   initialValues,
-  hasDraft,
-  draftNotice,
+  hasSavedProgress,
   onSave,
   onSubmit,
 }: {
@@ -21,11 +21,11 @@ export function SubmissionView({
   error?: ApiError;
   isLoading: boolean;
   submitted: boolean;
+  completedAt?: string | null;
   closed?: boolean;
   onRetry?: () => void;
   initialValues?: Partial<FormAnswers>;
-  hasDraft?: boolean;
-  draftNotice?: string;
+  hasSavedProgress?: boolean;
   onSave?: (answers: FormAnswers) => Promise<void>;
   onSubmit: (answers: FormAnswers, idempotencyKey: string) => Promise<void>;
 }) {
@@ -35,6 +35,10 @@ export function SubmissionView({
 
   if (isLoading) {
     return <SubmissionState kind="loading" title="Opening form" description="Please wait while we load the form." />;
+  }
+
+  if (closed && !completedAt) {
+    return <SubmissionState kind="closed" title={form?.name ?? "Form closed"} description="This form is closed and is no longer accepting submissions." />;
   }
 
   if (error?.status === 400 || error?.status === 404 || (!error && !form)) {
@@ -49,7 +53,7 @@ export function SubmissionView({
     return <SubmissionState kind="error" title="Couldn't open this form" description="Please check your connection and try again." onRetry={onRetry} />;
   }
 
-  if (closed || form.isClosed) {
+  if (form.isClosed && !completedAt) {
     return <SubmissionState kind="closed" title={form.name} description="This form is closed and is no longer accepting submissions." />;
   }
 
@@ -59,10 +63,10 @@ export function SubmissionView({
         key={form.id}
         form={form}
         initialValues={initialValues}
-        hasDraft={hasDraft}
-        draftNotice={draftNotice}
-        onSave={onSave}
-        onSubmit={onSubmit}
+        hasSavedProgress={hasSavedProgress && !completedAt}
+        readOnly={Boolean(completedAt)}
+        onSave={completedAt ? undefined : onSave}
+        onSubmit={completedAt ? undefined : onSubmit}
       />
     </main>
   );
