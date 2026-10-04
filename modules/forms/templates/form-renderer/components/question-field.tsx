@@ -82,11 +82,14 @@ export function QuestionField({
   switch (question.inputType) {
     case "string":
     case "email":
+    case "url":
     case "number":
       control = (
         <Input
           id={inputId}
           type={question.inputType === "string" ? "text" : question.inputType}
+          autoComplete={question.inputType === "url" ? "url" : undefined}
+          spellCheck={question.inputType === "url" ? false : undefined}
           value={textValue}
           aria-invalid={!!error}
           aria-describedby={error ? errorId : undefined}

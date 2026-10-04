@@ -16,7 +16,7 @@ function validateQuestion(question: FormPresentationQuestion, value: FormAnswer 
     return question.isRequired && value !== true ? "This must be checked." : undefined;
   }
 
-  if (["string", "text", "email", "countries"].includes(question.inputType)) {
+  if (["string", "text", "email", "url", "countries"].includes(question.inputType)) {
     if (typeof value !== "string") return "Enter valid text.";
     if (question.validation?.minLength !== undefined && value.length < question.validation.minLength) {
       return `Enter at least ${question.validation.minLength} characters.`;
@@ -26,6 +26,16 @@ function validateQuestion(question: FormPresentationQuestion, value: FormAnswer 
     }
     if (question.inputType === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
       return "Enter a valid email address.";
+    }
+    if (question.inputType === "url") {
+      try {
+        const url = new URL(value.trim());
+        if (!["http:", "https:"].includes(url.protocol) || !url.hostname) {
+          return "Enter a valid http or https URL.";
+        }
+      } catch {
+        return "Enter a valid http or https URL.";
+      }
     }
     return undefined;
   }

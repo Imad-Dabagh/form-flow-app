@@ -38,6 +38,7 @@ export type FormFieldType =
   | "string"
   | "text"
   | "email"
+  | "url"
   | "number"
   | "select"
   | "radio"

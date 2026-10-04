@@ -5,6 +5,7 @@ import {
   Copy,
   GripVertical,
   Hash,
+  Link2,
   Mail,
   Trash2,
   UploadCloud,
@@ -19,6 +20,7 @@ const previewText: Record<string, string> = {
   string: "Short answer text",
   text: "Long answer text",
   email: "name@example.com",
+  url: "https://example.com",
   number: "Enter a number",
 };
 
@@ -223,6 +225,7 @@ function QuestionCardContent({
             className={`flex gap-2 px-3 py-2 text-sm border rounded-md bg-muted/30 text-muted-foreground ${question.inputType === "text" ? "min-h-24 items-start" : "items-center"}`}
           >
             {question.inputType === "email" && <Mail className="size-4 shrink-0" />}
+            {question.inputType === "url" && <Link2 className="size-4 shrink-0" />}
             {question.inputType === "number" && <Hash className="size-4 shrink-0" />}
             {question.inputType === "datetime" &&
               (question.typeConfig?.type === "time" ? (

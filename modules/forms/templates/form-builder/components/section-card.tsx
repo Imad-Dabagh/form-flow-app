@@ -11,6 +11,7 @@ import {
   Copy,
   Hash,
   ListFilter,
+  Link2,
   Mail,
   Paperclip,
   ToggleLeft,
@@ -54,6 +55,7 @@ export function SectionCard({
       | "string"
       | "text"
       | "email"
+      | "url"
       | "number"
       | "select"
       | "radio"
@@ -206,6 +208,14 @@ export function SectionCard({
                 onClick={() => onAddQuestion("email")}
               >
                 <Mail className="size-4" /> Email
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => onAddQuestion("url")}
+              >
+                <Link2 className="size-4" /> URL
               </Button>
               <Button
                 type="button"

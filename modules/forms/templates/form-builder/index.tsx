@@ -234,7 +234,7 @@ function Builder({
           return toast.error(`The minimum for “${question.title}” must not exceed the maximum.`);
         }
         if (
-          question.inputType === "email" &&
+          (question.inputType === "email" || question.inputType === "url") &&
           minLength !== undefined &&
           maxLength !== undefined &&
           minLength > maxLength

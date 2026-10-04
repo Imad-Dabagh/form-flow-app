@@ -103,6 +103,7 @@ export function useFormBuilder(initialForm: OrganizationFormDetails) {
       | "string"
       | "text"
       | "email"
+      | "url"
       | "number"
       | "select"
       | "radio"
@@ -117,6 +118,7 @@ export function useFormBuilder(initialForm: OrganizationFormDetails) {
       string: "Short text",
       text: "Long text",
       email: "Email address",
+      url: "Website URL",
       number: "Number",
       select: "Dropdown",
       radio: "Single choice",
@@ -131,7 +133,7 @@ export function useFormBuilder(initialForm: OrganizationFormDetails) {
       _id: uid(),
       title: titles[inputType],
       description: "",
-      placeholder: "",
+      placeholder: inputType === "url" ? "https://example.com" : "",
       inputType,
       isRequired: false,
       defaultValue: inputType === "boolean" ? false : inputType === "linear-scale" ? null : "",

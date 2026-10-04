@@ -68,7 +68,7 @@ export function SidebarSettings({
               onChange={(event) => onUpdateQuestion({ description: event.target.value })}
             />
           </div>
-          {["string", "text", "email", "number", "select", "multi-select"].includes(
+          {["string", "text", "email", "url", "number", "select", "multi-select"].includes(
             question.inputType,
           ) && (
             <div className="space-y-2">
@@ -216,7 +216,7 @@ export function SidebarSettings({
               </div>
             </div>
           )}
-          {question.inputType === "email" && (
+          {(question.inputType === "email" || question.inputType === "url") && (
             <div className="grid grid-cols-2 gap-3 pt-5 border-t">
               <p className="col-span-2 text-sm font-medium">Character limits</p>
               <NumericSetting
