@@ -1,5 +1,5 @@
-import { FormDetailsTemplate } from "@/modules/forms";
+import { SubmissionsListTemplate } from "@/modules/forms";
 
-export default function FormDetailsPage() {
-  return <FormDetailsTemplate />;
+export default function SubmissionsListPage() {
+  return <SubmissionsListTemplate />;
 }
