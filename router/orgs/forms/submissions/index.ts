@@ -4,16 +4,6 @@ import useSWRInfinite from "swr/infinite";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
 
-export interface FormSubmissionAnswer {
-  sectionId: string;
-  sectionTitle: string;
-  questionId: string;
-  questionTitle: string;
-  inputType: string;
-  value: unknown;
-  selectedOptions?: Array<{ value: string; label: string }>;
-}
-
 export interface FormSubmission {
   id: string;
   submittedAt: string;
@@ -21,7 +11,7 @@ export interface FormSubmission {
     | { kind: "anonymous" }
     | { kind: "former-user" }
     | { kind: "user"; name: string; email: string; profilePic: string | null };
-  answers: FormSubmissionAnswer[];
+  answers: Record<string, unknown>;
 }
 
 interface FormSubmissionsPage {

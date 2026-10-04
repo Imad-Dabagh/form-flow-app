@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowUpRight, FileText, LayoutTemplate } from "lucide-react";
 import API from "@/router";
-import type { OrganizationFormDetails } from "@/router/orgs/forms";
-import type { FormSubmission, FormSubmissionAnswer } from "@/router/orgs/forms/submissions";
+import type { FormFieldType, FormOption, OrganizationFormDetails } from "@/router/orgs/forms";
+import type { FormSubmission } from "@/router/orgs/forms/submissions";
 import { organizationWorkspacePath, useOrganizationWorkspace } from "@/modules/organizations";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/components/ui/avatar";
@@ -24,34 +24,24 @@ import {
   PageBreadcrumbs,
 } from "@/modules/shared/components/workspace";
 
-type QuestionColumn = { id: string; title: string; sectionTitle: string };
+type QuestionColumn = {
+  id: string;
+  title: string;
+  sectionTitle: string;
+  inputType: FormFieldType;
+  options?: FormOption[];
+};
 
-function getQuestionColumns(form: OrganizationFormDetails, submissions: FormSubmission[]) {
-  const columns = new Map<string, QuestionColumn>();
-
-  for (const section of form.sections) {
-    for (const question of section.questions) {
-      columns.set(question._id, {
-        id: question._id,
-        title: question.title,
-        sectionTitle: section.title,
-      });
-    }
-  }
-
-  for (const submission of submissions) {
-    for (const answer of submission.answers) {
-      if (!columns.has(answer.questionId)) {
-        columns.set(answer.questionId, {
-          id: answer.questionId,
-          title: answer.questionTitle,
-          sectionTitle: answer.sectionTitle,
-        });
-      }
-    }
-  }
-
-  return [...columns.values()];
+function getQuestionColumns(form: OrganizationFormDetails) {
+  return form.sections.flatMap((section) =>
+    section.questions.map((question) => ({
+      id: question._id,
+      title: question.title,
+      sectionTitle: section.title,
+      inputType: question.inputType,
+      options: question.options,
+    })),
+  );
 }
 
 function SubmittedDate({ value }: { value: string }) {
@@ -72,15 +62,26 @@ function SubmittedDate({ value }: { value: string }) {
           {date}
         </time>
       </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={6}>{time}</TooltipContent>
+      <TooltipContent side="top" sideOffset={6}>
+        {time}
+      </TooltipContent>
     </Tooltip>
   );
 }
 
 function SubmittedByCell({ submittedBy }: { submittedBy: FormSubmission["submittedBy"] }) {
   const knownUser = submittedBy.kind === "user";
-  const name = knownUser ? submittedBy.name : submittedBy.kind === "former-user" ? "Former user" : "Unknown user";
-  const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+  const name = knownUser
+    ? submittedBy.name
+    : submittedBy.kind === "former-user"
+      ? "Former user"
+      : "Unknown user";
+  const initials = name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <div className="flex min-w-0 items-center gap-3">
@@ -93,7 +94,9 @@ function SubmittedByCell({ submittedBy }: { submittedBy: FormSubmission["submitt
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0">
-        <span className="block truncate font-medium" title={name}>{name}</span>
+        <span className="block truncate font-medium" title={name}>
+          {name}
+        </span>
         {knownUser && (
           <span className="block truncate text-xs text-muted-foreground" title={submittedBy.email}>
             {submittedBy.email}
@@ -104,54 +107,95 @@ function SubmittedByCell({ submittedBy }: { submittedBy: FormSubmission["submitt
   );
 }
 
-function isFile(value: unknown): value is { name?: string; url: string } {
-  return typeof value === "object" && value !== null &&
-    "url" in value && typeof value.url === "string";
+function isFile(value: unknown): value is { name?: string; mimeType?: string; url: string } {
+  return (
+    typeof value === "object" && value !== null && "url" in value && typeof value.url === "string"
+  );
 }
 
-function AnswerValue({ answer }: { answer?: FormSubmissionAnswer }) {
-  if (!answer || answer.value === null || answer.value === undefined || answer.value === "") {
+function FileAnswer({ value }: { value: unknown }) {
+  const files = Array.isArray(value) ? value.filter(isFile) : [];
+  if (!files.length)
+    return <span className="text-xs text-muted-foreground">No files uploaded</span>;
+
+  return (
+    <div className="flex min-w-52 flex-col gap-2">
+      {files.map((file, index) => {
+        const name = file.name || `File ${index + 1}`;
+        const canOpen = /^https?:\/\//i.test(file.url);
+        const content = (
+          <>
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <FileText className="size-4" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium text-foreground" title={name}>
+                {name}
+              </span>
+              <span className="block truncate text-xs text-muted-foreground" title={file.mimeType}>
+                {file.mimeType || "File"}
+              </span>
+            </span>
+            {canOpen && (
+              <ArrowUpRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            )}
+          </>
+        );
+
+        return canOpen ? (
+          <a
+            key={`${file.url}-${index}`}
+            href={file.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open ${name} in a new tab`}
+            className="flex min-w-0 items-center gap-2.5 rounded-lg border border-border bg-background p-2.5 transition-[border-color,background-color] hover:border-primary/50 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {content}
+          </a>
+        ) : (
+          <div
+            key={index}
+            className="flex min-w-0 items-center gap-2.5 rounded-lg border border-border bg-background p-2.5"
+          >
+            {content}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function AnswerValue({ value, question }: { value: unknown; question: QuestionColumn }) {
+  if (question.inputType === "file") return <FileAnswer value={value} />;
+
+  if (value === null || value === undefined || value === "") {
     return <span className="text-muted-foreground">—</span>;
   }
 
-  if (answer.inputType === "file" && Array.isArray(answer.value)) {
-    const files = answer.value.filter(isFile);
-    return files.length ? (
-      <div className="flex flex-col items-start gap-1">
-        {files.map((file, index) => {
-          const safeUrl = /^https?:\/\//i.test(file.url);
-          return safeUrl ? (
-            <a
-              key={`${file.url}-${index}`}
-              href={file.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex max-w-full items-center gap-1 truncate text-primary hover:underline"
-            >
-              <span className="truncate">{file.name || `File ${index + 1}`}</span>
-              <ArrowUpRight className="size-3 shrink-0" />
-            </a>
-          ) : (
-            <span key={index}>{file.name || `File ${index + 1}`}</span>
-          );
-        })}
-      </div>
-    ) : <span className="text-muted-foreground">—</span>;
+  if (["select", "radio", "multi-select", "checkboxes"].includes(question.inputType)) {
+    const selected = Array.isArray(value) ? value : [value];
+    return (
+      <span>
+        {selected
+          .map(
+            (item) =>
+              question.options?.find((option) => option.value === item)?.label ?? String(item),
+          )
+          .join(", ") || "—"}
+      </span>
+    );
   }
 
-  if (answer.selectedOptions?.length) {
-    return <span>{answer.selectedOptions.map((option) => option.label).join(", ")}</span>;
+  if (typeof value === "boolean") return <span>{value ? "Yes" : "No"}</span>;
+  if (Array.isArray(value)) {
+    return <span>{value.map(String).join(", ") || "—"}</span>;
+  }
+  if (typeof value === "object") {
+    return <span>{JSON.stringify(value)}</span>;
   }
 
-  if (typeof answer.value === "boolean") return <span>{answer.value ? "Yes" : "No"}</span>;
-  if (Array.isArray(answer.value)) {
-    return <span>{answer.value.map(String).join(", ") || "—"}</span>;
-  }
-  if (typeof answer.value === "object") {
-    return <span>{JSON.stringify(answer.value)}</span>;
-  }
-
-  return <span>{String(answer.value)}</span>;
+  return <span>{String(value)}</span>;
 }
 
 export function FormDetailsTemplate() {
@@ -160,7 +204,11 @@ export function FormDetailsTemplate() {
     organizationSlug: string;
     formId: string;
   }>();
-  const { form, error: formError, isLoading: isFormLoading } = API.orgs.forms.useFindById({
+  const {
+    form,
+    error: formError,
+    isLoading: isFormLoading,
+  } = API.orgs.forms.useFindById({
     organizationSlug,
     formId,
   });
@@ -172,7 +220,7 @@ export function FormDetailsTemplate() {
     loadMore,
     error: submissionsError,
   } = API.orgs.forms.submissions.useFindAll({ organizationSlug, formId });
-  const columns = form ? getQuestionColumns(form, submissions) : [];
+  const columns = form ? getQuestionColumns(form) : [];
   const isAuthenticatedForm = form?.type === "AUTHENTICATED";
 
   return (
@@ -237,11 +285,16 @@ export function FormDetailsTemplate() {
                   <TableHeader className="bg-muted/40">
                     <TableRow className="hover:bg-transparent">
                       {isAuthenticatedForm && <TableHead className="min-w-64 px-5">User</TableHead>}
-                      <TableHead className={isAuthenticatedForm ? "min-w-36 px-4" : "min-w-36 px-5"}>
+                      <TableHead
+                        className={isAuthenticatedForm ? "min-w-36 px-4" : "min-w-36 px-5"}
+                      >
                         Submitted at
                       </TableHead>
                       {columns.map((column) => (
-                        <TableHead key={column.id} className="min-w-48 max-w-72 px-4 py-3 whitespace-normal">
+                        <TableHead
+                          key={column.id}
+                          className="min-w-48 max-w-72 px-4 py-3 whitespace-normal"
+                        >
                           <span className="block text-xs font-normal text-muted-foreground">
                             {column.sectionTitle}
                           </span>
@@ -251,39 +304,46 @@ export function FormDetailsTemplate() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {submissions.map((submission) => {
-                      const answers = new Map(submission.answers.map((answer) => [answer.questionId, answer]));
-                      return (
-                        <TableRow key={submission.id}>
-                          {isAuthenticatedForm && (
-                            <TableCell className="max-w-72 px-5 py-4">
-                              <SubmittedByCell submittedBy={submission.submittedBy} />
-                            </TableCell>
-                          )}
-                          <TableCell className={isAuthenticatedForm ? "px-4 py-4 text-sm" : "px-5 py-4 text-sm"}>
-                            <SubmittedDate value={submission.submittedAt} />
+                    {submissions.map((submission) => (
+                      <TableRow key={submission.id}>
+                        {isAuthenticatedForm && (
+                          <TableCell className="max-w-72 px-5 py-4">
+                            <SubmittedByCell submittedBy={submission.submittedBy} />
                           </TableCell>
-                          {columns.map((column) => (
-                            <TableCell
-                              key={column.id}
-                              className="max-w-72 px-4 py-4 whitespace-normal break-words"
-                            >
-                              <AnswerValue answer={answers.get(column.id)} />
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      );
-                    })}
+                        )}
+                        <TableCell
+                          className={
+                            isAuthenticatedForm ? "px-4 py-4 text-sm" : "px-5 py-4 text-sm"
+                          }
+                        >
+                          <SubmittedDate value={submission.submittedAt} />
+                        </TableCell>
+                        {columns.map((column) => (
+                          <TableCell
+                            key={column.id}
+                            className="max-w-72 px-4 py-4 whitespace-normal break-words"
+                          >
+                            <AnswerValue value={submission.answers[column.id]} question={column} />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </div>
 
               {(hasMore || isLoadingMore || submissionsError) && (
                 <div className="flex flex-col items-center gap-2">
-                  {submissionsError && <p className="text-sm text-destructive">{submissionsError.message}</p>}
+                  {submissionsError && (
+                    <p className="text-sm text-destructive">{submissionsError.message}</p>
+                  )}
                   {hasMore && (
                     <Button variant="outline" disabled={isLoadingMore} onClick={loadMore}>
-                      {isLoadingMore ? "Loading…" : submissionsError ? "Try again" : "Load more submissions"}
+                      {isLoadingMore
+                        ? "Loading…"
+                        : submissionsError
+                          ? "Try again"
+                          : "Load more submissions"}
                     </Button>
                   )}
                 </div>
