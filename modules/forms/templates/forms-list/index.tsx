@@ -8,6 +8,7 @@ import type { OrganizationForm } from "@/router/orgs/forms";
 import { CreateEditFormModal } from "@/modules/forms/components/create-edit-form-modal";
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
+import { Pagination } from "@/modules/shared/components/pagination";
 import {
   WorkspacePage,
   PageNavigation,
@@ -106,30 +107,12 @@ export function FormsListTemplate() {
               </div>
             ))}
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
-            <span>
-              {formsPage.total} {formsPage.total === 1 ? "form" : "forms"}
-            </span>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >
-                Previous
-              </Button>
-              <span>Page {page}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page * formsPage.pageSize >= formsPage.total}
-                onClick={() => setPage(page + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
+          <Pagination
+            page={page}
+            pageSize={formsPage.pageSize}
+            total={formsPage.total}
+            onPageChange={setPage}
+          />
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-14 text-center">
