@@ -1,6 +1,6 @@
 "use client";
 
-import useSWRInfinite from "swr/infinite";
+import useSWR from "swr";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
 
@@ -16,40 +16,31 @@ export interface FormSubmission {
 
 interface FormSubmissionsPage {
   items: FormSubmission[];
-  nextCursor: string | null;
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 /** GET /api/orgs/:organizationSlug/forms/:formId/submissions */
 export function useFindAll({
   organizationSlug,
   formId,
+  page = 1,
 }: {
   organizationSlug: string;
   formId: string;
+  page?: number;
 }) {
-  const { data, size, setSize, ...rest } = useSWRInfinite<FormSubmissionsPage, ApiError>(
-    (pageIndex, previousPage) => {
-      if (!organizationSlug || !formId) return null;
-
-      const path = `/orgs/${organizationSlug}/forms/${formId}/submissions`;
-      if (pageIndex === 0) return path;
-      const cursor = previousPage?.nextCursor;
-      return cursor ? `${path}?cursor=${encodeURIComponent(cursor)}` : null;
-    },
-    (url: string) => requestData<FormSubmissionsPage>({ method: "GET", url }),
+  const key =
+    organizationSlug && formId
+      ? `/orgs/${organizationSlug}/forms/${formId}/submissions?page=${page}`
+      : null;
+  const { data, ...rest } = useSWR<FormSubmissionsPage, ApiError>(key, (url: string) =>
+    requestData<FormSubmissionsPage>({ method: "GET", url }),
   );
 
-  const submissions = data?.flatMap((page) => page.items) ?? [];
-  const hasMore = Boolean(data?.at(-1)?.nextCursor);
-  const isLoadingMore = Boolean(organizationSlug && formId && size > (data?.length ?? 0) && !rest.error);
-
   return {
-    submissions,
-    hasMore,
-    isLoadingMore,
-    loadMore: () => rest.error
-      ? rest.mutate()
-      : setSize((currentSize) => currentSize + 1),
+    submissionsPage: data,
     ...rest,
   };
 }

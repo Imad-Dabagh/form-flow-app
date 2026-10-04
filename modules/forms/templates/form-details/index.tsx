@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import { ArrowUpRight, FileText, LayoutTemplate, Link2 } from "lucide-react";
 import API from "@/router";
 import type { FormFieldType, FormOption, OrganizationFormDetails } from "@/router/orgs/forms";
 import type { FormSubmission } from "@/router/orgs/forms/submissions";
 import { organizationWorkspacePath, useOrganizationWorkspace } from "@/modules/organizations";
 import { Button } from "@/modules/shared/components/ui/button";
+import { Pagination } from "@/modules/shared/components/pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/shared/components/ui/tooltip";
 import {
@@ -232,6 +234,7 @@ function AnswerValue({ value, question }: { value: unknown; question: QuestionCo
 
 export function FormDetailsTemplate() {
   const organization = useOrganizationWorkspace();
+  const [page, setPage] = useState(1);
   const { organizationSlug, formId } = useParams<{
     organizationSlug: string;
     formId: string;
@@ -245,13 +248,11 @@ export function FormDetailsTemplate() {
     formId,
   });
   const {
-    submissions,
-    hasMore,
+    submissionsPage,
     isLoading: areSubmissionsLoading,
-    isLoadingMore,
-    loadMore,
     error: submissionsError,
-  } = API.orgs.forms.submissions.useFindAll({ organizationSlug, formId });
+  } = API.orgs.forms.submissions.useFindAll({ organizationSlug, formId, page });
+  const submissions = submissionsPage?.items ?? [];
   const columns = form ? getQuestionColumns(form) : [];
   const isAuthenticatedForm = form?.type === "AUTHENTICATED";
 
@@ -283,18 +284,9 @@ export function FormDetailsTemplate() {
         <p className="text-sm text-destructive">{formError?.message ?? "Form not found."}</p>
       ) : (
         <section className="space-y-5" aria-labelledby="submissions-heading">
-          <div className="flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <h2 id="submissions-heading" className="text-xl font-semibold tracking-tight">
-                Submissions
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {areSubmissionsLoading
-                  ? "Loading submissions…"
-                  : `${submissions.length} ${submissions.length === 1 ? "submission" : "submissions"}${hasMore ? " loaded" : ""}`}
-              </p>
-            </div>
-          </div>
+          <h2 id="submissions-heading" className="text-xl font-semibold tracking-tight">
+            Submissions
+          </h2>
 
           <div className="overflow-x-auto rounded-xl border border-border bg-card">
             <Table className="min-w-max">
@@ -365,21 +357,13 @@ export function FormDetailsTemplate() {
             </Table>
           </div>
 
-          {submissions.length > 0 && (hasMore || isLoadingMore || submissionsError) && (
-            <div className="flex flex-col items-center gap-2">
-              {submissionsError && (
-                <p className="text-sm text-destructive">{submissionsError.message}</p>
-              )}
-              {hasMore && (
-                <Button variant="outline" disabled={isLoadingMore} onClick={loadMore}>
-                  {isLoadingMore
-                    ? "Loading…"
-                    : submissionsError
-                      ? "Try again"
-                      : "Load more submissions"}
-                </Button>
-              )}
-            </div>
+          {submissionsPage && (
+            <Pagination
+              page={page}
+              pageSize={submissionsPage.pageSize}
+              total={submissionsPage.total}
+              onPageChange={setPage}
+            />
           )}
         </section>
       )}
