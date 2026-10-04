@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowUpRight, FileText, LayoutTemplate } from "lucide-react";
+import { ArrowUpRight, FileText, LayoutTemplate, Link2 } from "lucide-react";
 import API from "@/router";
 import type { FormFieldType, FormOption, OrganizationFormDetails } from "@/router/orgs/forms";
 import type { FormSubmission } from "@/router/orgs/forms/submissions";
@@ -171,6 +171,38 @@ function AnswerValue({ value, question }: { value: unknown; question: QuestionCo
 
   if (value === null || value === undefined || value === "") {
     return <span className="text-muted-foreground">—</span>;
+  }
+
+  if (question.inputType === "url" && typeof value === "string") {
+    try {
+      const url = new URL(value);
+      if (["http:", "https:"].includes(url.protocol) && url.hostname) {
+        return (
+          <a
+            href={url.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open ${value} in a new tab`}
+            className="flex min-w-52 max-w-72 items-center gap-2.5 rounded-lg border border-border bg-background p-2.5 transition-[border-color,background-color] hover:border-primary/50 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Link2 className="size-4" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium text-foreground" title={url.host}>
+                {url.host}
+              </span>
+              <span className="block truncate text-xs text-muted-foreground" title={value}>
+                {value}
+              </span>
+            </span>
+            <ArrowUpRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          </a>
+        );
+      }
+    } catch {
+      // An invalid saved value is shown as text instead of an unsafe link.
+    }
   }
 
   if (["select", "radio", "multi-select", "checkboxes"].includes(question.inputType)) {
