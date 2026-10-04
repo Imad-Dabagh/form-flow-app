@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ArrowRight, ImagePlus, Loader2, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrentProfileContext } from "@/modules/profile/current-profile-context";
-import { FilePicker, IMAGE_FILE_ACCEPT } from "@/modules/shared/components/file-upload/file-picker";
+import { FilePicker, IMAGE_FILE_ACCEPT } from "@/modules/shared/components/file-upload";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";

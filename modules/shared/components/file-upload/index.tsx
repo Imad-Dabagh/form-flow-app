@@ -213,9 +213,7 @@ export function FilePicker({
       <p className="mt-3 text-sm font-medium">
         {dropzone.isDragActive ? "Drop files here" : "Drag files here"}
       </p>
-      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        Up to {effectiveMaxSizeMb} MB per file
-      </p>
+      <p className="mt-1 text-xs text-slate-500">Up to {effectiveMaxSizeMb} MB per file</p>
       <Button
         className="mt-4"
         disabled={disabled || isUploading}
@@ -226,7 +224,7 @@ export function FilePicker({
       >
         {buttonTitle}
       </Button>
-      {error && <p className="mt-3 text-xs text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="mt-3 text-xs text-red-600">{error}</p>}
     </div>
   );
 }

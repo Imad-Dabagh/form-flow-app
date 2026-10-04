@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ChevronDown, ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { FilePicker } from "@/modules/shared/components/file-upload/file-picker";
+import { FilePicker } from "@/modules/shared/components/file-upload";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";

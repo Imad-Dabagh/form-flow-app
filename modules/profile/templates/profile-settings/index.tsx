@@ -6,7 +6,7 @@ import { ImagePlus, Loader2, UserRound, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useCurrentProfileContext } from "../../current-profile-context";
-import { FilePicker, IMAGE_FILE_ACCEPT } from "@/modules/shared/components/file-upload/file-picker";
+import { FilePicker, IMAGE_FILE_ACCEPT } from "@/modules/shared/components/file-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/components/ui/avatar";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
