@@ -296,91 +296,90 @@ export function FormDetailsTemplate() {
             </div>
           </div>
 
-          {areSubmissionsLoading ? (
-            <div className="rounded-xl border border-border bg-card px-5 py-12 text-sm text-muted-foreground">
-              Loading submissions…
-            </div>
-          ) : submissionsError && submissions.length === 0 ? (
-            <p className="text-sm text-destructive">{submissionsError.message}</p>
-          ) : submissions.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-14 text-center">
-              <FileText className="mx-auto size-7 text-muted-foreground" />
-              <h3 className="mt-4 font-medium">No submissions yet</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Answers will appear here after someone submits this form.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto rounded-xl border border-border bg-card">
-                <Table className="min-w-max">
-                  <TableHeader className="bg-muted/40">
-                    <TableRow className="hover:bg-transparent">
-                      {isAuthenticatedForm && <TableHead className="min-w-64 px-5">User</TableHead>}
-                      <TableHead
-                        className={isAuthenticatedForm ? "min-w-36 px-4" : "min-w-36 px-5"}
-                      >
-                        Submitted at
-                      </TableHead>
-                      {columns.map((column) => (
-                        <TableHead
-                          key={column.id}
-                          className="min-w-48 max-w-72 px-4 py-3 whitespace-normal"
-                        >
-                          <span className="block text-xs font-normal text-muted-foreground">
-                            {column.sectionTitle}
+          <div className="overflow-x-auto rounded-xl border border-border bg-card">
+            <Table className="min-w-max">
+              <TableHeader className="bg-muted/40">
+                <TableRow className="hover:bg-transparent">
+                  {isAuthenticatedForm && <TableHead className="min-w-64 px-5">User</TableHead>}
+                  <TableHead className={isAuthenticatedForm ? "min-w-36 px-4" : "min-w-36 px-5"}>
+                    Submitted at
+                  </TableHead>
+                  {columns.map((column) => (
+                    <TableHead
+                      key={column.id}
+                      className="min-w-48 max-w-72 px-4 py-3 whitespace-normal"
+                    >
+                      <span className="block text-xs font-normal text-muted-foreground">
+                        {column.sectionTitle}
+                      </span>
+                      <span className="block font-medium">{column.title}</span>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {submissions.length === 0 && (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell
+                      colSpan={columns.length + (isAuthenticatedForm ? 2 : 1)}
+                      className="h-36 px-5 text-center"
+                    >
+                      {areSubmissionsLoading ? (
+                        <span className="text-sm text-muted-foreground">Loading submissions…</span>
+                      ) : submissionsError ? (
+                        <span className="text-sm text-destructive">{submissionsError.message}</span>
+                      ) : (
+                        <span className="block space-y-1">
+                          <span className="block text-sm font-medium">No submissions yet</span>
+                          <span className="block text-sm text-muted-foreground">
+                            Answers will appear here after someone submits this form.
                           </span>
-                          <span className="block font-medium">{column.title}</span>
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {submissions.map((submission) => (
-                      <TableRow key={submission.id}>
-                        {isAuthenticatedForm && (
-                          <TableCell className="max-w-72 px-5 py-4">
-                            <SubmittedByCell submittedBy={submission.submittedBy} />
-                          </TableCell>
-                        )}
-                        <TableCell
-                          className={
-                            isAuthenticatedForm ? "px-4 py-4 text-sm" : "px-5 py-4 text-sm"
-                          }
-                        >
-                          <SubmittedDate value={submission.submittedAt} />
-                        </TableCell>
-                        {columns.map((column) => (
-                          <TableCell
-                            key={column.id}
-                            className="max-w-72 px-4 py-4 whitespace-normal break-words"
-                          >
-                            <AnswerValue value={submission.answers[column.id]} question={column} />
-                          </TableCell>
-                        ))}
-                      </TableRow>
+                        </span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
+                {submissions.map((submission) => (
+                  <TableRow key={submission.id}>
+                    {isAuthenticatedForm && (
+                      <TableCell className="max-w-72 px-5 py-4">
+                        <SubmittedByCell submittedBy={submission.submittedBy} />
+                      </TableCell>
+                    )}
+                    <TableCell
+                      className={isAuthenticatedForm ? "px-4 py-4 text-sm" : "px-5 py-4 text-sm"}
+                    >
+                      <SubmittedDate value={submission.submittedAt} />
+                    </TableCell>
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        className="max-w-72 px-4 py-4 whitespace-normal break-words"
+                      >
+                        <AnswerValue value={submission.answers[column.id]} question={column} />
+                      </TableCell>
                     ))}
-                  </TableBody>
-                </Table>
-              </div>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
-              {(hasMore || isLoadingMore || submissionsError) && (
-                <div className="flex flex-col items-center gap-2">
-                  {submissionsError && (
-                    <p className="text-sm text-destructive">{submissionsError.message}</p>
-                  )}
-                  {hasMore && (
-                    <Button variant="outline" disabled={isLoadingMore} onClick={loadMore}>
-                      {isLoadingMore
-                        ? "Loading…"
-                        : submissionsError
-                          ? "Try again"
-                          : "Load more submissions"}
-                    </Button>
-                  )}
-                </div>
+          {submissions.length > 0 && (hasMore || isLoadingMore || submissionsError) && (
+            <div className="flex flex-col items-center gap-2">
+              {submissionsError && (
+                <p className="text-sm text-destructive">{submissionsError.message}</p>
               )}
-            </>
+              {hasMore && (
+                <Button variant="outline" disabled={isLoadingMore} onClick={loadMore}>
+                  {isLoadingMore
+                    ? "Loading…"
+                    : submissionsError
+                      ? "Try again"
+                      : "Load more submissions"}
+                </Button>
+              )}
+            </div>
           )}
         </section>
       )}
