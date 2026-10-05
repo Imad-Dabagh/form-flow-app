@@ -4,23 +4,46 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
-import { ArrowDownUp, ArrowUpRight, FileText, LayoutTemplate, Link2, Search } from "lucide-react";
+import {
+  ArrowDownUp,
+  ArrowUpRight,
+  ChevronDown,
+  Copy,
+  FileText,
+  LayoutTemplate,
+  Link2,
+  LoaderCircle,
+  Pencil,
+  Search,
+} from "lucide-react";
+import { toast } from "sonner";
 import API from "@/router";
 import type { FormFieldType, FormOption, OrganizationFormDetails } from "@/router/orgs/forms";
 import type { FormSubmission } from "@/router/orgs/forms/submissions";
-import { organizationWorkspacePath, useOrganizationWorkspace } from "@/modules/organizations";
+import type { FormSubmissionStatus } from "@/router/orgs/forms/submission-statuses";
+import { FormSettingsDrawer } from "@/modules/forms/patterns/form-settings-drawer";
+import { SubmissionDetails } from "@/modules/forms/patterns/submission-details";
+import { getOrganizationColorSwatch } from "@/modules/organizations/lib/primary-color-theme";
+import {
+  organizationWorkspacePath,
+  useOrganizationPermissions,
+  useOrganizationWorkspace,
+} from "@/modules/organizations";
+import { SidePanel } from "@/modules/shared/components/side-panel";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { DatePicker } from "@/modules/shared/components/date-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/modules/shared/components/ui/dropdown-menu";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Pagination } from "@/modules/shared/components/pagination";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/modules/shared/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/shared/components/ui/tooltip";
 import { ToggleGroup, ToggleGroupItem } from "@/modules/shared/components/ui/toggle-group";
@@ -58,26 +81,39 @@ function getQuestionColumns(form: OrganizationFormDetails) {
   );
 }
 
-function SubmissionDate({ value, kind }: { value: string; kind: "Submitted" | "Started" }) {
+function SubmissionDate({
+  value,
+  kind,
+  onOpen,
+}: {
+  value: string;
+  kind: "Submitted" | "Started";
+  onOpen: () => void;
+}) {
   const timestamp = new Date(value);
   const date = new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(timestamp);
   const time = new Intl.DateTimeFormat("en", { timeStyle: "short" }).format(timestamp);
+  const fullDateTime = new Intl.DateTimeFormat("en", {
+    dateStyle: "full",
+    timeStyle: "short",
+  }).format(timestamp);
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <time
-          dateTime={value}
-          aria-label={`${kind} ${date} at ${time}`}
-          tabIndex={0}
-          suppressHydrationWarning
-          className="underline outline-none cursor-help whitespace-nowrap tabular-nums decoration-border decoration-dotted underline-offset-4 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring"
+        <button
+          type="button"
+          aria-label={`Open submission details, ${kind.toLowerCase()} on ${date} at ${time}`}
+          onClick={onOpen}
+          className="cursor-pointer underline outline-none whitespace-nowrap tabular-nums decoration-border decoration-dotted underline-offset-4 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {date}
-        </time>
+          <time dateTime={value} suppressHydrationWarning>
+            {date}
+          </time>
+        </button>
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={6}>
-        {time}
+        {fullDateTime}
       </TooltipContent>
     </Tooltip>
   );
@@ -118,6 +154,92 @@ function SubmittedByCell({ submittedBy }: { submittedBy: FormSubmission["submitt
         )}
       </div>
     </div>
+  );
+}
+
+function SubmissionStatusCell({
+  submission,
+  statuses,
+  canChange,
+  isUpdating,
+  isLoading,
+  hasLoadError,
+  isBusy,
+  onChange,
+}: {
+  submission: FormSubmission;
+  statuses: FormSubmissionStatus[];
+  canChange: boolean;
+  isUpdating: boolean;
+  isLoading: boolean;
+  hasLoadError: boolean;
+  isBusy: boolean;
+  onChange: (submission: FormSubmission, statusId: string) => void;
+}) {
+  const current = statuses.find((status) => status.id === submission.submissionStatusId);
+  const options = statuses.filter((status) => status.id !== submission.submissionStatusId);
+  const label = current?.name ?? (isLoading
+    ? "Loading status…"
+    : hasLoadError ? "Status unavailable"
+      : submission.submissionStatusId ? "Unknown status" : "Unassigned");
+  const color = current ? getOrganizationColorSwatch(current.color) : null;
+  const style = color ? {
+    backgroundColor: `color-mix(in oklch, ${color} 12%, transparent)`,
+    borderColor: `color-mix(in oklch, ${color} 38%, transparent)`,
+  } : undefined;
+  const content = (
+    <>
+      <span
+        className="size-2 shrink-0 rounded-full"
+        style={{ backgroundColor: color ?? "currentColor" }}
+        aria-hidden="true"
+      />
+      <span className="max-w-36 truncate">{label}</span>
+    </>
+  );
+
+  if (!canChange || options.length === 0) {
+    return (
+      <Badge variant="outline" className="min-h-8 gap-2 rounded-full px-2.5 py-1" style={style}>
+        {content}
+      </Badge>
+    );
+  }
+
+  return (
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          disabled={isBusy}
+          aria-label={`Change submission status, currently ${label}`}
+          className="inline-flex min-h-8 items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium text-foreground outline-none transition-[box-shadow,transform] hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+          style={style}
+        >
+          {content}
+          {isUpdating
+            ? <LoaderCircle className="size-3 animate-spin" aria-hidden="true" />
+            : <ChevronDown className="size-3 text-muted-foreground" aria-hidden="true" />}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        sideOffset={6}
+        className="min-w-44"
+        onClick={(event) => event.stopPropagation()}
+      >
+        {options.map((status) => (
+          <DropdownMenuItem key={status.id} onSelect={() => onChange(submission, status.id)}>
+            <span
+              className="size-2.5 shrink-0 rounded-full"
+              style={{ backgroundColor: getOrganizationColorSwatch(status.color) }}
+              aria-hidden="true"
+            />
+            <span className="truncate">{status.name}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -246,13 +368,18 @@ function AnswerValue({ value, question }: { value: unknown; question: QuestionCo
 
 export function SubmissionsListTemplate() {
   const organization = useOrganizationWorkspace();
+  const { canManageForms } = useOrganizationPermissions();
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [from, setFrom] = useState("");
   const [through, setThrough] = useState("");
   const [status, setStatus] = useState<"all" | "submitted" | "started">("submitted");
+  const [submissionStatusId, setSubmissionStatusId] = useState("");
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
+  const [selectedSubmission, setSelectedSubmission] = useState<FormSubmission | null>(null);
+  const [updatingSubmissionId, setUpdatingSubmissionId] = useState<string | null>(null);
+  const [editFormOpen, setEditFormOpen] = useState(false);
   const { organizationSlug, formId } = useParams<{
     organizationSlug: string;
     formId: string;
@@ -275,9 +402,31 @@ export function SubmissionsListTemplate() {
     page,
     search: form?.type === "AUTHENTICATED" ? search : "",
     status: form?.type === "AUTHENTICATED" ? status : "submitted",
+    submissionStatusId,
     sort,
     from,
     through,
+  });
+  const {
+    statuses: submissionStatuses,
+    isLoading: areStatusesLoading,
+    error: statusesError,
+  } = API.orgs.forms.submissionStatuses.useFormSubmissionStatuses({
+    organizationSlug,
+    formId,
+  });
+  useEffect(() => {
+    if (
+      submissionStatusId && !areStatusesLoading && !statusesError &&
+      !submissionStatuses.some((item) => item.id === submissionStatusId)
+    ) {
+      setSubmissionStatusId("");
+      setPage(1);
+    }
+  }, [submissionStatusId, submissionStatuses, areStatusesLoading, statusesError]);
+  const { trigger: updateSubmissionStatus } = API.orgs.forms.submissions.useUpdateStatus({
+    organizationSlug,
+    formId,
   });
   useEffect(() => {
     const timer = window.setTimeout(() => setSearch(searchInput.trim()), 300);
@@ -288,11 +437,13 @@ export function SubmissionsListTemplate() {
   const isAuthenticatedForm = form?.type === "AUTHENTICATED";
   const hasFilters =
     (isAuthenticatedForm && (searchInput.trim() !== "" || status !== "submitted")) ||
+    submissionStatusId !== "" ||
     from !== "" ||
     through !== "" ||
     sort !== "newest";
   const hasResultFilters =
-    (isAuthenticatedForm && searchInput.trim() !== "") || from !== "" || through !== "";
+    (isAuthenticatedForm && searchInput.trim() !== "") ||
+    submissionStatusId !== "" || from !== "" || through !== "";
   const emptyMessage = areSubmissionsLoading ? (
     <span className="text-sm text-muted-foreground">Loading submissions…</span>
   ) : submissionsError ? (
@@ -308,13 +459,39 @@ export function SubmissionsListTemplate() {
       </span>
       <span className="block text-sm text-muted-foreground">
         {hasResultFilters
-          ? "Try a different search or date range."
+          ? "Try different filters."
           : status === "started" && isAuthenticatedForm
             ? "People who open this form without submitting will appear here."
             : "Answers will appear here after someone submits this form."}
       </span>
     </span>
   );
+
+  async function copyFormLink() {
+    if (!form) return;
+    const path = organizationWorkspacePath(organizationSlug, `/submit/${form.id}`);
+    try {
+      await navigator.clipboard.writeText(new URL(path, window.location.origin).href);
+      toast.success("Form link copied");
+    } catch {
+      toast.error("Could not copy the form link.");
+    }
+  }
+
+  async function changeSubmissionStatus(submission: FormSubmission, submissionStatusId: string) {
+    setUpdatingSubmissionId(submission.id);
+    try {
+      await updateSubmissionStatus({ submissionId: submission.id, submissionStatusId });
+      setSelectedSubmission((current) => current?.id === submission.id
+        ? { ...current, submissionStatusId }
+        : current);
+      toast.success("Submission status updated");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update the submission status.");
+    } finally {
+      setUpdatingSubmissionId(null);
+    }
+  }
 
   return (
     <WorkspacePage>
@@ -330,11 +507,38 @@ export function SubmissionsListTemplate() {
           ]}
         />
         {form && (
-          <Button asChild size="sm" className="shrink-0">
-            <Link href={organizationWorkspacePath(organizationSlug, `/forms/${formId}/builder`)}>
-              <LayoutTemplate className="size-4" /> Open builder
-            </Link>
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-10 sm:h-8"
+              onClick={() => void copyFormLink()}
+            >
+              <Copy className="size-4" /> Copy Link
+            </Button>
+            {canManageForms && (
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="sm" className="h-10 sm:h-8">
+                    Actions <ChevronDown className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" side="bottom" sideOffset={6} className="min-w-44">
+                  <DropdownMenuItem onSelect={() => setEditFormOpen(true)}>
+                    <Pencil className="size-4" /> Edit Form
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={organizationWorkspacePath(organizationSlug, `/forms/${formId}/builder`)}
+                    >
+                      <LayoutTemplate className="size-4" /> Open Builder
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         )}
       </PageNavigation>
 
@@ -369,7 +573,7 @@ export function SubmissionsListTemplate() {
               {isAuthenticatedForm && (
                 <ToggleGroup
                   type="single"
-                  aria-label="Filter submissions by status"
+                  aria-label="Filter submissions by completion"
                   value={status}
                   onValueChange={(value) => {
                     if (!value) return;
@@ -398,6 +602,36 @@ export function SubmissionsListTemplate() {
                   </ToggleGroupItem>
                 </ToggleGroup>
               )}
+              <Select
+                value={submissionStatusId || "all"}
+                onValueChange={(value) => {
+                  setSubmissionStatusId(value === "all" ? "" : value);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger
+                  aria-label="Filter by submission status"
+                  className="h-10 w-full sm:w-48"
+                  disabled={areStatusesLoading && submissionStatuses.length === 0}
+                >
+                  <SelectValue placeholder="All statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  {submissionStatuses.map((submissionStatus) => (
+                    <SelectItem key={submissionStatus.id} value={submissionStatus.id}>
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="size-2.5 rounded-full"
+                          style={{ backgroundColor: getOrganizationColorSwatch(submissionStatus.color) }}
+                          aria-hidden="true"
+                        />
+                        {submissionStatus.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <DatePicker
                 mode="range"
                 value={{
@@ -450,6 +684,7 @@ export function SubmissionsListTemplate() {
                     setFrom("");
                     setThrough("");
                     setStatus("submitted");
+                    setSubmissionStatusId("");
                     setSort("newest");
                     setPage(1);
                   }}
@@ -478,6 +713,7 @@ export function SubmissionsListTemplate() {
                           ? "Date"
                           : "Submitted at"}
                     </TableHead>
+                    <TableHead className="min-w-44 px-4">Status</TableHead>
                     {submissions.length > 0 &&
                       columns.map((column) => (
                         <TableHead
@@ -495,13 +731,29 @@ export function SubmissionsListTemplate() {
                 <TableBody>
                   {submissions.length === 0 && (
                     <TableRow className="hover:bg-transparent">
-                      <TableCell colSpan={2} className="px-5 text-center h-36">
+                      <TableCell colSpan={3} className="px-5 text-center h-36">
                         {emptyMessage}
                       </TableCell>
                     </TableRow>
                   )}
                   {submissions.map((submission) => (
-                    <TableRow key={submission.id}>
+                    <TableRow
+                      key={submission.id}
+                      data-state={selectedSubmission?.id === submission.id ? "selected" : undefined}
+                      className="cursor-pointer"
+                      onClick={(event) => {
+                        if (
+                          event.target instanceof Element &&
+                          event.target.closest(
+                            "a, button, input, select, textarea, [role='button'], [role='menuitem']",
+                          )
+                        ) {
+                          return;
+                        }
+                        event.currentTarget.querySelector("button")?.focus();
+                        setSelectedSubmission(submission);
+                      }}
+                    >
                       {isAuthenticatedForm && (
                         <TableCell className="px-5 py-4 max-w-72">
                           <SubmittedByCell submittedBy={submission.submittedBy} />
@@ -514,6 +766,7 @@ export function SubmissionsListTemplate() {
                           <SubmissionDate
                             value={submission.submittedAt ?? submission.startedAt}
                             kind={submission.submittedAt ? "Submitted" : "Started"}
+                            onOpen={() => setSelectedSubmission(submission)}
                           />
                           {isAuthenticatedForm && status === "all" && (
                             <Badge variant={submission.submittedAt ? "secondary" : "outline"}>
@@ -521,6 +774,18 @@ export function SubmissionsListTemplate() {
                             </Badge>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell className="px-4 py-4">
+                        <SubmissionStatusCell
+                          submission={submission}
+                          statuses={submissionStatuses}
+                          canChange={canManageForms}
+                          isUpdating={updatingSubmissionId === submission.id}
+                          isLoading={areStatusesLoading}
+                          hasLoadError={Boolean(statusesError)}
+                          isBusy={updatingSubmissionId !== null}
+                          onChange={(item, statusId) => void changeSubmissionStatus(item, statusId)}
+                        />
                       </TableCell>
                       {columns.map((column) => (
                         <TableCell
@@ -545,7 +810,28 @@ export function SubmissionsListTemplate() {
               onPageChange={setPage}
             />
           )}
+
+          <SidePanel
+            isOpen={selectedSubmission !== null}
+            onClose={() => setSelectedSubmission(null)}
+            title="Submission details"
+            className="sm:w-[80vw] sm:max-w-[80vw]"
+          >
+            {selectedSubmission && (
+              <SubmissionDetails form={form} submission={selectedSubmission} />
+            )}
+          </SidePanel>
         </section>
+      )}
+
+      {form && canManageForms && (
+        <FormSettingsDrawer
+          key={form.id}
+          open={editFormOpen}
+          onOpenChange={setEditFormOpen}
+          organizationSlug={organizationSlug}
+          formId={form.id}
+        />
       )}
     </WorkspacePage>
   );
