@@ -15,6 +15,7 @@ export interface SavedSubmissionFile {
 
 export interface CurrentUserSubmission {
   id: string;
+  submissionStatusId: string;
   submittedAt: string | null;
   updatedAt: string;
   answers: Record<string, unknown>;
@@ -23,6 +24,15 @@ export interface CurrentUserSubmission {
 export interface CurrentUserForm {
   form: FormPresentation & { type: "AUTHENTICATED" };
   submission: CurrentUserSubmission;
+  submissionStatuses: Array<{
+    id: string;
+    name: string;
+    description: string;
+    color: string;
+    order: number;
+    isDefault: boolean;
+    isSubmissionLocked: boolean;
+  }>;
 }
 
 const pathFor = (formId: string) => `/me/forms/${formId}/submission`;
@@ -47,11 +57,14 @@ export function submit(formId: string) {
   });
 }
 
-export function uploadFile(formId: string, questionId: string, file: File) {
+export function uploadFile(formId: string, questionId: string, file: File, replaceFileId?: string) {
   const data = new FormData();
   data.append("file", file);
   return requestData<CurrentUserSubmission>({
-    method: "POST", url: `${pathFor(formId)}/files/${questionId}`, data,
+    method: "POST",
+    url: `${pathFor(formId)}/files/${questionId}${replaceFileId
+      ? `?replaceFileId=${encodeURIComponent(replaceFileId)}` : ""}`,
+    data,
   });
 }
 

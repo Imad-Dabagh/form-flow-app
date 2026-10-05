@@ -23,12 +23,16 @@ function initialAnswer(question: FormPresentationQuestion): FormAnswer {
   return typeof value === "string" || typeof value === "number" ? value : "";
 }
 
-function initialAnswers(form: FormPresentation): FormAnswers {
-  return Object.fromEntries(
+function initialAnswers(form: FormPresentation, initialValues?: Partial<FormAnswers>): FormAnswers {
+  const answers = Object.fromEntries(
     form.sections.flatMap((section) =>
       section.questions.map((question) => [question._id, initialAnswer(question)]),
     ),
   );
+  for (const [questionId, value] of Object.entries(initialValues ?? {})) {
+    if (value !== undefined) answers[questionId] = value;
+  }
+  return answers;
 }
 
 export function FormRenderer({
@@ -36,6 +40,7 @@ export function FormRenderer({
   initialValues,
   hasSavedProgress = false,
   readOnly = false,
+  notice,
   onSave,
   onSubmit,
 }: {
@@ -43,16 +48,11 @@ export function FormRenderer({
   initialValues?: Partial<FormAnswers>;
   hasSavedProgress?: boolean;
   readOnly?: boolean;
+  notice?: string;
   onSave?: (answers: FormAnswers) => Promise<void>;
   onSubmit?: (answers: FormAnswers, idempotencyKey: string) => Promise<void> | void;
 }) {
-  const [answers, setAnswers] = useState<FormAnswers>(() => {
-    const answers = initialAnswers(form);
-    for (const [questionId, value] of Object.entries(initialValues ?? {})) {
-      if (value !== undefined) answers[questionId] = value;
-    }
-    return answers;
-  });
+  const [answers, setAnswers] = useState<FormAnswers>(() => initialAnswers(form, initialValues));
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,10 +62,19 @@ export function FormRenderer({
   const [step, setStep] = useState(0);
   const [focusTarget, setFocusTarget] = useState<{ kind: "question" | "section"; id: string } | null>(null);
   const submissionKey = useRef<string | null>(null);
+  const wasReadOnly = useRef(readOnly);
   const sections = form.sections.filter((section) => !section.isHidden);
   const isWizard = form.displayMode === "WIZARD";
   const currentStep = Math.min(step, Math.max(0, sections.length - 1));
   const visibleSections = isWizard ? sections.slice(currentStep, currentStep + 1) : sections;
+
+  useEffect(() => {
+    if (readOnly && !wasReadOnly.current) {
+      setAnswers(initialAnswers(form, initialValues));
+      setErrors({});
+    }
+    wasReadOnly.current = readOnly;
+  }, [readOnly, form, initialValues]);
 
   useEffect(() => {
     if (!focusTarget) return;
@@ -99,7 +108,12 @@ export function FormRenderer({
     const nextErrors = validateSections(targetSections, answers);
     setErrors(nextErrors);
     const firstId = Object.keys(nextErrors)[0];
-    if (firstId) focusQuestion(firstId);
+    if (firstId) {
+      const sectionIndex = sections.findIndex((section) =>
+        section.questions.some((question) => question._id === firstId));
+      if (isWizard && sectionIndex >= 0) setStep(sectionIndex);
+      focusQuestion(firstId);
+    }
     return !firstId;
   }
 
@@ -184,9 +198,9 @@ export function FormRenderer({
 
   return (
     <div className="space-y-6">
-      {readOnly && (
+      {(notice || readOnly) && (
         <p role="status" className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
-          Submitted · Your answers are shown below for reference.
+          {notice ?? "Submitted · Your answers are shown below for reference."}
         </p>
       )}
       <header className="rounded-xl border bg-card px-5 py-6 shadow-sm sm:px-7 sm:py-7">
@@ -244,7 +258,7 @@ export function FormRenderer({
         </div>
       )}
 
-      {sections.length > 0 && ((isWizard && sections.length > 1) || onSubmit) && (
+      {sections.length > 0 && ((isWizard && sections.length > 1) || onSave || onSubmit) && (
         <div className="space-y-3">
           {submitError && <p role="alert" className="text-sm text-destructive">{submitError}</p>}
           {saveError && <p role="alert" className="text-sm text-destructive">{saveError}</p>}

@@ -17,8 +17,14 @@ export function useCurrentUserSubmission(formId: string) {
   const uploadedFiles = useRef(new WeakMap<File, string>());
 
   async function save(answers: FormAnswers) {
-    if (!current || current.submission.submittedAt) throw new Error("This submission cannot be edited.");
+    if (!current) throw new Error("This submission is unavailable.");
     const { form } = current;
+    const currentStatus = current.submissionStatuses.find(
+      (status) => status.id === current.submission.submissionStatusId,
+    );
+    if (form.isClosed || !currentStatus || currentStatus.isSubmissionLocked) {
+      throw new Error("This submission cannot be edited.");
+    }
     let updated = current.submission;
     const visibleQuestions = form.sections.filter((section) => !section.isHidden)
       .flatMap((section) => section.questions);
@@ -45,34 +51,42 @@ export function useCurrentUserSubmission(formId: string) {
       }
     }
 
-    for (const raw of Object.values(updated.answers)) {
-      if (!Array.isArray(raw)) continue;
-      for (const file of raw.filter(isSavedFile)) {
-        if (keptFileIds.has(file.id)) continue;
-        updated = await API.me.formSubmission.removeFile(formId, file.id);
-        await mutate({ form, submission: updated }, { revalidate: false });
-      }
-    }
     for (const { questionId, file } of newFiles) {
+      const replaced = Array.isArray(updated.answers[questionId])
+        ? updated.answers[questionId].filter(isSavedFile)
+          .find((savedFile) => !keptFileIds.has(savedFile.id))
+        : undefined;
       const before = new Set(
         Array.isArray(updated.answers[questionId])
           ? updated.answers[questionId].filter(isSavedFile).map((item) => item.id)
           : [],
       );
-      updated = await API.me.formSubmission.uploadFile(formId, questionId, file);
+      updated = await API.me.formSubmission.uploadFile(formId, questionId, file, replaced?.id);
       const savedFiles = updated.answers[questionId];
       const uploaded = Array.isArray(savedFiles)
         ? savedFiles.filter(isSavedFile).find((item) => !before.has(item.id))
         : undefined;
-      if (uploaded) uploadedFiles.current.set(file, uploaded.id);
-      await mutate({ form, submission: updated }, { revalidate: false });
+      if (uploaded) {
+        uploadedFiles.current.set(file, uploaded.id);
+        keptFileIds.add(uploaded.id);
+      }
+      await mutate({ ...current, submission: updated }, { revalidate: false });
+    }
+    for (const raw of Object.values(updated.answers)) {
+      if (!Array.isArray(raw)) continue;
+      for (const file of raw.filter(isSavedFile)) {
+        if (keptFileIds.has(file.id)) continue;
+        updated = await API.me.formSubmission.removeFile(formId, file.id);
+        await mutate({ ...current, submission: updated }, { revalidate: false });
+      }
     }
     updated = await API.me.formSubmission.save(formId, formAnswers);
-    await mutate({ form, submission: updated }, { revalidate: false });
+    await mutate({ ...current, submission: updated }, { revalidate: false });
     return updated;
   }
 
   async function finalize(answers: FormAnswers) {
+    if (current?.submission.submittedAt) return save(answers);
     try {
       await save(answers);
     } catch (error) {
@@ -83,7 +97,7 @@ export function useCurrentUserSubmission(formId: string) {
       throw error;
     }
     const submitted = await API.me.formSubmission.submit(formId);
-    if (current) await mutate({ form: current.form, submission: submitted }, { revalidate: false });
+    if (current) await mutate({ ...current, submission: submitted }, { revalidate: false });
     return submitted;
   }
 

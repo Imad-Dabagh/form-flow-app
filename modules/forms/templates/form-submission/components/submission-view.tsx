@@ -4,33 +4,52 @@ import { FormRenderer } from "../../form-renderer";
 import type { FormAnswers } from "../../form-renderer/types";
 import { SubmissionState } from "./submission-state";
 
+type SubmissionViewProps = {
+  form?: FormPresentation;
+  error?: ApiError;
+  isLoading: boolean;
+  submitted: boolean;
+  completedAt?: string | null;
+  statusLocked?: boolean;
+  closed?: boolean;
+  onRetry?: () => void;
+  onOpenSubmittedForm?: () => void;
+  initialValues?: Partial<FormAnswers>;
+  hasSavedProgress?: boolean;
+  onSave?: (answers: FormAnswers) => Promise<void>;
+  onSubmit: (answers: FormAnswers, idempotencyKey: string) => Promise<void>;
+};
+
 export function SubmissionView({
   form,
   error,
   isLoading,
   submitted,
   completedAt,
+  statusLocked = false,
   closed = false,
   onRetry,
+  onOpenSubmittedForm,
   initialValues,
   hasSavedProgress,
   onSave,
   onSubmit,
-}: {
-  form?: FormPresentation;
-  error?: ApiError;
-  isLoading: boolean;
-  submitted: boolean;
-  completedAt?: string | null;
-  closed?: boolean;
-  onRetry?: () => void;
-  initialValues?: Partial<FormAnswers>;
-  hasSavedProgress?: boolean;
-  onSave?: (answers: FormAnswers) => Promise<void>;
-  onSubmit: (answers: FormAnswers, idempotencyKey: string) => Promise<void>;
-}) {
+}: SubmissionViewProps) {
   if (submitted) {
-    return <SubmissionState kind="success" title="Form submitted" description={`Your submission to ${form?.name ?? "this form"} has been received.`} />;
+    const name = form?.name ?? "this form";
+    const canUpdate = !statusLocked && !closed && !form?.isClosed;
+    const description = form?.isClosed || closed
+      ? `Your response to ${name} was received. This form is closed, so updates are unavailable.`
+      : statusLocked
+        ? `Your response to ${name} was received. Its current status does not allow updates.`
+        : `Your response to ${name} was received.`;
+    return <SubmissionState
+      kind="success"
+      title="Form submitted successfully"
+      description={description}
+      actionLabel={canUpdate ? "Update submission" : "View submission"}
+      onAction={completedAt ? onOpenSubmittedForm : undefined}
+    />;
   }
 
   if (isLoading) {
@@ -57,6 +76,13 @@ export function SubmissionView({
     return <SubmissionState kind="closed" title={form.name} description="This form is closed and is no longer accepting submissions." />;
   }
 
+  const readOnly = statusLocked || Boolean(completedAt && (form.isClosed || closed));
+  const submissionNotice = form.isClosed || closed
+    ? "This form is closed. Your submitted answers are shown for reference."
+    : statusLocked
+      ? "Answers are locked in this submission status."
+      : undefined;
+
   return (
     <main className="mx-auto w-full max-w-3xl px-4 pb-16 pt-7 sm:px-6">
       <FormRenderer
@@ -64,9 +90,10 @@ export function SubmissionView({
         form={form}
         initialValues={initialValues}
         hasSavedProgress={hasSavedProgress && !completedAt}
-        readOnly={Boolean(completedAt)}
-        onSave={completedAt ? undefined : onSave}
-        onSubmit={completedAt ? undefined : onSubmit}
+        readOnly={readOnly}
+        notice={submissionNotice}
+        onSave={readOnly || completedAt ? undefined : onSave}
+        onSubmit={readOnly ? undefined : onSubmit}
       />
     </main>
   );
