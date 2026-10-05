@@ -20,6 +20,7 @@ import API from "@/router";
 import type { OrganizationForm, OrganizationFormListItem } from "@/router/orgs/forms";
 import { toApiError } from "@/lib/api-error";
 import { CreateEditFormModal } from "@/modules/forms/components/create-edit-form-modal";
+import { FormSettingsDrawer } from "@/modules/forms/patterns/form-settings-drawer";
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";
@@ -363,15 +364,23 @@ export function FormsListTemplate() {
         </div>
       )}
 
-      {canManageForms && formModal && (
+      {canManageForms && formModal?.mode === "create" && (
         <CreateEditFormModal
-          key={formModal.mode === "edit" ? formModal.form.id : "create"}
+          key="create"
           open
           onOpenChange={(open) => {
             if (!open) setFormModal(null);
           }}
           organizationSlug={organization.slug}
-          form={formModal.mode === "edit" ? formModal.form : undefined}
+        />
+      )}
+      {canManageForms && formModal?.mode === "edit" && (
+        <FormSettingsDrawer
+          key={formModal.form.id}
+          open
+          onOpenChange={(open) => { if (!open) setFormModal(null); }}
+          organizationSlug={organization.slug}
+          formId={formModal.form.id}
         />
       )}
 

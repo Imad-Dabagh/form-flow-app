@@ -8,6 +8,7 @@ import { requestData } from "@/lib/request";
 export * as questions from "./questions";
 export * as settings from "./settings";
 export * as submissions from "./submissions";
+export * as submissionStatuses from "./submission-statuses";
 
 export type FormType = "PUBLIC" | "AUTHENTICATED";
 export type FormDisplayMode = "SINGLE_PAGE" | "WIZARD";
