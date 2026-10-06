@@ -411,7 +411,7 @@ export function SubmissionsListTemplate() {
     statuses: submissionStatuses,
     isLoading: areStatusesLoading,
     error: statusesError,
-  } = API.orgs.forms.submissionStatuses.useFormSubmissionStatuses({
+  } = API.orgs.forms.submissionStatuses.useFindAll({
     organizationSlug,
     formId,
   });

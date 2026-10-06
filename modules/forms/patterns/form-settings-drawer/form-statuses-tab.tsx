@@ -24,8 +24,16 @@ export function FormStatusesTab({ organizationSlug, formId }: {
   organizationSlug: string;
   formId: string;
 }) {
-  const { statuses, error, isLoading, create, update, remove, reorder } =
-    API.orgs.forms.submissionStatuses.useFormSubmissionStatuses({ organizationSlug, formId });
+  const { statuses, error, isLoading } =
+    API.orgs.forms.submissionStatuses.useFindAll({ organizationSlug, formId });
+  const { trigger: create } =
+    API.orgs.forms.submissionStatuses.useCreateOne({ organizationSlug, formId });
+  const { trigger: update } =
+    API.orgs.forms.submissionStatuses.useUpdateById({ organizationSlug, formId });
+  const { trigger: remove } =
+    API.orgs.forms.submissionStatuses.useDeleteById({ organizationSlug, formId });
+  const { trigger: reorder } =
+    API.orgs.forms.submissionStatuses.useReorder({ organizationSlug, formId });
   const [editing, setEditing] = useState<FormSubmissionStatus | "new" | null>(null);
   const [deleting, setDeleting] = useState<FormSubmissionStatus | null>(null);
   const [name, setName] = useState("");
@@ -54,9 +62,12 @@ export function FormStatusesTab({ organizationSlug, formId }: {
           isDefault: makeDefault, isSubmissionLocked });
         toast.success("Status added");
       } else {
-        await update(editing.id, {
-          name: name.trim(), description: description.trim(), color, isSubmissionLocked,
-          ...(makeDefault && !editing.isDefault ? { isDefault: true } : {}),
+        await update({
+          submissionStatusId: editing.id,
+          input: {
+            name: name.trim(), description: description.trim(), color, isSubmissionLocked,
+            ...(makeDefault && !editing.isDefault ? { isDefault: true } : {}),
+          },
         });
         toast.success("Status updated");
       }
