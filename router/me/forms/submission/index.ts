@@ -5,6 +5,9 @@ import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
 import type { FormPresentation } from "@/router/orgs/forms";
 
+export * as files from "./files";
+export * as submit from "./submit";
+
 export interface SavedSubmissionFile {
   id: string;
   name: string;
@@ -37,6 +40,7 @@ export interface CurrentUserForm {
 
 const pathFor = (formId: string) => `/me/forms/${formId}/submission`;
 
+/** GET /api/me/forms/:formId/submission */
 export function useCurrent(formId: string) {
   const { data, ...rest } = useSWR<CurrentUserForm, ApiError>(
     formId ? pathFor(formId) : null,
@@ -45,31 +49,9 @@ export function useCurrent(formId: string) {
   return { current: data, ...rest };
 }
 
+/** PUT /api/me/forms/:formId/submission */
 export function save(formId: string, formAnswers: Record<string, unknown>) {
   return requestData<CurrentUserSubmission>({
     method: "PUT", url: pathFor(formId), data: { formAnswers },
-  });
-}
-
-export function submit(formId: string) {
-  return requestData<CurrentUserSubmission>({
-    method: "PUT", url: `${pathFor(formId)}/submit`,
-  });
-}
-
-export function uploadFile(formId: string, questionId: string, file: File, replaceFileId?: string) {
-  const data = new FormData();
-  data.append("file", file);
-  return requestData<CurrentUserSubmission>({
-    method: "POST",
-    url: `${pathFor(formId)}/files/${questionId}${replaceFileId
-      ? `?replaceFileId=${encodeURIComponent(replaceFileId)}` : ""}`,
-    data,
-  });
-}
-
-export function removeFile(formId: string, fileId: string) {
-  return requestData<CurrentUserSubmission>({
-    method: "DELETE", url: `${pathFor(formId)}/files/${fileId}`,
   });
 }

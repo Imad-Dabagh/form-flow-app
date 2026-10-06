@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { toApiError } from "@/lib/api-error";
 import API from "@/router";
-import type { SavedSubmissionFile } from "@/router/me/form-submission";
+import type { SavedSubmissionFile } from "@/router/me/forms/submission";
 import type { FormAnswers } from "../form-renderer/types";
 
 function isSavedFile(value: unknown): value is SavedSubmissionFile {
@@ -13,7 +13,7 @@ function isSavedFile(value: unknown): value is SavedSubmissionFile {
 }
 
 export function useCurrentUserSubmission(formId: string) {
-  const { current, error, isLoading, mutate } = API.me.formSubmission.useCurrent(formId);
+  const { current, error, isLoading, mutate } = API.me.forms.submission.useCurrent(formId);
   const uploadedFiles = useRef(new WeakMap<File, string>());
 
   async function save(answers: FormAnswers) {
@@ -61,7 +61,7 @@ export function useCurrentUserSubmission(formId: string) {
           ? updated.answers[questionId].filter(isSavedFile).map((item) => item.id)
           : [],
       );
-      updated = await API.me.formSubmission.uploadFile(formId, questionId, file, replaced?.id);
+      updated = await API.me.forms.submission.files.upload(formId, questionId, file, replaced?.id);
       const savedFiles = updated.answers[questionId];
       const uploaded = Array.isArray(savedFiles)
         ? savedFiles.filter(isSavedFile).find((item) => !before.has(item.id))
@@ -76,11 +76,11 @@ export function useCurrentUserSubmission(formId: string) {
       if (!Array.isArray(raw)) continue;
       for (const file of raw.filter(isSavedFile)) {
         if (keptFileIds.has(file.id)) continue;
-        updated = await API.me.formSubmission.removeFile(formId, file.id);
+        updated = await API.me.forms.submission.files.remove(formId, file.id);
         await mutate({ ...current, submission: updated }, { revalidate: false });
       }
     }
-    updated = await API.me.formSubmission.save(formId, formAnswers);
+    updated = await API.me.forms.submission.save(formId, formAnswers);
     await mutate({ ...current, submission: updated }, { revalidate: false });
     return updated;
   }
@@ -96,7 +96,7 @@ export function useCurrentUserSubmission(formId: string) {
       }
       throw error;
     }
-    const submitted = await API.me.formSubmission.submit(formId);
+    const submitted = await API.me.forms.submission.submit.run(formId);
     if (current) await mutate({ ...current, submission: submitted }, { revalidate: false });
     return submitted;
   }

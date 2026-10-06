@@ -24,7 +24,7 @@ import {
 } from "@/modules/shared/components/ui/select";
 import { Textarea } from "@/modules/shared/components/ui/textarea";
 import type { FormAnswer } from "../types";
-import type { SavedSubmissionFile } from "@/router/me/form-submission";
+import type { SavedSubmissionFile } from "@/router/me/forms/submission";
 
 function isSavedFile(value: unknown): value is SavedSubmissionFile {
   return (
