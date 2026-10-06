@@ -140,6 +140,106 @@
   }
 }
 
+.app-toaster {
+  font-family: inherit;
+}
+
+.app-toaster [data-sonner-toast][data-styled="true"] {
+  --toast-icon-bg: #475569;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 12px 44px 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  color: #1f2937;
+  box-shadow: none;
+  font-size: 13px;
+}
+
+.app-toaster [data-sonner-toast][data-type="success"] {
+  --toast-icon-bg: #16a34a;
+}
+
+.app-toaster [data-sonner-toast][data-type="error"] {
+  --toast-icon-bg: #dc2626;
+}
+
+.app-toaster [data-sonner-toast][data-type="info"] {
+  --toast-icon-bg: #2563eb;
+}
+
+.app-toaster [data-sonner-toast][data-type="warning"] {
+  --toast-icon-bg: #d97706;
+}
+
+.app-toaster [data-sonner-toast][data-type="loading"] {
+  --toast-icon-bg: #2563eb;
+}
+
+.app-toaster [data-sonner-toast] [data-icon] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border-radius: 8px;
+  background: var(--toast-icon-bg);
+  color: #fff;
+  line-height: 0;
+}
+
+.app-toaster [data-sonner-toast] [data-icon] svg {
+  display: block;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  stroke-width: 2.1;
+}
+
+.app-toaster [data-sonner-toast] [data-content] {
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.app-toaster [data-sonner-toast] [data-title] {
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.app-toaster [data-sonner-toast] [data-description] {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.app-toaster[data-theme] [data-sonner-toast][data-styled="true"] [data-close-button] {
+  top: 50%;
+  right: 10px;
+  left: auto;
+  width: 26px;
+  height: 26px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+}
+
+.app-toaster[data-theme] [data-sonner-toast][data-styled="true"] [data-close-button]:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
 .rich-text-editor-content {
   min-height: var(--editor-min-height);
   padding: 0.75rem;
