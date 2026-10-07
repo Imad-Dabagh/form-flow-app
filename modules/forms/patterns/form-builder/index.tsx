@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import {
   closestCenter,
   DndContext,
@@ -15,23 +14,13 @@ import {
   type CollisionDetection,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { Eye, FileText, Plus, Save, Settings2 } from "lucide-react";
+import { Eye, FileText, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 import API from "@/router";
 import type { FormQuestion, OrganizationFormDetails } from "@/router/orgs/forms";
 import { toApiError } from "@/lib/api-error";
-import {
-  organizationWorkspacePath,
-  useOrganizationPermissions,
-  useOrganizationWorkspace,
-} from "@/modules/organizations";
-import { CreateEditFormModal } from "@/modules/forms/components/create-edit-form-modal";
+import { organizationWorkspacePath } from "@/modules/organizations";
 import { Button } from "@/modules/shared/components/ui/button";
-import {
-  WorkspacePage,
-  PageNavigation,
-  PageBreadcrumbs,
-} from "@/modules/shared/components/workspace";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,67 +37,22 @@ import { QuestionCardDragPreview } from "./components/question-card";
 import { SidebarSettings } from "./components/sidebar-settings";
 import { useFormBuilder } from "./hooks/use-form-builder";
 
-export function FormBuilderTemplate() {
-  const organization = useOrganizationWorkspace();
-  const { organizationSlug, formId } = useParams<{
-    organizationSlug: string;
-    formId: string;
-  }>();
-  const { canManageForms } = useOrganizationPermissions();
-  const { form, error, isLoading } = API.orgs.forms.useFindById({
-    organizationSlug,
-    formId,
-  });
-
-  if (isLoading || error || !form)
-    return (
-      <WorkspacePage>
-        <PageNavigation title={form?.name ?? "Form builder"}>
-          <PageBreadcrumbs
-            items={[
-              {
-                label: organization.name,
-                href: organizationWorkspacePath(organizationSlug, "/dashboard"),
-              },
-              { label: "Forms", href: organizationWorkspacePath(organizationSlug, "/forms") },
-              {
-                label: form?.name ?? (isLoading ? "Loading form…" : "Form unavailable"),
-                href: form ? organizationWorkspacePath(organizationSlug, `/forms/${formId}`) : undefined,
-              },
-              { label: "Builder" },
-            ]}
-          />
-        </PageNavigation>
-        <p className={isLoading ? "text-sm text-muted-foreground" : "text-sm text-destructive"}>
-          {isLoading ? "Loading form…" : (error?.message ?? "Form not found.")}
-        </p>
-      </WorkspacePage>
-    );
-
-  return (
-    <Builder
-      key={form.id}
-      form={form}
-      organizationSlug={organizationSlug}
-      canEdit={canManageForms}
-    />
-  );
-}
-
-function Builder({
+export function FormBuilderEditor({
   form,
   organizationSlug,
   canEdit,
+  hasUnsavedGeneral,
+  onEditorStateChange,
 }: {
   form: OrganizationFormDetails;
   organizationSlug: string;
   canEdit: boolean;
+  hasUnsavedGeneral: boolean;
+  onEditorStateChange?: (state: { isDirty: boolean; isSaving: boolean }) => void;
 }) {
-  const organization = useOrganizationWorkspace();
   const editor = useFormBuilder(form);
   const [draggedQuestion, setDraggedQuestion] = useState<FormQuestion | null>(null);
   const [dropSectionId, setDropSectionId] = useState<string | null>(null);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const dragStart = useRef<{
     sections: typeof editor.draft.sections;
     isDirty: boolean;
@@ -130,6 +74,10 @@ function Builder({
     organizationSlug,
     formId: form.id,
   });
+
+  useEffect(() => {
+    onEditorStateChange?.({ isDirty: editor.isDirty, isSaving: isMutating });
+  }, [editor.isDirty, isMutating, onEditorStateChange]);
   const selectedSection = editor.selection
     ? editor.draft.sections.find((section) => section._id === editor.selection?.sectionId)
     : undefined;
@@ -260,44 +208,7 @@ function Builder({
   }
 
   return (
-    <WorkspacePage>
-      <PageNavigation title={form.name}>
-        <PageBreadcrumbs
-          items={[
-            {
-              label: organization.name,
-              href: organizationWorkspacePath(organizationSlug, "/dashboard"),
-            },
-            { label: "Forms", href: organizationWorkspacePath(organizationSlug, "/forms") },
-            {
-              label: form.name,
-              href: organizationWorkspacePath(organizationSlug, `/forms/${form.id}`),
-            },
-            { label: "Builder" },
-          ]}
-        />
-        <div className="flex shrink-0 items-center gap-2">
-          {canEdit && (
-            <Button type="button" size="sm" variant="outline" onClick={() => setSettingsOpen(true)}>
-              <Settings2 className="size-4" /> Settings
-            </Button>
-          )}
-          <Button asChild size="sm" variant="outline" className="gap-2">
-            <Link
-              href={organizationWorkspacePath(organizationSlug, `/forms/${form.id}/preview`)}
-              onClick={(event) => {
-                if (editor.isDirty) {
-                  event.preventDefault();
-                  toast.info("Save your changes before previewing the form.");
-                }
-              }}
-            >
-              <Eye className="size-4" /> Preview
-            </Link>
-          </Button>
-        </div>
-      </PageNavigation>
-
+    <div className="mx-auto w-full min-w-0 max-w-7xl">
       <fieldset disabled={isMutating} className="min-w-0 disabled:opacity-80">
         <RichTextEditor
           id="form-description"
@@ -461,27 +372,38 @@ function Builder({
               </button>
             )}
 
-            {canEdit && (
-              <div className="sticky bottom-4 z-20 mt-auto flex flex-col gap-4 rounded-xl border bg-card/95 p-4 shadow-lg backdrop-blur-sm sm:bottom-6 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                <span
-                  role="status"
-                  className="flex items-center gap-2 text-sm text-muted-foreground"
-                >
-                  <span
-                    className={`size-2 rounded-full ${editor.isDirty ? "bg-amber-500" : "bg-emerald-500"}`}
-                  />
+            <div className="sticky bottom-2 z-20 mt-4 flex flex-col gap-4 rounded-xl border bg-card/95 p-4 shadow-lg backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              {canEdit && (
+                <span role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className={`size-2 rounded-full ${editor.isDirty ? "bg-amber-500" : "bg-emerald-500"}`} />
                   {editor.isDirty ? "Unsaved changes" : "All changes saved"}
                 </span>
-                <Button
-                  type="button"
-                  className="sm:ml-auto"
-                  disabled={isMutating || !editor.isDirty}
-                  onClick={handleSave}
-                >
-                  <Save className="size-4" /> {isMutating ? "Saving…" : "Save changes"}
+              )}
+              <div className="flex items-center justify-end gap-2 sm:ml-auto">
+                <Button asChild variant="outline">
+                  <Link
+                    href={organizationWorkspacePath(organizationSlug, `/forms/${form.id}/preview`)}
+                    onClick={(event) => {
+                      if (hasUnsavedGeneral || editor.isDirty || isMutating) {
+                        event.preventDefault();
+                        toast.info("Save your changes before previewing the form.");
+                      }
+                    }}
+                  >
+                    <Eye className="size-4" /> Preview
+                  </Link>
                 </Button>
+                {canEdit && (
+                  <Button
+                    type="button"
+                    disabled={isMutating || !editor.isDirty}
+                    onClick={handleSave}
+                  >
+                    <Save className="size-4" /> {isMutating ? "Saving…" : "Save changes"}
+                  </Button>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {selectedSection && (
@@ -528,15 +450,6 @@ function Builder({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {canEdit && settingsOpen && (
-        <CreateEditFormModal
-          open
-          onOpenChange={setSettingsOpen}
-          organizationSlug={organizationSlug}
-          form={form}
-        />
-      )}
-    </WorkspacePage>
+    </div>
   );
 }

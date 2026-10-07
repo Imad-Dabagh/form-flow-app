@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
@@ -379,7 +378,7 @@ export function SubmissionsListTemplate() {
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const [selectedSubmission, setSelectedSubmission] = useState<FormSubmission | null>(null);
   const [updatingSubmissionId, setUpdatingSubmissionId] = useState<string | null>(null);
-  const [editFormOpen, setEditFormOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<"general" | "builder" | null>(null);
   const { organizationSlug, formId } = useParams<{
     organizationSlug: string;
     formId: string;
@@ -525,15 +524,11 @@ export function SubmissionsListTemplate() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" side="bottom" sideOffset={6} className="min-w-44">
-                  <DropdownMenuItem onSelect={() => setEditFormOpen(true)}>
+                  <DropdownMenuItem onSelect={() => setSettingsTab("general")}>
                     <Pencil className="size-4" /> Edit Form
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href={organizationWorkspacePath(organizationSlug, `/forms/${formId}/builder`)}
-                    >
-                      <LayoutTemplate className="size-4" /> Open Builder
-                    </Link>
+                  <DropdownMenuItem onSelect={() => setSettingsTab("builder")}>
+                    <LayoutTemplate className="size-4" /> Open Builder
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -824,13 +819,16 @@ export function SubmissionsListTemplate() {
         </section>
       )}
 
-      {form && canManageForms && (
+      {form && canManageForms && settingsTab && (
         <FormSettingsDrawer
           key={form.id}
-          open={editFormOpen}
-          onOpenChange={setEditFormOpen}
+          open
+          onOpenChange={(open) => {
+            if (!open) setSettingsTab(null);
+          }}
           organizationSlug={organizationSlug}
           formId={form.id}
+          initialTab={settingsTab}
         />
       )}
     </WorkspacePage>
