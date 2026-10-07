@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import API from "@/router";
 import type { OrganizationForm, OrganizationFormListItem } from "@/router/orgs/forms";
 import { toApiError } from "@/lib/api-error";
-import { CreateEditFormModal } from "@/modules/forms/components/create-edit-form-modal";
+import { CreateFormModal } from "@/modules/forms/components/create-form-modal";
 import { FormSettingsDrawer } from "@/modules/forms/patterns/form-settings-drawer";
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
@@ -71,7 +71,7 @@ export function FormsListTemplate() {
   const [status, setStatus] = useState<"active" | "archived">("active");
   const [closed, setClosed] = useState<"all" | "open" | "closed">("all");
   const [formModal, setFormModal] = useState<
-    { mode: "create" } | { mode: "edit"; form: OrganizationForm } | null
+    { mode: "create" } | { mode: "edit"; form: OrganizationForm; tab?: "general" | "builder" } | null
   >(null);
   const [pendingArchive, setPendingArchive] = useState<OrganizationForm | null>(null);
   const setArchived = API.orgs.forms.useSetArchivedById({ organizationSlug: organization.slug });
@@ -302,15 +302,10 @@ export function FormsListTemplate() {
                             <DropdownMenuItem onSelect={() => setFormModal({ mode: "edit", form })}>
                               <Pencil className="size-4" /> Edit Form
                             </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href={organizationWorkspacePath(
-                                  organization.slug,
-                                  `/forms/${form.id}/builder`,
-                                )}
-                              >
-                                <LayoutTemplate className="size-4" /> Open Builder
-                              </Link>
+                            <DropdownMenuItem
+                              onSelect={() => setFormModal({ mode: "edit", form, tab: "builder" })}
+                            >
+                              <LayoutTemplate className="size-4" /> Open Builder
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -365,22 +360,26 @@ export function FormsListTemplate() {
       )}
 
       {canManageForms && formModal?.mode === "create" && (
-        <CreateEditFormModal
+        <CreateFormModal
           key="create"
           open
           onOpenChange={(open) => {
             if (!open) setFormModal(null);
           }}
           organizationSlug={organization.slug}
+          onCreated={(form) => setFormModal({ mode: "edit", form, tab: "builder" })}
         />
       )}
       {canManageForms && formModal?.mode === "edit" && (
         <FormSettingsDrawer
           key={formModal.form.id}
           open
-          onOpenChange={(open) => { if (!open) setFormModal(null); }}
+          onOpenChange={(open) => {
+            if (!open) setFormModal(null);
+          }}
           organizationSlug={organization.slug}
           formId={formModal.form.id}
+          initialTab={formModal.tab}
         />
       )}
 
