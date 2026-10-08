@@ -1,8 +1,8 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { format, parseISO } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import {
   ArrowDownUp,
   ArrowUpRight,
@@ -42,7 +42,13 @@ import {
 } from "@/modules/shared/components/ui/dropdown-menu";
 import { Input } from "@/modules/shared/components/ui/input";
 import { Pagination } from "@/modules/shared/components/pagination";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/modules/shared/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/modules/shared/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/shared/components/ui/tooltip";
 import { ToggleGroup, ToggleGroupItem } from "@/modules/shared/components/ui/toggle-group";
@@ -177,15 +183,22 @@ function SubmissionStatusCell({
 }) {
   const current = statuses.find((status) => status.id === submission.submissionStatusId);
   const options = statuses.filter((status) => status.id !== submission.submissionStatusId);
-  const label = current?.name ?? (isLoading
-    ? "Loading status…"
-    : hasLoadError ? "Status unavailable"
-      : submission.submissionStatusId ? "Unknown status" : "Unassigned");
+  const label =
+    current?.name ??
+    (isLoading
+      ? "Loading status…"
+      : hasLoadError
+        ? "Status unavailable"
+        : submission.submissionStatusId
+          ? "Unknown status"
+          : "Unassigned");
   const color = current ? getOrganizationColorSwatch(current.color) : null;
-  const style = color ? {
-    backgroundColor: `color-mix(in oklch, ${color} 12%, transparent)`,
-    borderColor: `color-mix(in oklch, ${color} 38%, transparent)`,
-  } : undefined;
+  const style = color
+    ? {
+        backgroundColor: `color-mix(in oklch, ${color} 12%, transparent)`,
+        borderColor: `color-mix(in oklch, ${color} 38%, transparent)`,
+      }
+    : undefined;
   const content = (
     <>
       <span
@@ -216,9 +229,11 @@ function SubmissionStatusCell({
           style={style}
         >
           {content}
-          {isUpdating
-            ? <LoaderCircle className="size-3 animate-spin" aria-hidden="true" />
-            : <ChevronDown className="size-3 text-muted-foreground" aria-hidden="true" />}
+          {isUpdating ? (
+            <LoaderCircle className="size-3 animate-spin" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="size-3 text-muted-foreground" aria-hidden="true" />
+          )}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -365,16 +380,28 @@ function AnswerValue({ value, question }: { value: unknown; question: QuestionCo
   return <span>{String(value)}</span>;
 }
 
+function dateFilter(value: string | null): string {
+  return value && /^\d{4}-\d{2}-\d{2}$/.test(value) && isValid(parseISO(value)) ? value : "";
+}
+
 export function SubmissionsListTemplate() {
+  const searchParams = useSearchParams();
+  const requestedStatus = searchParams.get("status");
+  const statusIdParam = searchParams.get("submissionStatusId") ?? "";
+  const requestedStatusId = /^[a-f\d]{24}$/i.test(statusIdParam) ? statusIdParam : "";
+  const requestedFrom = dateFilter(searchParams.get("from"));
+  const requestedThrough = dateFilter(searchParams.get("through"));
   const organization = useOrganizationWorkspace();
   const { canManageForms } = useOrganizationPermissions();
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [from, setFrom] = useState("");
-  const [through, setThrough] = useState("");
-  const [status, setStatus] = useState<"all" | "submitted" | "started">("submitted");
-  const [submissionStatusId, setSubmissionStatusId] = useState("");
+  const [from, setFrom] = useState(requestedFrom);
+  const [through, setThrough] = useState(requestedThrough);
+  const [status, setStatus] = useState<"all" | "submitted" | "started">(
+    requestedStatus === "all" || requestedStatus === "started" ? requestedStatus : "submitted",
+  );
+  const [submissionStatusId, setSubmissionStatusId] = useState(requestedStatusId);
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const [selectedSubmission, setSelectedSubmission] = useState<FormSubmission | null>(null);
   const [updatingSubmissionId, setUpdatingSubmissionId] = useState<string | null>(null);
@@ -391,6 +418,16 @@ export function SubmissionsListTemplate() {
     organizationSlug,
     formId,
   });
+  // Dashboard links can open a specific completion, status, or date filter.
+  useEffect(() => {
+    setStatus(
+      requestedStatus === "all" || requestedStatus === "started" ? requestedStatus : "submitted",
+    );
+    setSubmissionStatusId(requestedStatusId);
+    setFrom(requestedFrom);
+    setThrough(requestedThrough);
+    setPage(1);
+  }, [requestedStatus, requestedStatusId, requestedFrom, requestedThrough]);
   const {
     submissionsPage,
     isLoading: areSubmissionsLoading,
@@ -416,7 +453,9 @@ export function SubmissionsListTemplate() {
   });
   useEffect(() => {
     if (
-      submissionStatusId && !areStatusesLoading && !statusesError &&
+      submissionStatusId &&
+      !areStatusesLoading &&
+      !statusesError &&
       !submissionStatuses.some((item) => item.id === submissionStatusId)
     ) {
       setSubmissionStatusId("");
@@ -442,7 +481,9 @@ export function SubmissionsListTemplate() {
     sort !== "newest";
   const hasResultFilters =
     (isAuthenticatedForm && searchInput.trim() !== "") ||
-    submissionStatusId !== "" || from !== "" || through !== "";
+    submissionStatusId !== "" ||
+    from !== "" ||
+    through !== "";
   const emptyMessage = areSubmissionsLoading ? (
     <span className="text-sm text-muted-foreground">Loading submissions…</span>
   ) : submissionsError ? (
@@ -481,12 +522,14 @@ export function SubmissionsListTemplate() {
     setUpdatingSubmissionId(submission.id);
     try {
       await updateSubmissionStatus({ submissionId: submission.id, submissionStatusId });
-      setSelectedSubmission((current) => current?.id === submission.id
-        ? { ...current, submissionStatusId }
-        : current);
+      setSelectedSubmission((current) =>
+        current?.id === submission.id ? { ...current, submissionStatusId } : current,
+      );
       toast.success("Submission status updated");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update the submission status.");
+      toast.error(
+        error instanceof Error ? error.message : "Could not update the submission status.",
+      );
     } finally {
       setUpdatingSubmissionId(null);
     }
@@ -618,7 +661,9 @@ export function SubmissionsListTemplate() {
                       <span className="flex items-center gap-2">
                         <span
                           className="size-2.5 rounded-full"
-                          style={{ backgroundColor: getOrganizationColorSwatch(submissionStatus.color) }}
+                          style={{
+                            backgroundColor: getOrganizationColorSwatch(submissionStatus.color),
+                          }}
                           aria-hidden="true"
                         />
                         {submissionStatus.name}
