@@ -1,6 +1,6 @@
 "use client";
 
-import useSWR, { useSWRConfig } from "swr";
+import useSWR, { useSWRConfig, type SWRConfiguration } from "swr";
 import useSWRMutation from "swr/mutation";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
@@ -28,30 +28,44 @@ export type StatusInput = {
 };
 
 /** GET /api/orgs/:organizationSlug/forms/:formId/submission-statuses */
-export function useFindAll({ organizationSlug, formId }: {
-  organizationSlug: string;
-  formId: string;
-}) {
-  const key = organizationSlug && formId
-    ? `/orgs/${organizationSlug}/forms/${formId}/submission-statuses`
-    : null;
+export function useFindAll(
+  {
+    organizationSlug,
+    formId,
+  }: {
+    organizationSlug: string;
+    formId: string;
+  },
+  swrConfig?: SWRConfiguration<FormSubmissionStatus[], ApiError>,
+) {
+  const key =
+    organizationSlug && formId
+      ? `/orgs/${organizationSlug}/forms/${formId}/submission-statuses`
+      : null;
   const { data, ...rest } = useSWR<FormSubmissionStatus[], ApiError>(
     key,
     (url: string) => requestData<FormSubmissionStatus[]>({ method: "GET", url }),
+    swrConfig,
   );
 
   return { statuses: data ?? [], ...rest };
 }
 
 /** POST /api/orgs/:organizationSlug/forms/:formId/submission-statuses */
-export function useCreateOne({ organizationSlug, formId }: {
+export function useCreateOne({
+  organizationSlug,
+  formId,
+}: {
   organizationSlug: string;
   formId: string;
 }) {
   const { mutate } = useSWRConfig();
   const key = `/orgs/${organizationSlug}/forms/${formId}/submission-statuses`;
   const { trigger: create, ...rest } = useSWRMutation<
-    FormSubmissionStatusMutationResult, ApiError, string, StatusInput
+    FormSubmissionStatusMutationResult,
+    ApiError,
+    string,
+    StatusInput
   >(key, (url, { arg }) =>
     requestData<FormSubmissionStatusMutationResult>({ method: "POST", url, data: arg }),
   );
@@ -66,25 +80,29 @@ export function useCreateOne({ organizationSlug, formId }: {
 }
 
 /** PUT /api/orgs/:organizationSlug/forms/:formId/submission-statuses/:submissionStatusId */
-export function useUpdateById({ organizationSlug, formId }: {
+export function useUpdateById({
+  organizationSlug,
+  formId,
+}: {
   organizationSlug: string;
   formId: string;
 }) {
   const { mutate } = useSWRConfig();
   const key = `/orgs/${organizationSlug}/forms/${formId}/submission-statuses`;
   const { trigger: update, ...rest } = useSWRMutation<
-    FormSubmissionStatusMutationResult, ApiError, string,
+    FormSubmissionStatusMutationResult,
+    ApiError,
+    string,
     { submissionStatusId: string; input: Partial<StatusInput> }
   >(key, (url, { arg }) =>
     requestData<FormSubmissionStatusMutationResult>({
-      method: "PUT", url: `${url}/${arg.submissionStatusId}`, data: arg.input,
+      method: "PUT",
+      url: `${url}/${arg.submissionStatusId}`,
+      data: arg.input,
     }),
   );
 
-  async function trigger(input: {
-    submissionStatusId: string;
-    input: Partial<StatusInput>;
-  }) {
+  async function trigger(input: { submissionStatusId: string; input: Partial<StatusInput> }) {
     const result = await update(input);
     await mutate(key);
     return result;
@@ -94,16 +112,19 @@ export function useUpdateById({ organizationSlug, formId }: {
 }
 
 /** DELETE /api/orgs/:organizationSlug/forms/:formId/submission-statuses/:submissionStatusId */
-export function useDeleteById({ organizationSlug, formId }: {
+export function useDeleteById({
+  organizationSlug,
+  formId,
+}: {
   organizationSlug: string;
   formId: string;
 }) {
   const { mutate } = useSWRConfig();
   const key = `/orgs/${organizationSlug}/forms/${formId}/submission-statuses`;
-  const { trigger: remove, ...rest } = useSWRMutation<
-    { id: string }, ApiError, string, string
-  >(key, (url, { arg: submissionStatusId }) =>
-    requestData<{ id: string }>({ method: "DELETE", url: `${url}/${submissionStatusId}` }),
+  const { trigger: remove, ...rest } = useSWRMutation<{ id: string }, ApiError, string, string>(
+    key,
+    (url, { arg: submissionStatusId }) =>
+      requestData<{ id: string }>({ method: "DELETE", url: `${url}/${submissionStatusId}` }),
   );
 
   async function trigger(submissionStatusId: string) {
@@ -116,17 +137,25 @@ export function useDeleteById({ organizationSlug, formId }: {
 }
 
 /** PUT /api/orgs/:organizationSlug/forms/:formId/submission-statuses/reorder */
-export function useReorder({ organizationSlug, formId }: {
+export function useReorder({
+  organizationSlug,
+  formId,
+}: {
   organizationSlug: string;
   formId: string;
 }) {
   const { mutate } = useSWRConfig();
   const key = `/orgs/${organizationSlug}/forms/${formId}/submission-statuses`;
   const { trigger: reorder, ...rest } = useSWRMutation<
-    FormSubmissionStatusMutationResult[], ApiError, string, string[]
+    FormSubmissionStatusMutationResult[],
+    ApiError,
+    string,
+    string[]
   >(key, (url, { arg: statusIds }) =>
     requestData<FormSubmissionStatusMutationResult[]>({
-      method: "PUT", url: `${url}/reorder`, data: { statusIds },
+      method: "PUT",
+      url: `${url}/reorder`,
+      data: { statusIds },
     }),
   );
 
