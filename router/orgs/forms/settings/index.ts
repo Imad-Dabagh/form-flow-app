@@ -4,10 +4,7 @@ import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import type { ApiError } from "@/lib/api-error";
 import { requestData } from "@/lib/request";
-import type {
-  FormSettingsInput,
-  OrganizationForm,
-} from "@/router/orgs/forms";
+import type { FormSettingsInput, OrganizationForm } from "@/router/orgs/forms";
 
 type UpdatedFormSettings = Pick<
   OrganizationForm,
@@ -37,7 +34,10 @@ export function useUpdateById({
     const result = await update(input);
     await mutate(formKey);
     await mutate(
-      (key) => typeof key === "string" && key.startsWith(`/orgs/${organizationSlug}/forms?page=`),
+      (key) =>
+        typeof key === "string" &&
+        (key.startsWith(`/orgs/${organizationSlug}/forms?page=`) ||
+          key.startsWith(`/orgs/${organizationSlug}/dashboard?`)),
     );
     return result;
   }

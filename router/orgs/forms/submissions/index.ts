@@ -96,6 +96,9 @@ export function useUpdateStatus({
     const result = await update(input);
     await mutate((key) => typeof key === "string" && key.startsWith(`${submissionsKey}?`));
     await mutate(`/orgs/${organizationSlug}/forms/${formId}/submission-statuses`);
+    await mutate(
+      (key) => typeof key === "string" && key.startsWith(`/orgs/${organizationSlug}/dashboard?`),
+    );
     return result;
   }
 

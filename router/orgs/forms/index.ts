@@ -177,7 +177,10 @@ export function useCreateOne({ organizationSlug }: { organizationSlug: string })
   async function trigger(input: FormSettingsInput) {
     const result = await create(input);
     await mutate(
-      (key) => typeof key === "string" && key.startsWith(`/orgs/${organizationSlug}/forms?page=`),
+      (key) =>
+        typeof key === "string" &&
+        (key.startsWith(`/orgs/${organizationSlug}/forms?page=`) ||
+          key.startsWith(`/orgs/${organizationSlug}/dashboard?`)),
     );
     return result;
   }
@@ -207,7 +210,12 @@ export function useSetArchivedById({ organizationSlug }: { organizationSlug: str
     if (input.archived) {
       await mutate(`${formsKey}/${input.formId}`, undefined, { revalidate: false });
     }
-    await mutate((key) => typeof key === "string" && key.startsWith(`${formsKey}?page=`));
+    await mutate(
+      (key) =>
+        typeof key === "string" &&
+        (key.startsWith(`${formsKey}?page=`) ||
+          key.startsWith(`/orgs/${organizationSlug}/dashboard?`)),
+    );
     return result;
   }
 
