@@ -26,7 +26,7 @@ import {
 } from "@/modules/shared/components/ui/select";
 import API from "@/router";
 import type { OrganizationTeamRole } from "@/router/orgs/types";
-import { useOrganizationWorkspace } from "../organization-workspace-context";
+import { useOrganizationWorkspace } from "@/lib/organization";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

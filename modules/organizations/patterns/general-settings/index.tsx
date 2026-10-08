@@ -15,7 +15,7 @@ import API from "@/router";
 import {
   ORGANIZATION_PRIMARY_COLORS,
   getOrganizationColorSwatch,
-} from "../../lib/primary-color-theme";
+} from "@/lib/organization";
 import type { OrganizationSummary } from "@/router/orgs/types";
 
 const ORGANIZATION_LOGO_ACCEPT = {

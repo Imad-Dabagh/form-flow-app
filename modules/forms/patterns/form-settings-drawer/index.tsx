@@ -31,7 +31,7 @@ import {
 } from "@/modules/shared/components/ui/alert-dialog";
 import { FormStatusesTab } from "./form-statuses-tab";
 import { FormBuilderEditor } from "@/modules/forms/patterns/form-builder";
-import { useOrganizationPermissions } from "@/modules/organizations";
+import { useOrganizationPermissions } from "@/lib/organization";
 
 export function FormSettingsDrawer({
   open,

@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { OrganizationWorkspaceSidebar } from "./organization-workspace-sidebar";
 import { OrganizationThemeScope } from "./organization-theme-scope";
-import { useOrganizationWorkspace } from "../../organization-workspace-context";
+import { useOrganizationWorkspace } from "@/lib/organization";
 import {
   SidebarInset,
   SidebarProvider,

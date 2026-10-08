@@ -8,12 +8,14 @@ import {
   PageNavigation,
   PageBreadcrumbs,
 } from "@/modules/shared/components/workspace";
-import { organizationWorkspacePath } from "../../paths";
+import {
+  organizationWorkspacePath,
+  useOrganizationPermissions,
+  useOrganizationWorkspace,
+} from "@/lib/organization";
 import { OrganizationGeneralSettings } from "../../patterns/general-settings";
 import { OrganizationInvitations } from "../../patterns/invitations";
 import { OrganizationTeamMembers } from "../../patterns/team-members";
-import { useOrganizationWorkspace } from "../../organization-workspace-context";
-import { useOrganizationPermissions } from "../../use-organization-permissions";
 
 const activeTabClass =
   "data-[state=active]:bg-primary-500 data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-primary-500 dark:data-[state=active]:text-primary-foreground";

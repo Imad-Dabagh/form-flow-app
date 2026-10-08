@@ -17,9 +17,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrentProfileContext } from "@/modules/profile/current-profile-context";
-import { organizationWorkspacePath } from "../../paths";
-import { useOrganizationPermissions } from "../../use-organization-permissions";
-import { useOrganizationWorkspace } from "../../organization-workspace-context";
+import {
+  organizationWorkspacePath,
+  useOrganizationPermissions,
+  useOrganizationWorkspace,
+} from "@/lib/organization";
 import type { OrganizationSummary } from "@/router/orgs/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/components/ui/avatar";
 import { Button } from "@/modules/shared/components/ui/button";

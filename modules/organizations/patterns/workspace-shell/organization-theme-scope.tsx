@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useMemo, type ReactNode } from "react";
 import { useTheme } from "@/modules/shared/components/theme-provider";
-import { getOrganizationThemeStyle } from "../../lib/primary-color-theme";
+import { getOrganizationThemeStyle } from "@/lib/organization";
 import type { OrganizationPrimaryColor } from "@/router/orgs/types";
 
 interface OrganizationThemeScopeProps {

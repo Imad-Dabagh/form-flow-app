@@ -10,9 +10,11 @@ import {
   PageBreadcrumbs,
   PageSection,
 } from "@/modules/shared/components/workspace";
-import { organizationWorkspacePath } from "../../paths";
-import { useOrganizationWorkspace } from "../../organization-workspace-context";
-import { useOrganizationPermissions } from "../../use-organization-permissions";
+import {
+  organizationWorkspacePath,
+  useOrganizationPermissions,
+  useOrganizationWorkspace,
+} from "@/lib/organization";
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("en", {

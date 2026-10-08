@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Building2, ImagePlus, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { organizationWorkspacePath } from "@/modules/organizations";
+import { organizationWorkspacePath } from "@/lib/organization";
 import { FilePicker, IMAGE_FILE_ACCEPT } from "@/modules/shared/components/file-upload";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Input } from "@/modules/shared/components/ui/input";

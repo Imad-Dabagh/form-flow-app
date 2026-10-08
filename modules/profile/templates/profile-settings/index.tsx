@@ -13,7 +13,7 @@ import { Input } from "@/modules/shared/components/ui/input";
 import { Label } from "@/modules/shared/components/ui/label";
 import { Textarea } from "@/modules/shared/components/ui/textarea";
 import API from "@/router";
-import { organizationWorkspacePath, useOrganizationWorkspace } from "@/modules/organizations";
+import { organizationWorkspacePath, useOrganizationWorkspace } from "@/lib/organization";
 import {
   WorkspacePage,
   PageNavigation,

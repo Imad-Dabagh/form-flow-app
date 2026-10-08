@@ -43,7 +43,7 @@ import {
 } from "@/modules/shared/components/ui/table";
 import API from "@/router";
 import { OrganizationAddMemberDialog } from "../../components/organization-add-member-dialog";
-import { useOrganizationWorkspace } from "../../organization-workspace-context";
+import { useOrganizationWorkspace } from "@/lib/organization";
 
 function formatJoinedAt(value: string): string {
   return new Intl.DateTimeFormat("en", {

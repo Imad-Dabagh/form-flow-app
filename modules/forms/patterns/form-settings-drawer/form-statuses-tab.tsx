@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import API from "@/router";
 import type { FormSubmissionStatus } from "@/router/orgs/forms/submission-statuses";
 import { toApiError } from "@/lib/api-error";
-import { getOrganizationColorSwatch, ORGANIZATION_PRIMARY_COLORS } from "@/modules/organizations/lib/primary-color-theme";
+import { getOrganizationColorSwatch, ORGANIZATION_PRIMARY_COLORS } from "@/lib/organization";
 import { Badge } from "@/modules/shared/components/ui/badge";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/modules/shared/components/ui/dialog";

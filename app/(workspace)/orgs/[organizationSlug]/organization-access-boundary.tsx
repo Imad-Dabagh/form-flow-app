@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useParams } from "next/navigation";
-import { OrganizationWorkspaceProvider } from "@/modules/organizations/organization-workspace-context";
+import { OrganizationWorkspaceProvider } from "@/lib/organization";
 import API from "@/router";
 
 export function OrganizationAccessBoundary({ children }: { children: ReactNode }) {

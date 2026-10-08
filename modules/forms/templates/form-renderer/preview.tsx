@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import API from "@/router";
-import { organizationWorkspacePath, useOrganizationWorkspace } from "@/modules/organizations";
+import { organizationWorkspacePath, useOrganizationWorkspace } from "@/lib/organization";
 import {
   WorkspacePage,
   PageNavigation,

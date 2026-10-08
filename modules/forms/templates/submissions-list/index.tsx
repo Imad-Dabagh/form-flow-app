@@ -22,12 +22,12 @@ import type { FormSubmission } from "@/router/orgs/forms/submissions";
 import type { FormSubmissionStatus } from "@/router/orgs/forms/submission-statuses";
 import { FormSettingsDrawer } from "@/modules/forms/patterns/form-settings-drawer";
 import { SubmissionDetails } from "@/modules/forms/patterns/submission-details";
-import { getOrganizationColorSwatch } from "@/modules/organizations/lib/primary-color-theme";
 import {
+  getOrganizationColorSwatch,
   organizationWorkspacePath,
   useOrganizationPermissions,
   useOrganizationWorkspace,
-} from "@/modules/organizations";
+} from "@/lib/organization";
 import { SidePanel } from "@/modules/shared/components/side-panel";
 import { Button } from "@/modules/shared/components/ui/button";
 import { Badge } from "@/modules/shared/components/ui/badge";

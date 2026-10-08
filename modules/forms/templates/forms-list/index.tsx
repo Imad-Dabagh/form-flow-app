@@ -59,7 +59,7 @@ import {
   organizationWorkspacePath,
   useOrganizationPermissions,
   useOrganizationWorkspace,
-} from "@/modules/organizations";
+} from "@/lib/organization";
 
 export function FormsListTemplate() {
   const organization = useOrganizationWorkspace();

@@ -27,7 +27,7 @@ import {
 import API from "@/router";
 import type { OrganizationInvitation } from "@/router/orgs/types";
 import { OrganizationAddMemberDialog } from "../../components/organization-add-member-dialog";
-import { useOrganizationWorkspace } from "../../organization-workspace-context";
+import { useOrganizationWorkspace } from "@/lib/organization";
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("en", {

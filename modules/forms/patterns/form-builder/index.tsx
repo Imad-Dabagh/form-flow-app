@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import API from "@/router";
 import type { FormQuestion, OrganizationFormDetails } from "@/router/orgs/forms";
 import { toApiError } from "@/lib/api-error";
-import { organizationWorkspacePath } from "@/modules/organizations";
+import { organizationWorkspacePath } from "@/lib/organization";
 import { Button } from "@/modules/shared/components/ui/button";
 import {
   AlertDialog,

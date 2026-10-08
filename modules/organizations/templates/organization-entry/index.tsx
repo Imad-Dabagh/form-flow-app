@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import API from "@/router";
-import { organizationWorkspacePath } from "../../paths";
+import { organizationWorkspacePath } from "@/lib/organization";
 
 export function OrganizationEntryTemplate() {
   const router = useRouter();
