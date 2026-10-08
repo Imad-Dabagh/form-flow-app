@@ -10,6 +10,7 @@ import type {
   UpdateOrganizationInput,
 } from "./types";
 
+export * as dashboard from "./dashboard";
 export * as forms from "./forms";
 export * as invitations from "./invitations";
 export * as members from "./members";
